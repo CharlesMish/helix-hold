@@ -1,7 +1,7 @@
 {
   "name": "helix-hold",
   "private": true,
-  "version": "0.6.2",
+  "version": "0.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "qa": "node qa/check.mjs",
-    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs",
+    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs && node qa/crown-growth.mjs && node qa/render-pools.mjs",
     "test:geometry": "node qa/geometry.mjs",
     "trial:carrier": "node qa/carrier-trial.mjs",
     "study:sweep": "node qa/sweep-study.mjs",
@@ -18,7 +18,9 @@
     "test:stasis-repro": "node qa/stasis-repro.mjs",
     "trial:crown": "node qa/crown-trial.mjs",
     "study:crown-coverage": "node qa/crown-coverage-study.mjs",
-    "study:crown-stasis": "node qa/crown-stasis-study.mjs"
+    "study:crown-stasis": "node qa/crown-stasis-study.mjs",
+    "study:crown-pilot": "node qa/crown-pilot-study.mjs",
+    "trial:crown-growth": "node qa/crown-growth-trial.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

@@ -1,0 +1,1580 @@
+{
+  "studyOnlyFinalCarrierHullMultiplier": null,
+  "method": "Seed17, 60Hz deterministic simulation. Greedy route-contact pose search through ordinary paid placement, every affordable purchase at setup, no bonus scrap or recalls. Active pilot uses bounded steering/thrust pursuit only on carrier waves, from one idealized legal E staging pose; idle otherwise. Two-field comparator buys fields in slots9/12 and selects nonoverlapping centers for damage overlap. Setup placements are instantaneous idealized poses. Not human difficulty, browser QA or optimal play.",
+  "checks": {
+    "campaignRecordedBeforeExtension": true,
+    "continuationDoesNotOverwriteScore": true,
+    "nonnegativeScrap": true
+  },
+  "results": [
+    {
+      "activePilot": false,
+      "twoFields": false,
+      "phase": "win",
+      "core": 60,
+      "scrap": 528,
+      "totalPaid": 2432,
+      "campaign": {
+        "core": 100,
+        "scrap": 368,
+        "drones": 13
+      },
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "fields": 0,
+          "maxAlive": 5,
+          "seconds": 17.233,
+          "carrier": null
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 10,
+          "scrap": 102,
+          "drones": 3,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 18.083,
+          "carrier": null
+        },
+        {
+          "wave": 3,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 11,
+          "scrap": 166,
+          "drones": 4,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 19,
+          "carrier": null
+        },
+        {
+          "wave": 4,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 14,
+          "scrap": 202,
+          "drones": 6,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 21.367,
+          "carrier": null
+        },
+        {
+          "wave": 5,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 17,
+          "scrap": 188,
+          "drones": 8,
+          "fields": 0,
+          "maxAlive": 8,
+          "seconds": 21.367,
+          "carrier": null
+        },
+        {
+          "wave": 6,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 19,
+          "scrap": 324,
+          "drones": 9,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 22.133,
+          "carrier": null
+        },
+        {
+          "wave": 7,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 22,
+          "scrap": 316,
+          "drones": 11,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 24.733,
+          "carrier": null
+        },
+        {
+          "wave": 8,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 25,
+          "scrap": 368,
+          "drones": 13,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 35.167,
+          "carrier": {
+            "outcome": "destroyed",
+            "hull": 486.00000000000006,
+            "aliveSeconds": 5.65,
+            "routeFractionAtOutcome": 0.136,
+            "remainingHull": 0,
+            "pilotCarrierDamage": 0,
+            "droneCarrierDamage": 486,
+            "pilotContactSeconds": 0,
+            "pilotContactFraction": 0
+          }
+        },
+        {
+          "wave": 9,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 20,
+          "scrap": 316,
+          "drones": 15,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 30.933,
+          "carrier": null
+        },
+        {
+          "wave": 10,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 28,
+          "scrap": 488,
+          "drones": 16,
+          "fields": 0,
+          "maxAlive": 12,
+          "seconds": 25.017,
+          "carrier": null
+        },
+        {
+          "wave": 11,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 26,
+          "scrap": 392,
+          "drones": 18,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 30.067,
+          "carrier": null
+        },
+        {
+          "wave": 12,
+          "core": 60,
+          "coreLost": 40,
+          "kills": 28,
+          "scrap": 528,
+          "drones": 19,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 43,
+          "carrier": {
+            "outcome": "breached",
+            "hull": 2916.0000000000005,
+            "aliveSeconds": 41.483,
+            "routeFractionAtOutcome": 0.998,
+            "remainingHull": 351.667,
+            "pilotCarrierDamage": 0,
+            "droneCarrierDamage": 2564.333,
+            "pilotContactSeconds": 0,
+            "pilotContactFraction": 0
+          }
+        }
+      ],
+      "placements": [
+        {
+          "beforeWave": 1,
+          "slot": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "coverageMetres": [
+            22.932,
+            2.498,
+            3.489,
+            2.485,
+            7.482
+          ]
+        },
+        {
+          "beforeWave": 1,
+          "slot": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            29.13,
+            20.158,
+            -2.544
+          ],
+          "coverageMetres": [
+            17.947,
+            6.995,
+            5.483,
+            11.93,
+            23.942
+          ]
+        },
+        {
+          "beforeWave": 2,
+          "slot": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            -1.838,
+            3.34,
+            2.339
+          ],
+          "coverageMetres": [
+            4.985,
+            23.484,
+            0,
+            0,
+            10.475
+          ]
+        },
+        {
+          "beforeWave": 3,
+          "slot": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "position": [
+            -18.734,
+            6.324,
+            -3.684
+          ],
+          "coverageMetres": [
+            4.487,
+            4.497,
+            20.438,
+            5.965,
+            11.472
+          ]
+        },
+        {
+          "beforeWave": 4,
+          "slot": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "position": [
+            -29.298,
+            24.674,
+            -15.455
+          ],
+          "coverageMetres": [
+            8.475,
+            6.496,
+            14.955,
+            6.462,
+            31.424
+          ]
+        },
+        {
+          "beforeWave": 4,
+          "slot": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "position": [
+            32.466,
+            22.638,
+            -3.92
+          ],
+          "coverageMetres": [
+            15.454,
+            4.997,
+            9.97,
+            2.983,
+            30.925
+          ]
+        },
+        {
+          "beforeWave": 5,
+          "slot": 7,
+          "mode": "pierce",
+          "paid": 92,
+          "position": [
+            -25.614,
+            23.365,
+            -14.677
+          ],
+          "coverageMetres": [
+            14.457,
+            6.995,
+            5.483,
+            11.93,
+            20.949
+          ]
+        },
+        {
+          "beforeWave": 5,
+          "slot": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "position": [
+            31.539,
+            19.013,
+            -0.174
+          ],
+          "coverageMetres": [
+            15.953,
+            3.498,
+            4.486,
+            13.422,
+            25.937
+          ]
+        },
+        {
+          "beforeWave": 6,
+          "slot": 9,
+          "mode": "pierce",
+          "paid": 116,
+          "position": [
+            2.409,
+            2.556,
+            1.448
+          ],
+          "coverageMetres": [
+            2.991,
+            24.483,
+            2.492,
+            1.988,
+            5.487
+          ]
+        },
+        {
+          "beforeWave": 7,
+          "slot": 10,
+          "mode": "pierce",
+          "paid": 128,
+          "position": [
+            26.195,
+            20.999,
+            -5.216
+          ],
+          "coverageMetres": [
+            8.475,
+            6.496,
+            10.967,
+            6.462,
+            31.923
+          ]
+        },
+        {
+          "beforeWave": 7,
+          "slot": 11,
+          "mode": "pierce",
+          "paid": 140,
+          "position": [
+            -16.583,
+            11.587,
+            -1.905
+          ],
+          "coverageMetres": [
+            3.988,
+            4.497,
+            13.459,
+            7.954,
+            4.988
+          ]
+        },
+        {
+          "beforeWave": 8,
+          "slot": 12,
+          "mode": "pierce",
+          "paid": 152,
+          "position": [
+            34.888,
+            16.317,
+            11.089
+          ],
+          "coverageMetres": [
+            0,
+            0,
+            4.985,
+            17.896,
+            28.93
+          ]
+        },
+        {
+          "beforeWave": 8,
+          "slot": 13,
+          "mode": "pierce",
+          "paid": 164,
+          "position": [
+            15.448,
+            24.07,
+            -9.852
+          ],
+          "coverageMetres": [
+            15.953,
+            7.495,
+            0,
+            0,
+            32.92
+          ]
+        },
+        {
+          "beforeWave": 9,
+          "slot": 14,
+          "mode": "pierce",
+          "paid": 176,
+          "position": [
+            20.475,
+            28.624,
+            17.573
+          ],
+          "coverageMetres": [
+            5.982,
+            0,
+            17.946,
+            0,
+            0
+          ]
+        },
+        {
+          "beforeWave": 9,
+          "slot": 15,
+          "mode": "pierce",
+          "paid": 188,
+          "position": [
+            28.172,
+            14.487,
+            13.653
+          ],
+          "coverageMetres": [
+            18.445,
+            0,
+            4.985,
+            4.971,
+            3.99
+          ]
+        },
+        {
+          "beforeWave": 10,
+          "slot": 16,
+          "mode": "pierce",
+          "paid": 200,
+          "position": [
+            -27.58,
+            18.579,
+            4.505
+          ],
+          "coverageMetres": [
+            2.493,
+            23.484,
+            1.994,
+            3.48,
+            3.492
+          ]
+        },
+        {
+          "beforeWave": 11,
+          "slot": 17,
+          "mode": "pierce",
+          "paid": 212,
+          "position": [
+            -32.698,
+            24.894,
+            -13.049
+          ],
+          "coverageMetres": [
+            5.484,
+            11.992,
+            8.474,
+            4.971,
+            7.482
+          ]
+        },
+        {
+          "beforeWave": 11,
+          "slot": 18,
+          "mode": "pierce",
+          "paid": 224,
+          "position": [
+            33.858,
+            24.096,
+            -3.01
+          ],
+          "coverageMetres": [
+            3.988,
+            3.498,
+            11.964,
+            8.451,
+            4.988
+          ]
+        },
+        {
+          "beforeWave": 12,
+          "slot": 19,
+          "mode": "pierce",
+          "paid": 236,
+          "position": [
+            33.746,
+            17.367,
+            7.179
+          ],
+          "coverageMetres": [
+            0,
+            0,
+            3.489,
+            18.393,
+            28.93
+          ]
+        }
+      ]
+    },
+    {
+      "activePilot": true,
+      "twoFields": false,
+      "phase": "win",
+      "core": 100,
+      "scrap": 588,
+      "totalPaid": 2432,
+      "campaign": {
+        "core": 100,
+        "scrap": 368,
+        "drones": 13
+      },
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "fields": 0,
+          "maxAlive": 5,
+          "seconds": 17.233,
+          "carrier": null
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 10,
+          "scrap": 102,
+          "drones": 3,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 18.083,
+          "carrier": null
+        },
+        {
+          "wave": 3,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 11,
+          "scrap": 166,
+          "drones": 4,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 19,
+          "carrier": null
+        },
+        {
+          "wave": 4,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 14,
+          "scrap": 202,
+          "drones": 6,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 21.367,
+          "carrier": null
+        },
+        {
+          "wave": 5,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 17,
+          "scrap": 188,
+          "drones": 8,
+          "fields": 0,
+          "maxAlive": 8,
+          "seconds": 21.367,
+          "carrier": null
+        },
+        {
+          "wave": 6,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 19,
+          "scrap": 324,
+          "drones": 9,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 22.133,
+          "carrier": null
+        },
+        {
+          "wave": 7,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 22,
+          "scrap": 316,
+          "drones": 11,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 24.733,
+          "carrier": null
+        },
+        {
+          "wave": 8,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 25,
+          "scrap": 368,
+          "drones": 13,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 35.167,
+          "carrier": {
+            "outcome": "destroyed",
+            "hull": 486.00000000000006,
+            "aliveSeconds": 4.617,
+            "routeFractionAtOutcome": 0.111,
+            "remainingHull": 0,
+            "pilotCarrierDamage": 156.967,
+            "droneCarrierDamage": 329.033,
+            "pilotContactSeconds": 4.617,
+            "pilotContactFraction": 1
+          }
+        },
+        {
+          "wave": 9,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 20,
+          "scrap": 316,
+          "drones": 15,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 30.933,
+          "carrier": null
+        },
+        {
+          "wave": 10,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 28,
+          "scrap": 488,
+          "drones": 16,
+          "fields": 0,
+          "maxAlive": 12,
+          "seconds": 25.017,
+          "carrier": null
+        },
+        {
+          "wave": 11,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 26,
+          "scrap": 392,
+          "drones": 18,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 30.067,
+          "carrier": null
+        },
+        {
+          "wave": 12,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 29,
+          "scrap": 588,
+          "drones": 19,
+          "fields": 0,
+          "maxAlive": 10,
+          "seconds": 40.95,
+          "carrier": {
+            "outcome": "destroyed",
+            "hull": 2916.0000000000005,
+            "aliveSeconds": 19.25,
+            "routeFractionAtOutcome": 0.463,
+            "remainingHull": 0,
+            "pilotCarrierDamage": 654.5,
+            "droneCarrierDamage": 2261.5,
+            "pilotContactSeconds": 19.25,
+            "pilotContactFraction": 1
+          }
+        }
+      ],
+      "placements": [
+        {
+          "beforeWave": 1,
+          "slot": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "coverageMetres": [
+            22.932,
+            2.498,
+            3.489,
+            2.485,
+            7.482
+          ]
+        },
+        {
+          "beforeWave": 1,
+          "slot": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            29.13,
+            20.158,
+            -2.544
+          ],
+          "coverageMetres": [
+            17.947,
+            6.995,
+            5.483,
+            11.93,
+            23.942
+          ]
+        },
+        {
+          "beforeWave": 2,
+          "slot": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            -1.838,
+            3.34,
+            2.339
+          ],
+          "coverageMetres": [
+            4.985,
+            23.484,
+            0,
+            0,
+            10.475
+          ]
+        },
+        {
+          "beforeWave": 3,
+          "slot": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "position": [
+            -18.734,
+            6.324,
+            -3.684
+          ],
+          "coverageMetres": [
+            4.487,
+            4.497,
+            20.438,
+            5.965,
+            11.472
+          ]
+        },
+        {
+          "beforeWave": 4,
+          "slot": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "position": [
+            -29.298,
+            24.674,
+            -15.455
+          ],
+          "coverageMetres": [
+            8.475,
+            6.496,
+            14.955,
+            6.462,
+            31.424
+          ]
+        },
+        {
+          "beforeWave": 4,
+          "slot": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "position": [
+            32.466,
+            22.638,
+            -3.92
+          ],
+          "coverageMetres": [
+            15.454,
+            4.997,
+            9.97,
+            2.983,
+            30.925
+          ]
+        },
+        {
+          "beforeWave": 5,
+          "slot": 7,
+          "mode": "pierce",
+          "paid": 92,
+          "position": [
+            -25.614,
+            23.365,
+            -14.677
+          ],
+          "coverageMetres": [
+            14.457,
+            6.995,
+            5.483,
+            11.93,
+            20.949
+          ]
+        },
+        {
+          "beforeWave": 5,
+          "slot": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "position": [
+            31.539,
+            19.013,
+            -0.174
+          ],
+          "coverageMetres": [
+            15.953,
+            3.498,
+            4.486,
+            13.422,
+            25.937
+          ]
+        },
+        {
+          "beforeWave": 6,
+          "slot": 9,
+          "mode": "pierce",
+          "paid": 116,
+          "position": [
+            2.409,
+            2.556,
+            1.448
+          ],
+          "coverageMetres": [
+            2.991,
+            24.483,
+            2.492,
+            1.988,
+            5.487
+          ]
+        },
+        {
+          "beforeWave": 7,
+          "slot": 10,
+          "mode": "pierce",
+          "paid": 128,
+          "position": [
+            26.195,
+            20.999,
+            -5.216
+          ],
+          "coverageMetres": [
+            8.475,
+            6.496,
+            10.967,
+            6.462,
+            31.923
+          ]
+        },
+        {
+          "beforeWave": 7,
+          "slot": 11,
+          "mode": "pierce",
+          "paid": 140,
+          "position": [
+            -16.583,
+            11.587,
+            -1.905
+          ],
+          "coverageMetres": [
+            3.988,
+            4.497,
+            13.459,
+            7.954,
+            4.988
+          ]
+        },
+        {
+          "beforeWave": 8,
+          "slot": 12,
+          "mode": "pierce",
+          "paid": 152,
+          "position": [
+            34.888,
+            16.317,
+            11.089
+          ],
+          "coverageMetres": [
+            0,
+            0,
+            4.985,
+            17.896,
+            28.93
+          ]
+        },
+        {
+          "beforeWave": 8,
+          "slot": 13,
+          "mode": "pierce",
+          "paid": 164,
+          "position": [
+            15.448,
+            24.07,
+            -9.852
+          ],
+          "coverageMetres": [
+            15.953,
+            7.495,
+            0,
+            0,
+            32.92
+          ]
+        },
+        {
+          "beforeWave": 9,
+          "slot": 14,
+          "mode": "pierce",
+          "paid": 176,
+          "position": [
+            20.475,
+            28.624,
+            17.573
+          ],
+          "coverageMetres": [
+            5.982,
+            0,
+            17.946,
+            0,
+            0
+          ]
+        },
+        {
+          "beforeWave": 9,
+          "slot": 15,
+          "mode": "pierce",
+          "paid": 188,
+          "position": [
+            28.172,
+            14.487,
+            13.653
+          ],
+          "coverageMetres": [
+            18.445,
+            0,
+            4.985,
+            4.971,
+            3.99
+          ]
+        },
+        {
+          "beforeWave": 10,
+          "slot": 16,
+          "mode": "pierce",
+          "paid": 200,
+          "position": [
+            -27.58,
+            18.579,
+            4.505
+          ],
+          "coverageMetres": [
+            2.493,
+            23.484,
+            1.994,
+            3.48,
+            3.492
+          ]
+        },
+        {
+          "beforeWave": 11,
+          "slot": 17,
+          "mode": "pierce",
+          "paid": 212,
+          "position": [
+            -32.698,
+            24.894,
+            -13.049
+          ],
+          "coverageMetres": [
+            5.484,
+            11.992,
+            8.474,
+            4.971,
+            7.482
+          ]
+        },
+        {
+          "beforeWave": 11,
+          "slot": 18,
+          "mode": "pierce",
+          "paid": 224,
+          "position": [
+            33.858,
+            24.096,
+            -3.01
+          ],
+          "coverageMetres": [
+            3.988,
+            3.498,
+            11.964,
+            8.451,
+            4.988
+          ]
+        },
+        {
+          "beforeWave": 12,
+          "slot": 19,
+          "mode": "pierce",
+          "paid": 236,
+          "position": [
+            33.746,
+            17.367,
+            7.179
+          ],
+          "coverageMetres": [
+            0,
+            0,
+            3.489,
+            18.393,
+            28.93
+          ]
+        }
+      ]
+    },
+    {
+      "activePilot": true,
+      "twoFields": true,
+      "phase": "win",
+      "core": 100,
+      "scrap": 588,
+      "totalPaid": 2432,
+      "campaign": {
+        "core": 100,
+        "scrap": 368,
+        "drones": 13
+      },
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "fields": 0,
+          "maxAlive": 5,
+          "seconds": 17.233,
+          "carrier": null
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 10,
+          "scrap": 102,
+          "drones": 3,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 18.083,
+          "carrier": null
+        },
+        {
+          "wave": 3,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 11,
+          "scrap": 166,
+          "drones": 4,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 19,
+          "carrier": null
+        },
+        {
+          "wave": 4,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 14,
+          "scrap": 202,
+          "drones": 6,
+          "fields": 0,
+          "maxAlive": 9,
+          "seconds": 21.367,
+          "carrier": null
+        },
+        {
+          "wave": 5,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 17,
+          "scrap": 188,
+          "drones": 8,
+          "fields": 0,
+          "maxAlive": 8,
+          "seconds": 21.367,
+          "carrier": null
+        },
+        {
+          "wave": 6,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 19,
+          "scrap": 324,
+          "drones": 9,
+          "fields": 1,
+          "maxAlive": 10,
+          "seconds": 22.133,
+          "carrier": null
+        },
+        {
+          "wave": 7,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 22,
+          "scrap": 316,
+          "drones": 11,
+          "fields": 1,
+          "maxAlive": 11,
+          "seconds": 24.733,
+          "carrier": null
+        },
+        {
+          "wave": 8,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 25,
+          "scrap": 368,
+          "drones": 13,
+          "fields": 2,
+          "maxAlive": 10,
+          "seconds": 35.3,
+          "carrier": {
+            "outcome": "destroyed",
+            "hull": 486.00000000000006,
+            "aliveSeconds": 4.85,
+            "routeFractionAtOutcome": 0.104,
+            "remainingHull": 0,
+            "pilotCarrierDamage": 164.9,
+            "droneCarrierDamage": 321.1,
+            "pilotContactSeconds": 4.85,
+            "pilotContactFraction": 1
+          }
+        },
+        {
+          "wave": 9,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 20,
+          "scrap": 316,
+          "drones": 15,
+          "fields": 2,
+          "maxAlive": 9,
+          "seconds": 30.933,
+          "carrier": null
+        },
+        {
+          "wave": 10,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 28,
+          "scrap": 488,
+          "drones": 16,
+          "fields": 2,
+          "maxAlive": 12,
+          "seconds": 25.267,
+          "carrier": null
+        },
+        {
+          "wave": 11,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 26,
+          "scrap": 392,
+          "drones": 18,
+          "fields": 2,
+          "maxAlive": 9,
+          "seconds": 28.6,
+          "carrier": null
+        },
+        {
+          "wave": 12,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 29,
+          "scrap": 588,
+          "drones": 19,
+          "fields": 2,
+          "maxAlive": 10,
+          "seconds": 40.95,
+          "carrier": {
+            "outcome": "destroyed",
+            "hull": 2916.0000000000005,
+            "aliveSeconds": 20.633,
+            "routeFractionAtOutcome": 0.397,
+            "remainingHull": 0,
+            "pilotCarrierDamage": 701.533,
+            "droneCarrierDamage": 2214.467,
+            "pilotContactSeconds": 20.633,
+            "pilotContactFraction": 1
+          }
+        }
+      ],
+      "placements": [
+        {
+          "beforeWave": 1,
+          "slot": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "coverageMetres": [
+            22.932,
+            2.498,
+            3.489,
+            2.485,
+            7.482
+          ]
+        },
+        {
+          "beforeWave": 1,
+          "slot": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            29.13,
+            20.158,
+            -2.544
+          ],
+          "coverageMetres": [
+            17.947,
+            6.995,
+            5.483,
+            11.93,
+            23.942
+          ]
+        },
+        {
+          "beforeWave": 2,
+          "slot": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            -1.838,
+            3.34,
+            2.339
+          ],
+          "coverageMetres": [
+            4.985,
+            23.484,
+            0,
+            0,
+            10.475
+          ]
+        },
+        {
+          "beforeWave": 3,
+          "slot": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "position": [
+            -18.734,
+            6.324,
+            -3.684
+          ],
+          "coverageMetres": [
+            4.487,
+            4.497,
+            20.438,
+            5.965,
+            11.472
+          ]
+        },
+        {
+          "beforeWave": 4,
+          "slot": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "position": [
+            -29.298,
+            24.674,
+            -15.455
+          ],
+          "coverageMetres": [
+            8.475,
+            6.496,
+            14.955,
+            6.462,
+            31.424
+          ]
+        },
+        {
+          "beforeWave": 4,
+          "slot": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "position": [
+            32.466,
+            22.638,
+            -3.92
+          ],
+          "coverageMetres": [
+            15.454,
+            4.997,
+            9.97,
+            2.983,
+            30.925
+          ]
+        },
+        {
+          "beforeWave": 5,
+          "slot": 7,
+          "mode": "pierce",
+          "paid": 92,
+          "position": [
+            -25.614,
+            23.365,
+            -14.677
+          ],
+          "coverageMetres": [
+            14.457,
+            6.995,
+            5.483,
+            11.93,
+            20.949
+          ]
+        },
+        {
+          "beforeWave": 5,
+          "slot": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "position": [
+            31.539,
+            19.013,
+            -0.174
+          ],
+          "coverageMetres": [
+            15.953,
+            3.498,
+            4.486,
+            13.422,
+            25.937
+          ]
+        },
+        {
+          "beforeWave": 6,
+          "slot": 9,
+          "mode": "stasis",
+          "paid": 116,
+          "position": [
+            -20.674,
+            23.685,
+            -12.493
+          ],
+          "coverageMetres": [
+            11.965,
+            11.992,
+            0,
+            0,
+            11.971
+          ]
+        },
+        {
+          "beforeWave": 7,
+          "slot": 10,
+          "mode": "pierce",
+          "paid": 128,
+          "position": [
+            2.409,
+            2.556,
+            1.448
+          ],
+          "coverageMetres": [
+            2.991,
+            24.483,
+            2.492,
+            1.988,
+            5.487
+          ]
+        },
+        {
+          "beforeWave": 7,
+          "slot": 11,
+          "mode": "pierce",
+          "paid": 140,
+          "position": [
+            26.195,
+            20.999,
+            -5.216
+          ],
+          "coverageMetres": [
+            8.475,
+            6.496,
+            10.967,
+            6.462,
+            31.923
+          ]
+        },
+        {
+          "beforeWave": 8,
+          "slot": 12,
+          "mode": "stasis",
+          "paid": 152,
+          "position": [
+            23.556,
+            20.887,
+            -4.964
+          ],
+          "coverageMetres": [
+            0,
+            0,
+            12.462,
+            11.93,
+            11.971
+          ]
+        },
+        {
+          "beforeWave": 8,
+          "slot": 13,
+          "mode": "pierce",
+          "paid": 164,
+          "position": [
+            34.888,
+            16.317,
+            11.089
+          ],
+          "coverageMetres": [
+            0,
+            0,
+            4.985,
+            17.896,
+            28.93
+          ]
+        },
+        {
+          "beforeWave": 9,
+          "slot": 14,
+          "mode": "pierce",
+          "paid": 176,
+          "position": [
+            20.475,
+            28.624,
+            17.573
+          ],
+          "coverageMetres": [
+            5.982,
+            0,
+            17.946,
+            0,
+            0
+          ]
+        },
+        {
+          "beforeWave": 9,
+          "slot": 15,
+          "mode": "pierce",
+          "paid": 188,
+          "position": [
+            -16.583,
+            11.587,
+            -1.905
+          ],
+          "coverageMetres": [
+            3.988,
+            4.497,
+            13.459,
+            7.954,
+            4.988
+          ]
+        },
+        {
+          "beforeWave": 10,
+          "slot": 16,
+          "mode": "pierce",
+          "paid": 200,
+          "position": [
+            -27.58,
+            18.579,
+            4.505
+          ],
+          "coverageMetres": [
+            2.493,
+            23.484,
+            1.994,
+            3.48,
+            3.492
+          ]
+        },
+        {
+          "beforeWave": 11,
+          "slot": 17,
+          "mode": "pierce",
+          "paid": 212,
+          "position": [
+            -11.625,
+            22.509,
+            -5.907
+          ],
+          "coverageMetres": [
+            22.932,
+            1.999,
+            1.495,
+            2.485,
+            3.492
+          ]
+        },
+        {
+          "beforeWave": 11,
+          "slot": 18,
+          "mode": "pierce",
+          "paid": 224,
+          "position": [
+            -32.698,
+            24.894,
+            -13.049
+          ],
+          "coverageMetres": [
+            5.484,
+            11.992,
+            8.474,
+            4.971,
+            7.482
+          ]
+        },
+        {
+          "beforeWave": 12,
+          "slot": 19,
+          "mode": "pierce",
+          "paid": 236,
+          "position": [
+            14.221,
+            23.555,
+            -11.209
+          ],
+          "coverageMetres": [
+            0,
+            0,
+            3.489,
+            18.393,
+            29.429
+          ]
+        }
+      ]
+    }
+  ]
+}

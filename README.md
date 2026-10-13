@@ -1,4 +1,4 @@
-# Helix Hold · Sightline Lab (0.6.2)
+# Helix Hold · Sightline Lab (0.7.0)
 
 A 3D defense game in which placement is piloting. Fly into a useful line, anchor a weaker drone there, and return to the launch cradle to build the next.
 
@@ -26,11 +26,11 @@ Your hull does not collide with enemies or ribbons. Lasers use a finite cylindri
 
 Choose **Split Crown** for eight authored waves across two separated helix districts. A/B are the west crown and coil; C/D are their eastern counterparts. They first open in waves 1/2/3/5. Gate **E** is reserved for one final carrier in wave 8. Its distinct transfer visits useful defense neighborhoods in both crowns and the lower approaches. It stays visible as a dashed route before opening.
 
-Stasis is available from setup, with the same 6m radius, half-speed effect, normal paid slot and no stacking. Sweep uses the regular 18 DPS here. The starting 60 scrap and eight slots are unchanged. Use free selected-drone repositioning between waves. Split Crown records its own eight-wave score; earlier campaign clears and optional continuations are unchanged.
+Stasis is available from setup, with the same 6m radius, half-speed effect, normal paid slot and no stacking. Sweep uses the regular 18 DPS here. Start with 60 scrap. **Crown has no fixed drone cap:** grow through the same rising scrap prices, adding Stasis when you can afford the next unit. Other arenas retain eight slots. Use free selected-drone repositioning between waves. Split Crown records its eight-wave score, then offers **Continue to waves 9–12** with your fleet, scrap and core. Four authored extra waves shift convoy pressure between crowns and coils, ending with a 2,916-hull carrier on E. The original wave-eight carrier remains 486 hull. The extension cannot overwrite the recorded eight-wave score.
 
-**Show eight-wave gate plan** in the observatory or Survey reveals the full authored schedule, enemy counts and first arrival time after launch for each gate. Letters and route colors distinguish A–E. Two low crown platforms mark the districts without adding collision obstacles. The floating upper arches and their support lines were removed in v0.6.1 after screenshot feedback.
+**Show 8-wave gate plan** in the observatory or Survey reveals the full authored schedule, enemy counts and first arrival time after launch for each gate. The optional waves 9–12 have a separate forecast; continued Survey shows all twelve. Letters and route colors distinguish A–E. Two low crown platforms mark the districts without adding collision obstacles. The floating upper arches and their support lines were removed in v0.6.1 after screenshot feedback.
 
-`npm run trial:crown` compares funded idealized defenses and an ordinary-input opening. Shared-line layouts finish with and without Stasis; one dedicated-line layout benefits from a late field and a free carrier-wave reposition. These establish feasibility and a useful tradeoff, not human difficulty or an optimal solution. Browser visuals remain unverified in this environment.
+`npm run trial:crown` retains the historical eight-drone comparisons and an ordinary-input opening. `npm run trial:crown-growth` tests normally funded larger fleets through twelve waves, including an automated pursuing pilot; `npm run study:crown-pilot` isolates the original short carrier encounter. See [funded growth and the long flight](docs/CROWN_GROWTH.md) for results and limits. In the historical trial, shared-line layouts finish with and without Stasis; one dedicated-line layout benefits from a late field and a free carrier-wave reposition. These establish feasibility and a useful tradeoff, not human difficulty or an optimal solution. Browser visuals remain unverified in this environment.
 
 ## Optional Carrier Test Flight
 
@@ -57,16 +57,16 @@ npm run build
 npm test
 ```
 
-`npm test` runs 51 deterministic simulation, revision, field-check, Split Crown and coverage checks, including manual/automatic pacing, paused launch, group-specific speeds, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
+`npm test` runs 58 deterministic simulation, revision, field-check, Split Crown, coverage, growth and renderer-allocation checks, including manual/automatic pacing, paused launch, group-specific speeds, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
 
 ### Verification for this revision
 
 - TypeScript and production build checked as part of publication.
-- All 51 deterministic checks pass on Node 24.19.0. The historical guard also passes with V8's alternate exponentiation implementation; Node 20–22 were not available here.
+- All 58 deterministic checks pass on Node 24.19.0. New checks cover growth past eight, continuation score integrity and real Three object allocations beyond the old visual limits. The historical guard was also verified under alternate exponentiation in v0.6.2; Node 20–22 were not available here.
 - Geometry calculations place every opening gate inside desktop and 390×844 portrait camera views.
 - Enemy solid vertices fit their collision spheres; sampled Barge/Shard centers remain exactly on their paths.
 - Score migration preserves Shear across reordering and archives original Needle/Twin records.
-- Funded idealized layouts establish carrier and eight-wave feasibility. Optimized five-drone layouts also clear the extensions without reinforcement: the added waves provide authored variation, not a proven harder strategic tier. These are not human playtests.
+- Three funded idealized twelve-wave Crown layouts finish at 60/100/100 core. The two active-pilot cases reach the eastern crown before intercepting the final carrier. Earlier five-wave-arena extensions also have feasible idealized layouts. These are simulation cases, not human difficulty claims.
 - Browser suite and final appearance: **not executed for this revision**. The managed Sites environment lacks the required browser-control capability. Source and mathematical checks do not replace visual or human playtesting.
 
 The v0.6.2 review follow-up also adds Enter-to-end for the desktop field check, separates portrait Survey from the gate rows, and prepares browser assertions that poll actual state instead of assuming a fast renderer. See [review findings and limits](docs/REVIEW_FOLLOWUP_062.md).
@@ -80,7 +80,8 @@ The v0.6.2 review follow-up also adds Enter-to-end for the desktop field check, 
 - `src/game/HelixHold.tsx`: input, lifecycle, responsive HUD, guide and controls.
 - `src/game/save.ts`: arena-ID records and legacy migration.
 - `qa/simulation.mjs`: source-bundled simulation checks.
-- `docs/SPLIT_CROWN.md`: eight-wave arena, fifth route, measured contacts and funded defense trials.
+- `docs/CROWN_GROWTH.md`: current funded growth, optional twelve-wave flight and active-pilot evidence.
+- `docs/SPLIT_CROWN.md`: original eight-wave arena, fifth route, measured contacts and historical defense trials.
 - `qa/crown-trial.mjs`: funded matched defenses and ordinary-input opening.
 - `docs/STASIS_REPORT_051.md`: historical live report, subsequent confirmation and diagnostic workflow.
 - `docs/ARENA_CANDIDATES.md`: three measured replacement designs.

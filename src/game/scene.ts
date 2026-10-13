@@ -21,6 +21,77 @@ function pathColor(run: Run, index: number): number {
   if (run.level.presentation === "split-crown") return SPLIT_PATH_COLORS[index] ?? PALETTE.ice;
   return run.level.primaryPath === index ? 0xffb692 : PATH_COLORS[index] ?? PALETTE.ice;
 }
+
+/** Grow the whole visual slot together so every paid drone has all of its visuals. */
+export function buildDroneVisualPool(scene: THREE.Scene, beamGeo: THREE.CylinderGeometry) {
+  const makeBeam = () => {
+    const beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.62, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    beam.frustumCulled = false; beam.visible = false; scene.add(beam); return beam;
+  };
+  const drones: THREE.Group[] = [];
+  const beams = [makeBeam()]; // Slot zero always belongs to the pilot.
+  const droneShells: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial>[] = [];
+  const targetRings: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>[] = [];
+  const fields: ReturnType<typeof buildStasisFieldVisual>[] = [];
+  function ensure(count: number) {
+    while (drones.length < count) {
+      const drone = buildDrone(); drone.visible = false; drone.userData.relocating = false; scene.add(drone); drones.push(drone);
+      beams.push(makeBeam());
+      const shell = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: PALETTE.lavender, transparent: true, opacity: 0.012, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+      shell.visible = false; shell.frustumCulled = false; scene.add(shell); droneShells.push(shell);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.024, 5, 36), glowMaterial(PALETTE.ice, 0.75));
+      ring.visible = false; scene.add(ring); targetRings.push(ring);
+      const field = buildStasisFieldVisual(); field.group.visible = false; scene.add(field.group); fields.push(field);
+    }
+  }
+  ensure(MAX_DRONES);
+  return { drones, beams, droneShells, targetRings, fields, ensure };
+}
+
+type CoverageBatch = { segments: ReturnType<typeof getBeamCoverage>["segments"]; color: number; width: number };
+
+/** Resize instance buffers instead of silently losing late batches, including the aim preview. */
+export function buildCoverageVisual(scene: THREE.Scene) {
+  const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 5, 1, true);
+  geometry.rotateX(Math.PI / 2);
+  const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.82, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+  function create(capacity: number) {
+    const result = new THREE.InstancedMesh(geometry, material, capacity);
+    result.count = 0; result.frustumCulled = false; result.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(result);
+    return result;
+  }
+  let mesh = create(4096);
+  return {
+    get mesh() { return mesh; },
+    sync(batches: CoverageBatch[]) {
+      const needed = batches.reduce((sum, batch) => sum + batch.segments.reduce((n, segment) => n + Math.max(0, segment.points.length - 1), 0), 0);
+      if (needed > mesh.instanceMatrix.count) {
+        let capacity = mesh.instanceMatrix.count;
+        while (capacity < needed) capacity *= 2;
+        const old = mesh; mesh = create(capacity); scene.remove(old);
+        // Instance buffers belong to the old mesh; geometry and material are shared.
+        old.dispose();
+      }
+      let count = 0;
+      for (const batch of batches) {
+        _color.setHex(batch.color);
+        for (const segment of batch.segments) {
+          for (let i = 1; i < segment.points.length; i++) {
+            const a = segment.points[i - 1]!, b = segment.points[i]!;
+            const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, length = Math.hypot(dx, dy, dz);
+            if (length < 0.001) continue;
+            _dummy.position.set((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
+            aimAlong(_dummy, dx, dy, dz);
+            _dummy.scale.set(batch.width, batch.width, length); _dummy.updateMatrix();
+            mesh.setMatrixAt(count, _dummy.matrix); mesh.setColorAt(count, _color); count++;
+          }
+        }
+      }
+      mesh.count = count; mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    },
+  };
+}
 const _x = new THREE.Vector3();
 const _y = new THREE.Vector3();
 const _z = new THREE.Vector3();
@@ -314,7 +385,6 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   const makeHalo = (hex: number, opacity: number) => new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture, color: hex, opacity, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
 
   const ship = buildShip(); scene.add(ship);
-  const drones = Array.from({ length: MAX_DRONES }, () => { const drone = buildDrone(); drone.visible = false; drone.userData.relocating = false; scene.add(drone); return drone; });
   const droneMaterialDefaults = new WeakMap<THREE.Material, { transparent: boolean; opacity: number; depthWrite: boolean }>();
   const ghost = buildDrone(true); ghost.visible = false; scene.add(ghost);
   const selectedDroneRing = new THREE.Mesh(new THREE.TorusGeometry(1.24, 0.032, 6, 40), glowMaterial(PALETTE.ice, 0.84));
@@ -322,18 +392,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
 
   const beamGeo = new THREE.CylinderGeometry(1, 1, 1, 8, 1, true);
   beamGeo.translate(0, 0.5, 0); beamGeo.rotateX(Math.PI / 2);
-  const beams = Array.from({ length: MAX_DRONES + 1 }, () => {
-    const beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.62, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
-    beam.frustumCulled = false; beam.visible = false; scene.add(beam); return beam;
-  });
-  const droneShells = Array.from({ length: MAX_DRONES }, () => {
-    const shell = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: PALETTE.lavender, transparent: true, opacity: 0.012, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
-    shell.visible = false; shell.frustumCulled = false; scene.add(shell); return shell;
-  });
-  const targetRings = Array.from({ length: MAX_DRONES }, () => {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.024, 5, 36), glowMaterial(PALETTE.ice, 0.75));
-    ring.visible = false; scene.add(ring); return ring;
-  });
+  const { drones, beams, droneShells, targetRings, fields, ensure: ensureDroneVisuals } = buildDroneVisualPool(scene, beamGeo);
   // The proposed drone's true finite cylinder is a translucent shell with sparse depth hoops.
   const previewVolume = new THREE.Group();
   const volumeMat = new THREE.MeshBasicMaterial({ color: PALETTE.lavender, transparent: true, opacity: 0.026, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
@@ -344,15 +403,10 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   });
   previewVolume.visible = false; scene.add(previewVolume);
 
-  const fields = Array.from({ length: MAX_DRONES }, () => buildStasisFieldVisual());
   const fieldPreview = buildStasisFieldVisual(true);
-  for (const field of [...fields, fieldPreview]) scene.add(field.group);
+  scene.add(fieldPreview.group);
 
-  const COVERAGE_MAX = 4096;
-  const coverageGeo = new THREE.CylinderGeometry(0.1, 0.1, 1, 5, 1, true);
-  coverageGeo.rotateX(Math.PI / 2);
-  const coverage = new THREE.InstancedMesh(coverageGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.82, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }), COVERAGE_MAX);
-  coverage.count = 0; coverage.frustumCulled = false; coverage.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(coverage);
+  const coverage = buildCoverageVisual(scene);
   let coverageClock = 1;
 
   const enemyGeometry = buildEnemyGeometries();
@@ -539,27 +593,12 @@ export function createWorld(canvas: HTMLCanvasElement): World {
     }
   }
   function syncCoverage(run: Run, preview: ReturnType<typeof getPlacementPreview>) {
-    let count = 0;
-    function add(segments: ReturnType<typeof getBeamCoverage>["segments"], hex: number, width: number) {
-      _color.setHex(hex);
-      for (const segment of segments) {
-        for (let i = 1; i < segment.points.length && count < COVERAGE_MAX; i++) {
-          const a = segment.points[i - 1]!, b = segment.points[i]!;
-          const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, length = Math.hypot(dx, dy, dz);
-          if (length < 0.001) continue;
-          _dummy.position.set((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
-          aimAlong(_dummy, dx, dy, dz);
-          _dummy.scale.set(width, width, length); _dummy.updateMatrix();
-          coverage.setMatrixAt(count, _dummy.matrix); coverage.setColorAt(count, _color); count++;
-        }
-      }
-    }
+    const batches: CoverageBatch[] = [];
     if (overview || run.rest > 0 || run.expand > 0.05 || Math.abs(run.shift) > 0.05) {
-      for (const drone of run.drones.filter(d => !run.fieldCheck || d.mode === "stasis")) add((drone.mode === "stasis" ? getFieldCoverage(run, drone) : getBeamCoverage(run, droneBeam(drone))).segments, DRONE_SPECS[drone.mode].color, 0.85);
+      for (const drone of run.drones.filter(d => !run.fieldCheck || d.mode === "stasis")) batches.push({ segments: (drone.mode === "stasis" ? getFieldCoverage(run, drone) : getBeamCoverage(run, droneBeam(drone))).segments, color: DRONE_SPECS[drone.mode].color, width: 0.85 });
     }
-    if (run.phase !== "title" && !overview && !run.fieldCheck) add(preview.segments, DRONE_SPECS[run.droneMode].color, 2.2);
-    coverage.count = count; coverage.instanceMatrix.needsUpdate = true;
-    if (coverage.instanceColor) coverage.instanceColor.needsUpdate = true;
+    if (run.phase !== "title" && !overview && !run.fieldCheck) batches.push({ segments: preview.segments, color: DRONE_SPECS[run.droneMode].color, width: 2.2 });
+    coverage.sync(batches);
   }
   function updateCamera(run: Run, dt: number, elapsed: number) {
     if (overview) {
@@ -662,6 +701,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
     },
     sync(run, dt, elapsed) {
       if (builtId !== run.levelId) rebuild(run);
+      ensureDroneVisuals(run.drones.length);
       updateCamera(run, dt, elapsed);
       const preview = getPlacementPreview(run);
       aimAlong(ship, run.aimx, run.aimy, run.aimz, run.ship.roll); ship.position.set(run.ship.x, run.ship.y, run.ship.z);
@@ -824,7 +864,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
     },
     dispose() {
       const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>();
-      scene.traverse((obj) => { const mesh = obj as THREE.Mesh; if (mesh.geometry) geometries.add(mesh.geometry); if (Array.isArray(mesh.material)) mesh.material.forEach((mat) => materials.add(mat)); else if (mesh.material) materials.add(mesh.material); });
+      scene.traverse((obj) => { const mesh = obj as THREE.Mesh; if (mesh instanceof THREE.InstancedMesh) mesh.dispose(); if (mesh.geometry) geometries.add(mesh.geometry); if (Array.isArray(mesh.material)) mesh.material.forEach((mat) => materials.add(mat)); else if (mesh.material) materials.add(mesh.material); });
       geometries.forEach((geometry) => geometry.dispose()); materials.forEach((material) => material.dispose());
       for (const gate of gates) gate.labelTexture?.dispose();
       glowTexture.dispose(); renderer.dispose();

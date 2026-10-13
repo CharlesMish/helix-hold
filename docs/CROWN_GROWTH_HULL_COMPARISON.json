@@ -1,0 +1,109 @@
+{
+  "question": "Choose a bounded final-carrier hull for the authored 12-wave experiment with scrap-funded growth.",
+  "method": "Same seed 17, all 19 funded drone positions/modes and prior waves held fixed across 5x/6x/8x final-carrier hull candidates. Final HP overrides apply after fleet placement. Reproduce with node qa/crown-growth-trial.mjs --final-hull=5 (or 6/8). Each row is automated deterministic simulation; active pilot is an ordinary-input pursuit controller with perfect state knowledge, not human play.",
+  "checks": {
+    "allPlacementsMatchAcrossHullCandidates": true
+  },
+  "reasonForSix": "The idle reference fleet defeats 5x. At 6x, it needs some extra damage or better placement; both active cases reach the east district before killing the carrier. At 8x, the damage-only case nearly reaches the core even under perfect active pursuit, making it a less forgiving first prototype.",
+  "results": [
+    {
+      "hullMultiplier": 5,
+      "activePilot": false,
+      "twoFields": false,
+      "finalCore": 100,
+      "outcome": "destroyed",
+      "hull": 2430.0000000000005,
+      "aliveSeconds": 39.367,
+      "routeFractionAtOutcome": 0.947,
+      "remainingHull": 0
+    },
+    {
+      "hullMultiplier": 5,
+      "activePilot": true,
+      "twoFields": false,
+      "finalCore": 100,
+      "outcome": "destroyed",
+      "hull": 2430.0000000000005,
+      "aliveSeconds": 16.6,
+      "routeFractionAtOutcome": 0.399,
+      "remainingHull": 0
+    },
+    {
+      "hullMultiplier": 5,
+      "activePilot": true,
+      "twoFields": true,
+      "finalCore": 100,
+      "outcome": "destroyed",
+      "hull": 2430.0000000000005,
+      "aliveSeconds": 18.6,
+      "routeFractionAtOutcome": 0.373,
+      "remainingHull": 0
+    },
+    {
+      "hullMultiplier": 6,
+      "activePilot": false,
+      "twoFields": false,
+      "finalCore": 60,
+      "outcome": "breached",
+      "hull": 2916.0000000000005,
+      "aliveSeconds": 41.483,
+      "routeFractionAtOutcome": 0.998,
+      "remainingHull": 351.667
+    },
+    {
+      "hullMultiplier": 6,
+      "activePilot": true,
+      "twoFields": false,
+      "finalCore": 100,
+      "outcome": "destroyed",
+      "hull": 2916.0000000000005,
+      "aliveSeconds": 19.25,
+      "routeFractionAtOutcome": 0.463,
+      "remainingHull": 0
+    },
+    {
+      "hullMultiplier": 6,
+      "activePilot": true,
+      "twoFields": true,
+      "finalCore": 100,
+      "outcome": "destroyed",
+      "hull": 2916.0000000000005,
+      "aliveSeconds": 20.633,
+      "routeFractionAtOutcome": 0.397,
+      "remainingHull": 0
+    },
+    {
+      "hullMultiplier": 8,
+      "activePilot": false,
+      "twoFields": false,
+      "finalCore": 60,
+      "outcome": "breached",
+      "hull": 3888.0000000000005,
+      "aliveSeconds": 41.483,
+      "routeFractionAtOutcome": 0.998,
+      "remainingHull": 1323.667
+    },
+    {
+      "hullMultiplier": 8,
+      "activePilot": true,
+      "twoFields": false,
+      "finalCore": 100,
+      "outcome": "destroyed",
+      "hull": 3888.0000000000005,
+      "aliveSeconds": 40.7,
+      "routeFractionAtOutcome": 0.979,
+      "remainingHull": 0
+    },
+    {
+      "hullMultiplier": 8,
+      "activePilot": true,
+      "twoFields": true,
+      "finalCore": 100,
+      "outcome": "destroyed",
+      "hull": 3888.0000000000005,
+      "aliveSeconds": 26.683,
+      "routeFractionAtOutcome": 0.5,
+      "remainingHull": 0
+    }
+  ]
+}

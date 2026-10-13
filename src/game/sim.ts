@@ -117,6 +117,7 @@ type Group = {
   interval: number;
   delay: number;
   speedMul?: number;
+  hpMul?: number;
   spawned: number;
 };
 
@@ -192,6 +193,11 @@ export type Run = {
 
 export function anchorCost(droneCount: number): number {
   return 20 + droneCount * 12;
+}
+
+/** Only arenas authored for scrap-funded growth omit the ordinary fleet limit. */
+export function getDroneLimit(level: LevelDef): number {
+  return level.fleetGrowth === "scrap" ? Infinity : MAX_DRONES;
 }
 
 export function hasStasis(level: LevelDef): boolean {
@@ -295,7 +301,7 @@ function placeEnemy(run: Run, e: Enemy) {
   e.tz = pose.tz;
 }
 
-function spawnEnemy(run: Run, kind: Kind, pathIndex: number, speedMul = 1): boolean {
+function spawnEnemy(run: Run, kind: Kind, pathIndex: number, speedMul = 1, hpMul = 1): boolean {
   const slot = run.enemies.find((e) => !e.alive);
   if (!slot) return false;
   const spec = KINDS[kind];
@@ -303,7 +309,7 @@ function spawnEnemy(run: Run, kind: Kind, pathIndex: number, speedMul = 1): bool
   slot.kind = kind;
   slot.pathIndex = pathIndex;
   slot.dist = 0;
-  slot.maxHp = spec.hp * run.level.hpMul;
+  slot.maxHp = spec.hp * run.level.hpMul * hpMul;
   slot.hp = slot.maxHp;
   slot.speed = spec.speed * run.level.speedMul * speedMul;
   slot.speedScale = 1;
@@ -621,7 +627,7 @@ function updateWaves(run: Run, dt: number) {
   run.waveTime += dt;
   for (const g of wave.groups) {
     while (g.spawned < g.count && run.waveTime >= g.delay + g.spawned * g.interval) {
-      if (!spawnEnemy(run, g.kind, g.path, g.speedMul)) break;
+      if (!spawnEnemy(run, g.kind, g.path, g.speedMul, g.hpMul)) break;
       g.spawned += 1;
     }
   }
@@ -636,7 +642,7 @@ function updateWaves(run: Run, dt: number) {
       run.rest = 8;
       run.banner = run.waveMode === "manual" ? "Lane clear · launch when ready" : "Lane clear  8";
       const cost = anchorCost(run.drones.length);
-      const placement = run.scrap >= cost && run.drones.length < MAX_DRONES
+      const placement = run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
         ? `Next drone costs ${cost} scrap. ` : "Adjust your defense. ";
       run.hint = placement + (run.waveMode === "manual"
         ? "Take your time, then launch the next wave."
@@ -679,7 +685,7 @@ export function placementStatus(run: Run): string | null {
   const moving = run.drones.find(d => d.id === run.repositionId);
   if (run.repositionId !== null && (!moving || run.rest <= 0)) return "Reposition only during setup";
   if (!moving) {
-    if (run.drones.length >= MAX_DRONES) return "Lattice is full";
+    if (run.drones.length >= getDroneLimit(run.level)) return "Lattice is full";
     const cost = anchorCost(run.drones.length);
     if (run.scrap < cost) return `Need ${cost} scrap to anchor`;
   }
@@ -794,16 +800,17 @@ export function recallSelected(run: Run, id: number): string | null {
   return null;
 }
 
-/** The five-wave result is already recorded; continuation cannot overwrite it. */
+/** The ordinary campaign result is already recorded; continuation cannot overwrite it. */
 export function beginContinuation(run: Run): boolean {
   const extra = run.level.continuation;
   if (run.phase !== "win" || run.continued || !extra?.length || run.waveIndex !== run.level.waves.length - 1) return false;
   run.waves.push(...extra.map(w => ({ ...w, groups: w.groups.map(g => ({ ...g, spawned: 0 })) })));
   run.continued = true;
+  run.carrierOutcome = "pending";
   run.waveMode = "manual";
   run.rest = 8;
   run.banner = "Extended defense · launch when ready";
-  run.hint = "Five-wave victory recorded. Keep your fleet and scrap; revise your lines before wave six.";
+  run.hint = `${run.level.waves.length}-wave victory recorded. Keep your fleet and scrap; revise your lines before wave ${run.level.waves.length + 1}.`;
   setPhase(run, "play");
   return true;
 }
@@ -1006,6 +1013,7 @@ export function beginWave(run: Run, index: number) {
   run.waveIndex = index;
   run.waveTime = 0;
   run.rest = 0;
+  if (run.waves[index]?.groups.some(g => g.kind === "carrier" && g.count > 0)) run.carrierOutcome = "pending";
   run.banner = `Wave ${index + 1} / ${run.waves.length}`;
   run.hint = run.waves[index]?.lesson ?? "Wave launched. Your drones hold their lines while you fly.";
 }

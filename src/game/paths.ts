@@ -47,6 +47,8 @@ export type LevelDef = {
   archived?: boolean;
   /** Fields may be offered by a campaign arena without making it a lab experiment. */
   stasisAvailable?: boolean;
+  /** Crown grows through earned scrap; other arenas retain their eight-drone limit. */
+  fleetGrowth?: "scrap";
   presentation?: "split-crown";
   primaryPath?: number;
   sweepDps?: number;
@@ -71,6 +73,8 @@ export type WaveSpec = {
     delay: number;
     /** Local route pacing, multiplied by the arena and enemy-kind speeds. */
     speedMul?: number;
+    /** Authored local hull multiplier; omitted groups keep the original arena hull. */
+    hpMul?: number;
   }[];
 };
 
@@ -240,7 +244,8 @@ const g = (
   interval: number,
   delay: number,
   speedMul = 1,
-) => ({ kind, path, count, interval, delay, speedMul });
+  hpMul?: number,
+) => ({ kind, path, count, interval, delay, speedMul, ...(hpMul === undefined ? {} : { hpMul }) });
 
 export const LEVELS: LevelDef[] = [
   {
@@ -398,12 +403,13 @@ export const SPLIT_CROWN_INDEX = LEVELS.length;
 LEVELS.push({
   id: "split-crown",
   name: "Split Crown",
-  subtitle: "Two crowns · 4 gates + carrier route · 8 waves",
+  subtitle: "Two crowns · 4 gates + carrier route · 8 + 4 optional waves",
   blurb: "Build across two distant helix districts. A final carrier visits both crowns: keep shared slices working while you hold dedicated lines.",
-  briefing: "Start on the west crown, then build toward the east as four gates open. Stasis is available alongside Pierce and Sweep. Route E is reserved for the final carrier: it visits both crowns and their lower approaches. Eight waves. Plan & launch gives unlimited setup; reposition drones for free between waves.",
+  briefing: "Start on the west crown, then build toward the east as four gates open. Grow your fleet with earned scrap, without a drone cap. Route E carries the wave-eight carrier. Record that clear, then choose four more waves and a stronger carrier on E. Plan & launch gives unlimited setup; reposition drones for free between waves.",
   hangar: lookingAt({ x: -9, y: 28, z: -20 }, { x: -14.24097, y: 37, z: -13.3037 }),
   accent: 0xe8c58b,
   stasisAvailable: true,
+  fleetGrowth: "scrap",
   presentation: "split-crown",
   primaryPath: 4,
   hpMul: 1.08,
@@ -435,5 +441,11 @@ LEVELS.push({
     { chapter: "06 · Low pressure", lesson: "Heavy traffic moves to the lower coils. Compare a useful local Stasis field with the damage line that would occupy its slot.", groups: [g("barge", 1, 4, 2.25, 1), g("barge", 3, 4, 2.25, 4), g("wisp", 0, 5, 1.4, 6), g("shard", 2, 6, 1.2, 10)] },
     { chapter: "07 · Crown exchange", lesson: "Convoys split between the crowns while lower escorts arrive later. Prepare a final line for E: the carrier will visit both districts next wave.", groups: [g("barge", 0, 3, 2.2, 1), g("barge", 2, 3, 2.2, 4), g("wisp", 1, 6, 1.3, 6), g("shard", 3, 6, 1.2, 10), g("shard", 0, 4, 1.2, 15)] },
     { chapter: "08 · The crown carrier", lesson: "Carrier inbound on E: 486 hull, 40 core on breach. It crosses both local defense neighborhoods before turning through the lower approaches. Escorts keep all four gates relevant.", groups: [g("carrier", 4, 1, 1, 1.5), g("barge", 0, 4, 2.3, 3), g("shard", 1, 7, 1.2, 6), g("wisp", 2, 5, 1.4, 9), g("barge", 3, 4, 2.2, 14), g("wisp", 0, 4, 1.4, 23)] },
+  ],
+  continuation: [
+    { chapter: "09 · Upper convoys", lesson: "The west crown sends a heavy convoy, then the east answers. Lower-coil Wisps arrive between them. Reinforce with earned scrap or move a redundant line for free; E rests this wave.", groups: [g("barge", 0, 6, 2.1, 1, 1, 1.25), g("barge", 2, 6, 2.1, 10, 1, 1.25), g("wisp", 1, 4, 1.3, 5), g("wisp", 3, 4, 1.3, 18)] },
+    { chapter: "10 · Lower clamp", lesson: "The heavier convoys move to B and D. Upper Wisps split your attention, then a late Shard burst follows B. Long lower contact matters more than covering every gate once.", groups: [g("barge", 1, 5, 2, 1, 1, 1.4), g("barge", 3, 5, 2, 4, 1, 1.4), g("wisp", 0, 6, 1.25, 6), g("wisp", 2, 6, 1.25, 9), g("shard", 1, 6, 1.05, 18)] },
+    { chapter: "11 · Crown exchange", lesson: "A west convoy overlaps a lower-east burst; the eastern convoy and west-coil Wisps follow. Watch both districts before committing your pilot to a chase. E's stronger carrier comes next.", groups: [g("barge", 0, 5, 2, 1, 1, 1.6), g("barge", 2, 5, 2, 10, 1, 1.6), g("shard", 3, 8, 1, 4), g("wisp", 1, 8, 1.2, 17)] },
+    { chapter: "12 · The long pursuit", lesson: "A reinforced carrier takes E: 2916 hull, 40 core on breach. Hold it through both crowns while lower convoys and delayed upper escorts test the fleet. Your eight-wave result is already recorded.", groups: [g("carrier", 4, 1, 1, 1.5, 1, 6), g("barge", 1, 5, 2.1, 5, 1, 1.6), g("barge", 3, 5, 2.1, 14, 1, 1.6), g("wisp", 0, 6, 1.2, 8), g("wisp", 2, 6, 1.2, 22), g("shard", 0, 6, 1, 30)] },
   ],
 });

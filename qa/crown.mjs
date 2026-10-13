@@ -138,7 +138,7 @@ test('Stasis is available as an ordinary paid slot without raising the starting 
   Object.assign(run.ship, { x: 22.3, y: 21.3, z: -5.9 }); run.droneMode = 'pierce';
   assert.equal(tryAnchor(run), null); assert.equal(run.drones[1].paid, 32); assert.equal(run.scrap, 8);
   assert.equal(anchorCost(run.drones.length), 44);
-  assert.equal(beginContinuation(run), false, 'the eight-wave arena is its own campaign, not an appended old clear');
+  assert.equal(beginContinuation(run), false, 'Crown continuation requires the completed eight-wave campaign');
 });
 test('A Crown clear writes its own score and preserves Orbital, Shear and tutorial identities', () => {
   const initial = { version: 2, bestByLevel: { tutorial: 97, shear: 71, orbital: 83 }, legacyBestByLevel: {} };

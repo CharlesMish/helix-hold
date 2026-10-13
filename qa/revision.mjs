@@ -185,7 +185,7 @@ function campaignVictory(index = 1) {
   return run;
 }
 
-test("Only completed non-tutorial campaigns offer a single three-wave continuation", () => {
+test("The original five-wave campaigns offer one three-wave continuation; tutorial and lab remain bounded", () => {
   assert.equal(LEVELS[0].continuation, undefined);
   assert.equal(LEVELS[CARRIER_TEST_INDEX].continuation, undefined);
   for (const index of [1, 2]) {

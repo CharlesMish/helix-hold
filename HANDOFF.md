@@ -1,3 +1,27 @@
+# Helix Hold 0.7.0 — Crown growth and the long flight
+
+Started from authenticated Sites `85595089c74a52204a63551731d5ddbf2027ac18` and GitHub `3a0d5120cc379696d18282d68721fa22e6c3f2ad`. Keep the same owner-private Site and public source repository.
+
+**Newest human playtest:** Charlie confirms he played Split Crown before the v0.6.2 corrections. He enjoyed it, hit eight drones early, wanted to add a ninth Stasis without dismantling his defense, and destroyed the carrier too near E's entrance while actively pursuing it. He suggested scrap-funded growth and 10–12 waves. The previous checkpoint's missing-transcript note is superseded by this direct replacement report.
+
+- Crown alone grows without a fixed drone cap; ordinary `20 + 12 × owned` purchase prices and 60 starting scrap remain. Perfect earnings fund eight after wave 4 and fifteen after wave 8. Other arenas retain eight. Free setup Reposition and actual-paid Recall remain; the UI explains these alongside the next purchase price.
+- The first eight Crown authored waves are protected by an exact schedule hash from the starting source. Routes and weapon values stay unchanged. Larger fleets can make these waves easier. Wave 8 remains a 486-hull carrier checkpoint and writes its normal score.
+- After that win, the player may keep the fleet, core and scrap for four authored waves 9–12. Upper/lower convoy pressure changes by wave; E rests until the final carrier. Continuation returns to unlimited manual setup, can start only once and cannot overwrite the eight-wave record after win or loss.
+- The optional wave-12 carrier has 2,916 hull, normal cumulative damage, unchanged speed and a 40-core breach. New Barge groups have local hull multipliers. No immunities, contact resets, weapon changes or forced Stasis. The gate plan exposes the optional schedule and the setup lesson warns about the stronger carrier.
+- Drone/beam/shell/ring/field visuals and coverage buffers grow with demand. The active preview is retained beyond the old 4,096-instance coverage capacity. Superseded instance buffers are disposed.
+
+The active-pilot study explains the short original encounter: one historical shared-line eight-drone fleet plus ordinary-input automated pursuit kills the carrier at 5.23s / 12.6% of E. The actual growth trial reaches 13 drones at the eight-wave checkpoint and 19 before wave 12 with earned scrap. A 19-Pierce idle fleet finishes at 60 core after the final carrier breaches with about 352 hull; active pursuit finishes at 100 core, intercepting at 19.25s / 46.3% of E. A 17-Pierce/two-paid-Stasis active case finishes at 100 core, 20.63s / 39.7%. Both reach the east crown. Setup poses are idealized; pursuit has perfect state knowledge and 100% contact in these cases. These are feasibility measurements, not human balance or win rates.
+
+Validation: **58 deterministic checks** (the prior 51 plus five growth/continuation and two actual Three allocation checks), enemy/field geometry, unchanged byte-for-byte historical eight-drone Crown trial, bounded pilot and funded twelve-wave studies, browser-script syntax, TypeScript and production build. Rendering tests exercise 24 visual slots and 4,101 highlight segments without WebGL. Approved browser control remains unavailable; no preview or alternate browser was used. UI appearance, practical large-fleet performance and human pursuit difficulty remain unverified.
+
+Start with `docs/CROWN_GROWTH.md`. Reproduce `npm run study:crown-pilot` and `npm run trial:crown-growth`; recorded outputs include `CROWN_PILOT_STUDY.json`, `CROWN_GROWTH_TRIAL.json` and the fixed-fleet 5×/6×/8× hull comparison. Earlier eight-drone trial outputs remain historical comparisons, not the new maximum fleet.
+
+Next playtest: does purchasing a ninth or later field feel like extending a working defense, and does the final chase use both districts without feeling like a health sponge? Check side-lane pressure while pursuing. Keep the experiment focused before adding relays, another drone type or further waves.
+
+---
+
+## Previous v0.6.2 checkpoint
+
 # Helix Hold 0.6.2 — outside-review corrections
 
 Authenticated the matching v0.6.1 sources: GitHub `91bacf0108543ad6bce002363bc5f5ef65b6dfeb` and Sites `7a51eeea27b8e133356a69b2b7731dff9c107355`. Preserve the same private Site and public source repository. Charlie supplied Claude's executed review, Grok's source-only review and a portrait Survey screenshot. No later completed Split Crown playtest transcript was found; earlier Stasis feedback remains available.
