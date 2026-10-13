@@ -1,4 +1,4 @@
-# Helix Hold · Sightline Lab (0.6.1)
+# Helix Hold · Sightline Lab (0.6.2)
 
 A 3D defense game in which placement is piloting. Fly into a useful line, anchor a weaker drone there, and return to the launch cradle to build the next.
 
@@ -9,14 +9,14 @@ A 3D defense game in which placement is piloting. Fly into a useful line, anchor
 - Start with 60 scrap. Drones cost 20, 32, 44, …; the first two are funded.
 - **Pierce:** a long narrow beam that damages every enemy it intersects.
 - **Sweep:** a shorter, wider beam that damages only its nearest target.
-- Coverage highlights show potential contact with shard-sized enemies using the combat hit test. Exposure time, Sweep obstruction and Wisp weaving still matter.
+- Coverage highlights show potential contact with shard-sized enemies using the combat hit test. In Split Crown, the main number and bar count the upcoming wave's routes during setup, or routes with traffic still pending/alive during combat; future-wave coverage is listed separately. Hover still shows every route. Exposure time, Sweep obstruction and Wisp weaving still matter.
 - Recall the most recent drone for its original purchase price. During setup, Survey lets you select any drone and **Reposition** it for free, preserving its type, paid value and contribution. Anchor commits; Cancel keeps the old placement.
 - Survey pauses the simulation and shows the whole 3D arena.
 - Flight School, Shear and Split Crown are featured; Orbital remains available as an archived study. Best surviving core integrity is saved locally by campaign arena ID. The optional test flight does not write campaign scores.
 
 **Flight School** combines two Glass Needle waves with three Twin Ribbon waves. **Shear Lane** keeps its three-route geometry with a slower short dive. **Orbital Garden** explores two recognizable tilted rings and their inward exits. After clearing Shear or Orbital’s original five waves, choose **Continue to waves 6–8** to keep your fleet, scrap and core for three authored extra waves. Your five-wave score is recorded before continuing; the extension cannot overwrite it. Flight School stays five waves and the lab stays three.
 
-Desktop: W/S thrust/reverse; A/D or left/right arrows yaw; mouse or up/down arrows aim; Space boost; F anchor; 1/2 drone mode; R recall; Shift fan; Q/E slide; Tab survey; Tab/Shift+Tab navigate Survey controls; Esc resume from Survey or pause flight; C cancel a move; Enter launch prepared wave. Click the sky to capture mouse aim. Keyboard aiming remains usable without pointer lock.
+Desktop: W/S thrust/reverse; A/D or left/right arrows yaw; mouse or up/down arrows aim; Space boost; F anchor; 1/2 drone mode; R recall; Shift fan; Q/E slide; Tab survey; Tab/Shift+Tab navigate Survey controls; Esc resume from Survey or pause flight; C cancel a move; Enter launch prepared wave, or end an active field check. Click the sky to capture mouse aim. Keyboard aiming remains usable without pointer lock.
 
 Touch: left stick aims, right stick flies forward/backward. Fan and Slide are toggles to leave both thumbs available. Anchor and Recall sit between the sticks. Survey pauses time.
 
@@ -42,7 +42,7 @@ Established beams are quieter during combat; Survey, setup and lattice adjustmen
 
 ## Checking a field
 
-Charlie confirms the v0.5.1 live field effect works. The earlier persistent-zero session has no established cause; diagnostics remain available. With at least one anchored Stasis drone, choose **Test placed fields** during setup. Harmless blue targets loop along every real route; amber brackets mean actually slowed. There is no damage, weapon fire, wave advance or economy change. Only placed fields are shown. **End check** returns to the original setup.
+Charlie confirms the v0.5.1 live field effect works. The earlier persistent-zero session has no established cause; diagnostics remain available. With at least one anchored Stasis drone, choose **Test placed fields** during setup. Harmless blue targets loop along every real route; amber brackets mean actually slowed. There is no damage, weapon fire, wave advance or economy change. Only placed fields are shown. **End check** or **Enter** during flight returns to the original setup without launching its wave.
 
 The field counter retains how many enemies have ever been affected in this flight (or check), alongside current slowed count. **Save field report** downloads game coordinates, build and membership/speed state for diagnosis. It sends nothing externally. Survey lists each selected anchored field's route coverage.
 
@@ -57,17 +57,19 @@ npm run build
 npm test
 ```
 
-`npm test` runs 43 deterministic simulation, revision, field-check and Split Crown checks, including manual/automatic pacing, paused launch, group-specific speeds, hit geometry and real-input opening trials. `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
+`npm test` runs 51 deterministic simulation, revision, field-check, Split Crown and coverage checks, including manual/automatic pacing, paused launch, group-specific speeds, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
 
 ### Verification for this revision
 
 - TypeScript and production build checked as part of publication.
-- All 43 simulation, revision, field-check and Split Crown checks pass.
+- All 51 deterministic checks pass on Node 24.19.0. The historical guard also passes with V8's alternate exponentiation implementation; Node 20–22 were not available here.
 - Geometry calculations place every opening gate inside desktop and 390×844 portrait camera views.
 - Enemy solid vertices fit their collision spheres; sampled Barge/Shard centers remain exactly on their paths.
 - Score migration preserves Shear across reordering and archives original Needle/Twin records.
 - Funded idealized layouts establish carrier and eight-wave feasibility. Optimized five-drone layouts also clear the extensions without reinforcement: the added waves provide authored variation, not a proven harder strategic tier. These are not human playtests.
 - Browser suite and final appearance: **not executed for this revision**. The managed Sites environment lacks the required browser-control capability. Source and mathematical checks do not replace visual or human playtesting.
+
+The v0.6.2 review follow-up also adds Enter-to-end for the desktop field check, separates portrait Survey from the gate rows, and prepares browser assertions that poll actual state instead of assuming a fast renderer. See [review findings and limits](docs/REVIEW_FOLLOWUP_062.md).
 
 ## Source map
 

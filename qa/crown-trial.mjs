@@ -2,9 +2,10 @@
 // Full runs use idealized in-bounds setup poses through ordinary paid placement
 // APIs. The separate opening flies through step(input) without pose teleports.
 import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 const bundle = await build({ stdin: { contents: 'export * from "./src/game/sim"; export * from "./src/game/paths"; export * from "./src/game/combat";', resolveDir: new URL('../', import.meta.url).pathname }, bundle: true, platform: 'node', format: 'esm', write: false });
-const api = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
+export const api = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
 const { createRun, step, nextWaveNow, tryAnchor, beginReposition, anchorCost, getBeamCoverage, getFieldCoverage, beamContact, LEVELS, DRONE_SPECS } = api;
 globalThis.localStorage = { getItem: () => null, setItem() {} };
 const index = LEVELS.findIndex(l => l.id === 'split-crown');
@@ -29,7 +30,7 @@ function pose(a, b, reverse = false) {
   p.beam = beam;
   return p;
 }
-const options = [];
+export const options = [];
 for (const path of level.paths) {
   for (let d = 0; d < path.length - 7; d += 4) {
     for (const span of [10, 20, 34, 50]) for (const reverse of [false, true]) {
@@ -58,7 +59,7 @@ for (let theta = 0; theta < Math.PI * 2; theta += Math.PI / 10) for (const y of 
   }
 }
 const openingOptions = options.filter(p => p.x < -5).sort((a, b) => b.metres[0] - a.metres[0]);
-function setPose(run, p, mode = 'pierce') {
+export function setPose(run, p, mode = 'pierce') {
   Object.assign(run.ship, { x: p.x, y: p.y, z: p.z, yaw: Math.atan2(-p.f.x, -p.f.z), pitch: Math.asin(p.f.y), vx: 0, vy: 0, vz: 0, yawRate: 0, pitchRate: 0 });
   Object.assign(run, { aimx: p.f.x, aimy: p.f.y, aimz: p.f.z, speed: 0, droneMode: mode });
 }
@@ -87,7 +88,7 @@ function fieldOptions(run) {
   }).sort((a, b) => b.score - a.score);
 }
 const purchaseLanes = [0, 0, 1, 2, 2, 3, 1, 3];
-function fullTrial(strategy, withField, refit = true, fieldSlot = 6, carrierRoute = 4) {
+export function fullTrial(strategy, withField, refit = true, fieldSlot = 6, carrierRoute = 4, observer = {}) {
   const run = createRun(index, 17), placements = [], waves = [], revisions = [];
   function buy() {
     const slot = run.drones.length;
@@ -110,7 +111,13 @@ function fullTrial(strategy, withField, refit = true, fieldSlot = 6, carrierRout
       // One explicit setup adjustment when the late route is announced. This is
       // a separate measured choice: paid value, mode and resource balance persist.
       if (refit && run.waveIndex + 1 === lateRouteWave && level.paths.length > 4 && run.drones.length >= 5) {
-        const moving = run.drones.filter(d => d.mode === 'pierce').at(-2);
+        // The original comparator intentionally retains its historical rule.
+        // A sibling study can pin the same paid unit in both fleets to isolate
+        // the field purchase from the otherwise different refitted unit.
+        const moving = observer.refitId === undefined
+          ? run.drones.filter(d => d.mode === 'pierce').at(-2)
+          : run.drones.find(d => d.id === observer.refitId && d.mode === 'pierce');
+        assert.ok(moving, 'requested setup refit identifies an existing Pierce');
         const retained = { paid: moving.paid, scrap: run.scrap, id: moving.id, mode: moving.mode };
         assert.equal(beginReposition(run, moving.id), null);
         const list = ranked(run, strategy === 'core-heavy' ? strategy : 'dedicated', 4);
@@ -132,7 +139,10 @@ function fullTrial(strategy, withField, refit = true, fieldSlot = 6, carrierRout
     const before = { kills: run.kills, core: run.core, touched: run.stasisTouched, contact: run.stasisExposure };
     let seconds = 0, maxAlive = 0, maxSlowed = 0, carrierMinHp = null, carrierSeen = false;
     while (run.phase === 'play' && run.rest === 0 && seconds < 240) {
-      step(run, neutral(), dt); run.fx.length = 0; seconds += dt;
+      observer.beforeStep?.(run, dt);
+      step(run, neutral(), dt);
+      observer.afterStep?.(run, dt);
+      run.fx.length = 0; seconds += dt;
       const alive = run.enemies.filter(e => e.alive);
       maxAlive = Math.max(maxAlive, alive.length); maxSlowed = Math.max(maxSlowed, alive.filter(e => e.speedScale < 1).length);
       for (const e of alive.filter(e => e.kind === 'carrier')) { carrierSeen = true; carrierMinHp = Math.min(carrierMinHp ?? Infinity, e.hp); }
@@ -188,6 +198,7 @@ function realInputOpening() {
   assert.ok(seconds < 180);
   return { method: 'Automated steering/thrust and step(anchor), zero pose assignments or bonus resources; not a human control-usability test.', flights, core: run.core, kills: run.kills, scrap: run.scrap, canAffordThird: run.scrap >= anchorCost(run.drones.length), seconds: round(seconds), pilotContactFrames };
 }
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 const opening = realInputOpening();
 const results = [];
 for (const strategy of ['dedicated', 'cross-lane', 'core-heavy']) for (const field of [false, true]) results.push(fullTrial(strategy, field));
@@ -207,3 +218,4 @@ for (const strategy of ['dedicated', 'cross-lane', 'core-heavy']) {
 console.log(JSON.stringify({ limitation: 'Idealized setup pose search and paid placement/reposition APIs, deterministic seed17, ordinary60scrap and8slots, pilot not attacking. One actual-input opening is separate. This is feasibility/comparison evidence, not human difficulty, browser rendering, or optimal play.', candidateCount: options.length, opening, results }, null, 2));
 assert.ok(opening.canAffordThird, 'real-input two-line opening earns the ordinary third drone');
 assert.ok(results.some(r => !r.withField && r.phase === 'win'), 'a normally funded damage-only fleet can complete all eight waves');
+}

@@ -1,7 +1,7 @@
 {
   "name": "helix-hold",
   "private": true,
-  "version": "0.6.1",
+  "version": "0.6.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,14 +9,16 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "qa": "node qa/check.mjs",
-    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs",
+    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs",
     "test:geometry": "node qa/geometry.mjs",
     "trial:carrier": "node qa/carrier-trial.mjs",
     "study:sweep": "node qa/sweep-study.mjs",
     "trial:continuation": "node qa/continuation-trial.mjs",
     "study:stasis": "node qa/stasis-study.mjs",
     "test:stasis-repro": "node qa/stasis-repro.mjs",
-    "trial:crown": "node qa/crown-trial.mjs"
+    "trial:crown": "node qa/crown-trial.mjs",
+    "study:crown-coverage": "node qa/crown-coverage-study.mjs",
+    "study:crown-stasis": "node qa/crown-stasis-study.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

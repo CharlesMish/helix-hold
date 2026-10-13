@@ -80,3 +80,21 @@
  .game-root[data-arena=split-crown][data-touch='1'] .flight-note{top:auto;bottom:118px}
  .game-root[data-arena=split-crown] .survey-card{max-height:calc(100dvh - 118px)}
 }
+
+/* Keep compact launch controls on one line; the icon is redundant beside Enter. */
+.launch-label{white-space:nowrap}
+@media(max-width:760px){
+ .wave-read .launch-wave{gap:5px;padding-inline:6px}
+ .wave-read .launch-wave>svg{display:none}
+ .wave-read[data-checking=true]>b{display:none}
+ .wave-read .launch-wave>kbd{font-size:8px;padding:2px 4px}
+}
+/* Gate rows and Survey share available portrait height, including wrapped names. */
+@media(max-width:760px) and (orientation:portrait){
+ .game-root[data-survey='1']{display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px;padding:150px 16px max(20px,env(safe-area-inset-bottom))}
+ .game-root[data-survey='1']>.view{position:absolute;inset:0}
+ .game-root[data-arena][data-survey='1']>.lane-intel{position:relative;inset:auto;width:auto;min-width:0}
+ .game-root[data-survey='1']>.survey-card{position:relative;inset:auto;width:auto;min-height:0;max-height:none}
+}
+
+.coverage-timing{display:flex;justify-content:space-between;gap:8px;margin-top:6px;color:#b4aecb;font:9px/1.5 var(--font-mono)}

@@ -6,7 +6,7 @@ Repository: [CharlesMish/helix-hold](https://github.com/CharlesMish/helix-hold).
 
 Helix Hold is a React/TypeScript/Three.js spatial defense game. The player flies into position and anchors fixed firing drones, seeking useful lines through three-dimensional enemy routes. Flight School teaches the idea; Shear adds competing paths; Split Crown is the larger eight-wave arena. Orbital remains an archived playable study, and the three-wave carrier/Stasis lab remains optional.
 
-Version 0.6.1 removes the stray decorative crown arches identified in the user's screenshot. This is a decoration cleanup, not a change to enemy routes, gate positions, collision, weapon stats or the economy. The route diagrams show gameplay geometry rather than those architectural ornaments.
+Version 0.6.1 removed the stray decorative crown arches identified in the user's screenshot. Version 0.6.2 addresses outside-review findings: portable historical geometry checks, Enter-to-end for field checks, portrait Survey layout, and a Crown readout separating this wave's coverage from later waves. Routes, collision, weapon stats and economy are unchanged. Read [the follow-up](REVIEW_FOLLOWUP_062.md) before repeating the earlier findings.
 
 The user has confirmed Stasis now works in the live game. The earlier persistent-zero report was not reproduced or causally explained; a refresh was only a possibility. Do not describe that report as an active confirmed defect or claim a proven root-cause fix. Setup **Test placed fields**, per-field coverage, contact history and **Save field report** remain available to investigate a fresh reproduction.
 
@@ -26,6 +26,8 @@ npm test
 npm run test:geometry
 npm run build
 npm run trial:crown
+npm run study:crown-coverage
+npm run study:crown-stasis
 ```
 
 `npm run build` includes TypeScript checking and produces the static `dist/` directory. `trial:crown` compares funded fleet strategies and prints detailed results; it is not a human playtest. Further studies are listed in `package.json`, including `study:sweep`, `study:stasis` and `test:stasis-repro`.
@@ -56,11 +58,11 @@ npm run trial:crown
 
 ## What the evidence establishes
 
-The v0.6 baseline records 43 deterministic checks: 22 simulation, 9 revision, 6 field-check and 6 Crown, plus enemy/field geometry checks. Rerun them against the reviewed commit. Passing assertions establish their tested invariants, not complete game correctness.
+Version 0.6.2 has 51 deterministic checks: 22 simulation, 9 revision, 6 field-check, 8 Crown and 6 coverage, plus enemy/field geometry checks. The original 43 passed on Node 24, but the old whole-level hash was brittle across exponentiation implementations. The retained historical fixture is still checked against the original hashes; live computed geometry now uses tolerances while authored schedules/settings remain exact. [Provenance and reproduction](../qa/fixtures/README.md). Rerun checks against the reviewed commit. Passing assertions establish their tested invariants, not complete game correctness.
 
 Crown's ordinary-input opening uses automated steering, thrust and anchoring without teleporting or bonus currency: 6/6 kills, 100 core, 56 scrap. Longer trials use finite idealized placement candidates, normal earned purchases and a setup reposition. Shared-line fleets finish at 82 core with or without a late field; one dedicated fleet benefits from a late field. Those results establish feasible strategies and useful comparisons, not player win rates or optimal balance.
 
-Approved browser control was unavailable in the development environment. Prepared browser tests were not executed there, and numerical camera checks or rasterized route diagrams are not browser playtests. Desktop/mobile HUD fit, contrast, depth reading and comfortable flight remain valuable review targets. Record browser/device, build, actions and observed state when reporting a visual or input defect.
+Approved browser control was unavailable in the development environment. Charlie supplied Claude's automated Chromium/software-renderer observations of v0.6.1; those are external browser evidence, not human playtesting. Updated v0.6.2 browser tests were not executed here. They use state polling, include the field-check keyboard exit and narrow desktop/touch Survey layout, and retain Barge screenshots/pixel measurements as review evidence rather than an uncalibrated visibility threshold. Desktop/mobile HUD fit, contrast, depth reading and comfortable flight remain valuable review targets. Record browser/device, build, actions and observed state when reporting a visual or input defect.
 
 ## Useful review questions
 

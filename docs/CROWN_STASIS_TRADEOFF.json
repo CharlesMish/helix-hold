@@ -1,0 +1,1042 @@
+{
+  "question": "What is the cost and benefit of buying a 92-scrap Stasis drone instead of a seventh Pierce in the existing dedicated Crown layout?",
+  "method": {
+    "seed": 17,
+    "timestepSeconds": 0.016666666666666666,
+    "initialScrap": 60,
+    "totalPurchaseCost": 496,
+    "purchasedSlot": 7,
+    "purchaseBeforeWave": 6,
+    "selectedSlotCost": 92,
+    "fieldRadiusMetres": 6,
+    "fieldSpeedScale": 0.5,
+    "fieldCenter": {
+      "x": -2.7922418484481066,
+      "y": 4.922189992508299,
+      "z": -1.24762440583113
+    },
+    "actualContact": "Actual enemy-center 3D membership sampled before movement at 60 Hz, independently checked against cumulative simulation Stasis exposure. Enemy-seconds sums concurrent enemies; it is not elapsed time or route length.",
+    "referenceZone": "Same stationary 6m sphere observed from the seventh purchase onward, including damage-only runs. This is a counterfactual geographic zone, not applied slowing.",
+    "terminalHp": "Includes kill/leak frame, unlike the older alive-only lowest-HP statistic. No time-to-core is reported for a carrier killed before arrival.",
+    "limitation": "One deterministic seed and idealized setup pose search through ordinary paid placement/refit APIs. No browser rendering, user-interface comprehension, human difficulty, optimality or general balance claim. Slot 7 mode and suitable placement differ together."
+  },
+  "confound": "Original pair changes slot 7 purchase AND the wave-8 refitted unit: the second-to-last Pierce is unit 7 without Stasis and unit 6 with Stasis. This is not a pure field effect and no owned drone is recalled/replaced.",
+  "checks": {
+    "originalRowsExactlyReproduced": 2,
+    "matchedNonTestFleetEveryWave": true,
+    "matchedPurchaseTimingAndCosts": true,
+    "matchedRefitUnitAndPose": true,
+    "actualContactMatchesSimulation": true
+  },
+  "originalComparisonDifferingFinalUnitIds": [
+    6,
+    7
+  ],
+  "matchedComparisonDifferingFinalUnitIds": [
+    7
+  ],
+  "results": [
+    {
+      "label": "Original dedicated: seventh purchase is Pierce, refit unit 7",
+      "phase": "lose",
+      "finalCore": 0,
+      "finalScrap": 924,
+      "kills": 116,
+      "totalEffectiveDamage": 7029.547,
+      "paidScrap": 496,
+      "refitUnit": 7,
+      "slot7": {
+        "slot": 7,
+        "mode": "pierce",
+        "paid": 92,
+        "kills": 10,
+        "damage": 914.59
+      },
+      "actualFieldEnemySeconds": 0,
+      "referenceZoneEnemySeconds": 4.467,
+      "carrier": {
+        "outcome": "breached",
+        "initialHp": 486,
+        "elapsedToOutcomeSeconds": 41.483,
+        "timeToCoreSeconds": 41.483,
+        "lowestHpIncludingTerminalFrame": 5.667,
+        "effectiveDamage": 480.333,
+        "actualFieldSeconds": 0,
+        "distanceTravelledWhileSlowedMetres": 0,
+        "referenceZoneSeconds": 2.167,
+        "routeDistanceAtOutcomeMetres": 167.261
+      },
+      "pilotContactFrames": 0,
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "seconds": 18.72,
+          "maxAlive": 5,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 10,
+          "scrap": 102,
+          "drones": 3,
+          "seconds": 21.43,
+          "maxAlive": 10,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 3,
+          "core": 91,
+          "coreLost": 9,
+          "kills": 10,
+          "scrap": 154,
+          "drones": 4,
+          "seconds": 22.23,
+          "maxAlive": 11,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 4,
+          "core": 82,
+          "coreLost": 9,
+          "kills": 13,
+          "scrap": 258,
+          "drones": 5,
+          "seconds": 25.47,
+          "maxAlive": 12,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 5,
+          "core": 46,
+          "coreLost": 36,
+          "kills": 13,
+          "scrap": 312,
+          "drones": 6,
+          "seconds": 24.4,
+          "maxAlive": 12,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 6,
+          "core": 37,
+          "coreLost": 9,
+          "kills": 18,
+          "scrap": 460,
+          "drones": 7,
+          "seconds": 24.12,
+          "maxAlive": 17,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 7,
+          "core": 37,
+          "coreLost": 0,
+          "kills": 22,
+          "scrap": 616,
+          "drones": 8,
+          "seconds": 27.25,
+          "maxAlive": 17,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 8,
+          "core": 0,
+          "coreLost": 37,
+          "kills": 24,
+          "scrap": 924,
+          "drones": 8,
+          "seconds": 43,
+          "maxAlive": 16,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": "breached",
+          "carrierLowestObservedHp": 5.67
+        }
+      ],
+      "contributions": [
+        {
+          "slot": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "kills": 35,
+          "damage": 919.61
+        },
+        {
+          "slot": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "kills": 6,
+          "damage": 1329.31
+        },
+        {
+          "slot": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "kills": 23,
+          "damage": 1022.44
+        },
+        {
+          "slot": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "kills": 14,
+          "damage": 930.28
+        },
+        {
+          "slot": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "kills": 12,
+          "damage": 762.72
+        },
+        {
+          "slot": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "kills": 10,
+          "damage": 831.49
+        },
+        {
+          "slot": 7,
+          "mode": "pierce",
+          "paid": 92,
+          "kills": 10,
+          "damage": 914.59
+        },
+        {
+          "slot": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "kills": 6,
+          "damage": 319.11
+        }
+      ],
+      "finalFleet": [
+        {
+          "id": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -11.624729954858894,
+            22.50876221598838,
+            -5.906697539236348
+          ],
+          "aim": [
+            0.5202400463644495,
+            -0.8231516798619485,
+            0.22753374716548677
+          ]
+        },
+        {
+          "id": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            -19.0038850168949,
+            25.89722283596934,
+            -15.409744195257733
+          ],
+          "aim": [
+            0.5949146082788794,
+            -0.6388384744543061,
+            0.4878135016717786
+          ]
+        },
+        {
+          "id": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            -31.26373507172395,
+            23.227529345703527,
+            -9.946724753558621
+          ],
+          "aim": [
+            0.8188522188014512,
+            -0.5026894342679313,
+            0.277099939443024
+          ]
+        },
+        {
+          "id": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "position": [
+            17.844348534389084,
+            21.37010075548221,
+            -9.353103943556444
+          ],
+          "aim": [
+            -0.49817588224110443,
+            -0.4033490110404206,
+            0.7675482822897931
+          ]
+        },
+        {
+          "id": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "position": [
+            4.825248264366159,
+            10.829162493022622,
+            10.705651217895593
+          ],
+          "aim": [
+            0.49817588224110443,
+            0.4033490110404206,
+            -0.7675482822897931
+          ]
+        },
+        {
+          "id": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "position": [
+            5.943684435489855,
+            4.8645462784253635,
+            -4.769936256318333
+          ],
+          "aim": [
+            0.5064890914324076,
+            0.4169424211147647,
+            0.7547369195520598
+          ]
+        },
+        {
+          "id": 7,
+          "mode": "pierce",
+          "paid": 92,
+          "position": [
+            -29.349658457415586,
+            24.374518913425543,
+            -15.158744362276867
+          ],
+          "aim": [
+            0.9942129842134054,
+            0.009976435095894803,
+            0.10696266995663585
+          ]
+        },
+        {
+          "id": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "position": [
+            18.416298825874676,
+            13.715847332985753,
+            14.70583151699413
+          ],
+          "aim": [
+            -0.4391643840226725,
+            -0.292603586381676,
+            -0.849422029996025
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Original dedicated: seventh purchase is Stasis, refit unit 6",
+      "phase": "win",
+      "finalCore": 46,
+      "finalScrap": 996,
+      "kills": 118,
+      "totalEffectiveDamage": 7042.747,
+      "paidScrap": 496,
+      "refitUnit": 6,
+      "slot7": {
+        "slot": 7,
+        "mode": "stasis",
+        "paid": 92,
+        "kills": 0,
+        "damage": 0
+      },
+      "actualFieldEnemySeconds": 23.65,
+      "referenceZoneEnemySeconds": 23.65,
+      "carrier": {
+        "outcome": "destroyed",
+        "initialHp": 486,
+        "elapsedToOutcomeSeconds": 42.183,
+        "timeToCoreSeconds": null,
+        "lowestHpIncludingTerminalFrame": 0,
+        "effectiveDamage": 486,
+        "actualFieldSeconds": 2.867,
+        "distanceTravelledWhileSlowedMetres": 5.779,
+        "referenceZoneSeconds": 2.867,
+        "routeDistanceAtOutcomeMetres": 164.304
+      },
+      "pilotContactFrames": 0,
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "seconds": 18.72,
+          "maxAlive": 5,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 10,
+          "scrap": 102,
+          "drones": 3,
+          "seconds": 21.43,
+          "maxAlive": 10,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 3,
+          "core": 91,
+          "coreLost": 9,
+          "kills": 10,
+          "scrap": 154,
+          "drones": 4,
+          "seconds": 22.23,
+          "maxAlive": 11,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 4,
+          "core": 82,
+          "coreLost": 9,
+          "kills": 13,
+          "scrap": 258,
+          "drones": 5,
+          "seconds": 25.47,
+          "maxAlive": 12,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 5,
+          "core": 46,
+          "coreLost": 36,
+          "kills": 13,
+          "scrap": 312,
+          "drones": 6,
+          "seconds": 24.4,
+          "maxAlive": 12,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 6,
+          "core": 46,
+          "coreLost": 0,
+          "kills": 19,
+          "scrap": 472,
+          "drones": 7,
+          "seconds": 24.28,
+          "maxAlive": 18,
+          "maxSlowed": 2,
+          "affected": 9,
+          "fieldEnemySeconds": 10.1,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 7,
+          "core": 46,
+          "coreLost": 0,
+          "kills": 22,
+          "scrap": 628,
+          "drones": 8,
+          "seconds": 27.32,
+          "maxAlive": 19,
+          "maxSlowed": 2,
+          "affected": 6,
+          "fieldEnemySeconds": 8.08,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 8,
+          "core": 46,
+          "coreLost": 0,
+          "kills": 25,
+          "scrap": 996,
+          "drones": 8,
+          "seconds": 43.7,
+          "maxAlive": 16,
+          "maxSlowed": 1,
+          "affected": 6,
+          "fieldEnemySeconds": 5.47,
+          "carrier": "destroyed",
+          "carrierLowestObservedHp": 0
+        }
+      ],
+      "contributions": [
+        {
+          "slot": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "kills": 35,
+          "damage": 1016.27
+        },
+        {
+          "slot": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "kills": 12,
+          "damage": 1388.91
+        },
+        {
+          "slot": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "kills": 33,
+          "damage": 1356.36
+        },
+        {
+          "slot": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "kills": 15,
+          "damage": 930.48
+        },
+        {
+          "slot": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "kills": 11,
+          "damage": 761.52
+        },
+        {
+          "slot": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "kills": 6,
+          "damage": 1160.77
+        },
+        {
+          "slot": 7,
+          "mode": "stasis",
+          "paid": 92,
+          "kills": 0,
+          "damage": 0
+        },
+        {
+          "slot": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "kills": 6,
+          "damage": 428.44
+        }
+      ],
+      "finalFleet": [
+        {
+          "id": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -11.624729954858894,
+            22.50876221598838,
+            -5.906697539236348
+          ],
+          "aim": [
+            0.5202400463644495,
+            -0.8231516798619485,
+            0.22753374716548677
+          ]
+        },
+        {
+          "id": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            -19.0038850168949,
+            25.89722283596934,
+            -15.409744195257733
+          ],
+          "aim": [
+            0.5949146082788794,
+            -0.6388384744543061,
+            0.4878135016717786
+          ]
+        },
+        {
+          "id": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            -31.26373507172395,
+            23.227529345703527,
+            -9.946724753558621
+          ],
+          "aim": [
+            0.8188522188014512,
+            -0.5026894342679313,
+            0.277099939443024
+          ]
+        },
+        {
+          "id": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "position": [
+            17.844348534389084,
+            21.37010075548221,
+            -9.353103943556444
+          ],
+          "aim": [
+            -0.49817588224110443,
+            -0.4033490110404206,
+            0.7675482822897931
+          ]
+        },
+        {
+          "id": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "position": [
+            4.825248264366159,
+            10.829162493022622,
+            10.705651217895593
+          ],
+          "aim": [
+            0.49817588224110443,
+            0.4033490110404206,
+            -0.7675482822897931
+          ]
+        },
+        {
+          "id": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "position": [
+            -29.349658457415586,
+            24.374518913425543,
+            -15.158744362276867
+          ],
+          "aim": [
+            0.9942129842134054,
+            0.009976435095894803,
+            0.10696266995663585
+          ]
+        },
+        {
+          "id": 7,
+          "mode": "stasis",
+          "paid": 92,
+          "position": [
+            -2.7922418484481066,
+            4.922189992508299,
+            -1.24762440583113
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "id": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "position": [
+            18.416298825874676,
+            13.715847332985753,
+            14.70583151699413
+          ],
+          "aim": [
+            -0.4391643840226725,
+            -0.292603586381676,
+            -0.849422029996025
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Matched refit: seventh purchase is Pierce, refit unit 6",
+      "phase": "win",
+      "finalCore": 37,
+      "finalScrap": 984,
+      "kills": 117,
+      "totalEffectiveDamage": 7035.213,
+      "paidScrap": 496,
+      "refitUnit": 6,
+      "slot7": {
+        "slot": 7,
+        "mode": "pierce",
+        "paid": 92,
+        "kills": 14,
+        "damage": 563.31
+      },
+      "actualFieldEnemySeconds": 0,
+      "referenceZoneEnemySeconds": 5.683,
+      "carrier": {
+        "outcome": "destroyed",
+        "initialHp": 486,
+        "elapsedToOutcomeSeconds": 40.967,
+        "timeToCoreSeconds": null,
+        "lowestHpIncludingTerminalFrame": 0,
+        "effectiveDamage": 486,
+        "actualFieldSeconds": 0,
+        "distanceTravelledWhileSlowedMetres": 0,
+        "referenceZoneSeconds": 1.65,
+        "routeDistanceAtOutcomeMetres": 165.178
+      },
+      "pilotContactFrames": 0,
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "seconds": 18.72,
+          "maxAlive": 5,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 10,
+          "scrap": 102,
+          "drones": 3,
+          "seconds": 21.43,
+          "maxAlive": 10,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 3,
+          "core": 91,
+          "coreLost": 9,
+          "kills": 10,
+          "scrap": 154,
+          "drones": 4,
+          "seconds": 22.23,
+          "maxAlive": 11,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 4,
+          "core": 82,
+          "coreLost": 9,
+          "kills": 13,
+          "scrap": 258,
+          "drones": 5,
+          "seconds": 25.47,
+          "maxAlive": 12,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 5,
+          "core": 46,
+          "coreLost": 36,
+          "kills": 13,
+          "scrap": 312,
+          "drones": 6,
+          "seconds": 24.4,
+          "maxAlive": 12,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 6,
+          "core": 37,
+          "coreLost": 9,
+          "kills": 18,
+          "scrap": 460,
+          "drones": 7,
+          "seconds": 24.12,
+          "maxAlive": 17,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 7,
+          "core": 37,
+          "coreLost": 0,
+          "kills": 22,
+          "scrap": 616,
+          "drones": 8,
+          "seconds": 27.25,
+          "maxAlive": 17,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": null,
+          "carrierLowestObservedHp": null
+        },
+        {
+          "wave": 8,
+          "core": 37,
+          "coreLost": 0,
+          "kills": 25,
+          "scrap": 984,
+          "drones": 8,
+          "seconds": 42.48,
+          "maxAlive": 15,
+          "maxSlowed": 0,
+          "affected": 0,
+          "fieldEnemySeconds": 0,
+          "carrier": "destroyed",
+          "carrierLowestObservedHp": 0.33
+        }
+      ],
+      "contributions": [
+        {
+          "slot": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "kills": 34,
+          "damage": 876.75
+        },
+        {
+          "slot": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "kills": 8,
+          "damage": 1346.51
+        },
+        {
+          "slot": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "kills": 23,
+          "damage": 962.44
+        },
+        {
+          "slot": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "kills": 14,
+          "damage": 930.28
+        },
+        {
+          "slot": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "kills": 12,
+          "damage": 762.72
+        },
+        {
+          "slot": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "kills": 6,
+          "damage": 1164.77
+        },
+        {
+          "slot": 7,
+          "mode": "pierce",
+          "paid": 92,
+          "kills": 14,
+          "damage": 563.31
+        },
+        {
+          "slot": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "kills": 6,
+          "damage": 428.44
+        }
+      ],
+      "finalFleet": [
+        {
+          "id": 1,
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -11.624729954858894,
+            22.50876221598838,
+            -5.906697539236348
+          ],
+          "aim": [
+            0.5202400463644495,
+            -0.8231516798619485,
+            0.22753374716548677
+          ]
+        },
+        {
+          "id": 2,
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            -19.0038850168949,
+            25.89722283596934,
+            -15.409744195257733
+          ],
+          "aim": [
+            0.5949146082788794,
+            -0.6388384744543061,
+            0.4878135016717786
+          ]
+        },
+        {
+          "id": 3,
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            -31.26373507172395,
+            23.227529345703527,
+            -9.946724753558621
+          ],
+          "aim": [
+            0.8188522188014512,
+            -0.5026894342679313,
+            0.277099939443024
+          ]
+        },
+        {
+          "id": 4,
+          "mode": "pierce",
+          "paid": 56,
+          "position": [
+            17.844348534389084,
+            21.37010075548221,
+            -9.353103943556444
+          ],
+          "aim": [
+            -0.49817588224110443,
+            -0.4033490110404206,
+            0.7675482822897931
+          ]
+        },
+        {
+          "id": 5,
+          "mode": "pierce",
+          "paid": 68,
+          "position": [
+            4.825248264366159,
+            10.829162493022622,
+            10.705651217895593
+          ],
+          "aim": [
+            0.49817588224110443,
+            0.4033490110404206,
+            -0.7675482822897931
+          ]
+        },
+        {
+          "id": 6,
+          "mode": "pierce",
+          "paid": 80,
+          "position": [
+            -29.349658457415586,
+            24.374518913425543,
+            -15.158744362276867
+          ],
+          "aim": [
+            0.9942129842134054,
+            0.009976435095894803,
+            0.10696266995663585
+          ]
+        },
+        {
+          "id": 7,
+          "mode": "pierce",
+          "paid": 92,
+          "position": [
+            2.409196659383543,
+            2.5558786944674825,
+            1.4482096794412096
+          ],
+          "aim": [
+            -0.8188522188014512,
+            0.5026894342679313,
+            -0.277099939443024
+          ]
+        },
+        {
+          "id": 8,
+          "mode": "pierce",
+          "paid": 104,
+          "position": [
+            18.416298825874676,
+            13.715847332985753,
+            14.70583151699413
+          ],
+          "aim": [
+            -0.4391643840226725,
+            -0.292603586381676,
+            -0.849422029996025
+          ]
+        }
+      ]
+    }
+  ]
+}

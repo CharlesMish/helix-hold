@@ -1,0 +1,139 @@
+{
+  "method": "Identical finite candidate poses from crown-trial; opening setup with ordinary 60 scrap, no fleet or Fan/Slide. Actual preview uses the droneBeam 0.7m muzzle offset. No enemies or human choices simulated.",
+  "limitation": "Candidate rankings demonstrate what each number rewards, not difficulty, damage, first-two-anchor performance, or observed player preference. Idealized poses are not a claim that players will find them.",
+  "semantics": {
+    "now": "Current upcoming/pending/occupied gates, consistent with the gate HUD.",
+    "later": "Coverage on a noncurrent route with authored traffic in a later wave.",
+    "idle": "Coverage without current or remaining authored traffic. All geometric hover segments are retained."
+  },
+  "candidateCount": 1454,
+  "eligibleCandidateCount": 1454,
+  "rejectedCandidateCount": 0,
+  "actualPreview": {
+    "totalRankWinner": {
+      "candidate": 686,
+      "position": [
+        -29.298,
+        24.674,
+        -15.455
+      ],
+      "aim": [
+        0.981,
+        -0.065,
+        0.181
+      ],
+      "totalMetres": 67.313,
+      "nowMetres": 8.475,
+      "laterMetres": 58.838,
+      "idleMetres": 0,
+      "metresByGate": [
+        8.475,
+        6.496,
+        14.955,
+        6.462,
+        30.925
+      ]
+    },
+    "nowRankWinner": {
+      "candidate": 166,
+      "position": [
+        -11.625,
+        22.509,
+        -5.907
+      ],
+      "aim": [
+        0.52,
+        -0.823,
+        0.228
+      ],
+      "totalMetres": 32.403,
+      "nowMetres": 22.932,
+      "laterMetres": 9.471,
+      "idleMetres": 0,
+      "metresByGate": [
+        22.932,
+        1.999,
+        1.495,
+        2.485,
+        3.492
+      ]
+    },
+    "strongestZeroNowLine": {
+      "candidate": 670,
+      "position": [
+        -35.266,
+        29.517,
+        -17.985
+      ],
+      "aim": [
+        0.978,
+        -0.124,
+        0.17
+      ],
+      "totalMetres": 52.368,
+      "nowMetres": 0,
+      "laterMetres": 52.368,
+      "idleMetres": 0,
+      "metresByGate": [
+        0,
+        0,
+        8.973,
+        0,
+        43.395
+      ]
+    },
+    "gateAGainMetres": 14.457,
+    "gateAGainRatio": 2.706,
+    "topTen": {
+      "totalRanking": {
+        "candidates": 10,
+        "meanGateAMetres": 13.51,
+        "zeroGateACandidates": 0
+      },
+      "nowRanking": {
+        "candidates": 10,
+        "meanGateAMetres": 21.486,
+        "zeroGateACandidates": 0
+      }
+    }
+  },
+  "legacyTrialCandidateGeometry": {
+    "explanation": "Base-origin approximation used by existing trial; distinct from actual HUD muzzle.",
+    "totalRankWinner": {
+      "candidate": 686,
+      "totalMetres": 67.811,
+      "gateAMetres": 8.475,
+      "metresByGate": [
+        8.475,
+        6.496,
+        14.955,
+        6.462,
+        31.424
+      ]
+    },
+    "gateARankWinner": {
+      "candidate": 166,
+      "totalMetres": 32.403,
+      "gateAMetres": 22.932,
+      "metresByGate": [
+        22.932,
+        1.999,
+        1.495,
+        2.485,
+        3.492
+      ]
+    },
+    "strongestZeroGateALine": {
+      "candidate": 670,
+      "totalMetres": 52.368,
+      "gateAMetres": 0,
+      "metresByGate": [
+        0,
+        0,
+        8.973,
+        0,
+        43.395
+      ]
+    }
+  }
+}

@@ -390,7 +390,28 @@ export function droneBeam(d: Drone): Beam {
 
 export type CoverageSegment = { pathIndex: number; points: Vec3[]; metres: number };
 export type BeamCoverage = { segments: CoverageSegment[]; metres: number; sampleRadius: number };
-export type PlacementPreview = BeamCoverage & { drone: Drone; beam: Beam; status: string | null };
+export type CoverageTiming = { nowMetres: number; laterMetres: number; idleMetres: number };
+export type PlacementPreview = BeamCoverage & CoverageTiming & { drone: Drone; beam: Beam; status: string | null };
+
+/** Keep all highlighted geometry, but distinguish useful traffic from future plans.
+ * Now follows the gate HUD: the next setup wave, or pending/live combat traffic.
+ * A previously opened gate can be quiet now and return later. Cleared routes with
+ * no further authored traffic are idle, never advertised as a future opening.
+ */
+export function getCoverageTiming(run: Run, coverage: BeamCoverage): CoverageTiming {
+  const upcoming = run.rest > 0 || run.waveIndex < 0;
+  const waveIndex = run.waveIndex + (upcoming ? 1 : 0);
+  const laterLanes = new Set(run.waves.slice(waveIndex + 1).flatMap(w => w.groups.filter(g => g.count > 0).map(g => g.path)));
+  const timing: CoverageTiming = { nowMetres: 0, laterMetres: 0, idleMetres: 0 };
+  const status = run.paths.map((_, index) => getLaneStatus(run, index));
+  for (const segment of coverage.segments) {
+    const lane = status[segment.pathIndex];
+    if (lane === "active" || lane === "upcoming") timing.nowMetres += segment.metres;
+    else if (laterLanes.has(segment.pathIndex)) timing.laterMetres += segment.metres;
+    else timing.idleMetres += segment.metres;
+  }
+  return timing;
+}
 
 /**
  * Potential coverage for ordinary shard centers, sampled at <=0.5m intervals.
@@ -537,7 +558,7 @@ export function getPlacementPreview(run: Run): PlacementPreview {
     const segments = coverage.segments.filter((segment) => announced.has(segment.pathIndex));
     coverage = { ...coverage, segments, metres: segments.reduce((sum, segment) => sum + segment.metres, 0) };
   }
-  return { ...coverage, drone, beam, status: placementStatus(run) };
+  return { ...coverage, ...getCoverageTiming(run, coverage), drone, beam, status: placementStatus(run) };
 }
 
 function weapons(run: Run, dt: number) {

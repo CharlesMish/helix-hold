@@ -1,3 +1,22 @@
+# Helix Hold 0.6.2 — outside-review corrections
+
+Authenticated the matching v0.6.1 sources: GitHub `91bacf0108543ad6bce002363bc5f5ef65b6dfeb` and Sites `7a51eeea27b8e133356a69b2b7731dff9c107355`. Preserve the same private Site and public source repository. Charlie supplied Claude's executed review, Grok's source-only review and a portrait Survey screenshot. No later completed Split Crown playtest transcript was found; earlier Stasis feedback remains available.
+
+- Fixed a real portability flaw in the historical test, not changed campaign geometry. Node 24's alternate exponentiation implementation changes exactly the reported two hashes by at most 1.42e-14 m. The historical fixture retains all original integrity hashes; authored settings compare exactly and geometry within 1e-6 m. Node 20–22 were not directly available.
+- Enter ends the active field check without launching. Pointer lock cannot also activate an old focused button. The shortcut is visible in the HUD and guide.
+- Portrait Survey and gate cards now share grid flow; D/E are above the scrolling card. Compact launch labels stay on one line. No post-change browser verification is claimed.
+- Crown's main coverage number/bar now track this wave's pending/live routes, with future coverage separate. Every hover segment stays available. A finite 1,454-pose comparison improves top-ranked Gate-A contact from 8.475 to 22.932 m; this is not a player outcome or damage result.
+- Browser QA now polls state/HUD and has prepared keyboard-exit/portrait desktop+touch assertions. Barge gold pixels/screenshots are diagnostic evidence, not an uncalibrated visibility pass. Revised browser suite was not run here.
+- Corrected the interpretation of the original Stasis trial: its fleets refitted different units. With the same refit, both win (37 core Pierce, 46 Stasis). No weapon/economy/geometry tuning was made.
+
+Validation: 51 deterministic checks, solid/field geometry, the 8 Crown checks under alternate exponentiation, unchanged original Crown trial output, two bounded studies, TypeScript/build and browser-script syntax. See `docs/REVIEW_FOLLOWUP_062.md`, `docs/CROWN_COVERAGE_REVIEW.md`, `docs/CROWN_STASIS_TRADEOFF.md` and `qa/fixtures/README.md` for evidence and limits. Approved browser control is still unavailable in this managed environment.
+
+Next playtest: does this-wave/later coverage guide the first two anchors onto A without losing the pleasure of planning a shared slice for later? Check portrait Survey and Enter-to-end during that visit. Avoid further stat changes until that feedback.
+
+---
+
+## Previous v0.6.1 checkpoint
+
 # Helix Hold 0.6.1 — decorative cleanup and GitHub source
 
 Charlie’s screenshot identifies the detached shallow arches above Split Crown. They were six decorative crown facets at heights 39–41m plus six faint dashed supports. Removed that loop from `buildSplitCrownArchitecture`; retained both floor platforms and their segmented rings/ticks. Routes, gate labels, collision, fields, coverage previews, waves and balance are unchanged.

@@ -1,8 +1,8 @@
 // Split Crown contract checks: authored geometry, gate forecasts and saved identity.
 // The companion crown-trial.mjs measures normally funded combat feasibility.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
+import { assertAuthoredBaseline, historical, GEOMETRY_TOLERANCE } from './authored-baseline.mjs';
 const bundle = await build({ stdin: { contents: 'export * from "./src/game/sim"; export * from "./src/game/paths"; export * from "./src/game/save";', resolveDir: new URL('../', import.meta.url).pathname }, bundle: true, platform: 'node', format: 'esm', write: false });
 const api = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
 const { LEVELS, CORE, createRun, step, nextWaveNow, getLaneStatus, getLaneFirstWave, hasStasis, tryAnchor, anchorCost, MAX_DRONES, beginContinuation, loadSave, recordWin } = api;
@@ -19,17 +19,52 @@ function storage(initial = {}) {
   return { data, writes };
 }
 storage();
-const original = {
-  tutorial: 'cf1c02d50eac48aa2797ab9c33971524d8f6bf10a40b7644ade7a69de8a283e5',
-  shear: 'd4a790629082c4013911fb6942b7d2b4cc20cff982d7289728637bae1d1ba90a',
-  orbital: 'c4a0609eb7641d6c957cbba7aaa1f3651df461352f1732158a69d9ca31dffae1',
-  'carrier-test': '1834042c317a40f3dc2430b384f3bc682b8a8597f08eadf086adca737f31ca8a',
-};
-test('Existing authored campaign geometry, hangars, multipliers and schedules retain their source baseline', () => {
-  for (const [id, hash] of Object.entries(original)) {
-    const l = LEVELS.find(l => l.id === id); assert.ok(l);
-    const data = { id: l.id, hpMul: l.hpMul, speedMul: l.speedMul, hangar: l.hangar, waves: l.waves, continuation: l.continuation, paths: l.paths.map(p => ({ id: p.id, points: p.points, cum: p.cum, length: p.length })) };
-    assert.equal(createHash('sha256').update(JSON.stringify(data)).digest('hex'), hash, id);
+test('Existing authored settings stay exact and computed geometry stays within 1 micrometre of the retained pre-Crown baseline', () => {
+  for (const reference of historical.levels) assertAuthoredBaseline(LEVELS.find(l => l.id === reference.id), reference);
+});
+test('The historical geometry guard accepts sub-tolerance arithmetic noise but rejects changed routes and non-finite samples', () => {
+  const reference = historical.levels[0];
+  const harmless = structuredClone(reference);
+  harmless.paths[0].points[12].x += GEOMETRY_TOLERANCE / 10;
+  harmless.paths[0].cum[12] += GEOMETRY_TOLERANCE / 10;
+  harmless.paths[0].length += GEOMETRY_TOLERANCE / 10;
+  harmless.hangar.yaw += 1e-14;
+  assert.doesNotThrow(() => assertAuthoredBaseline(harmless, reference));
+  const mutations = [
+    l => { l.paths[0].points[12].x += GEOMETRY_TOLERANCE * 2; },
+    l => { l.paths[0].cum[12] += GEOMETRY_TOLERANCE * 2; },
+    l => { l.paths[0].length += GEOMETRY_TOLERANCE * 2; },
+    l => { l.paths[0].points[12].y = NaN; },
+    l => { l.paths[0].cum[12] = Infinity; },
+    l => { l.paths[0].points.pop(); },
+    l => { l.paths[0].cum.pop(); },
+    l => { l.hangar.pitch += 1e-6; },
+  ];
+  for (const mutate of mutations) {
+    const changed = structuredClone(reference); mutate(changed);
+    assert.throws(() => assertAuthoredBaseline(changed, reference), assert.AssertionError);
+  }
+});
+test('Geometry tolerance never permits changes to authored IDs, multipliers, hangar positions or wave schedules', () => {
+  const reference = historical.levels.find(l => l.id === 'shear');
+  const mutations = [
+    l => { l.id += '-changed'; },
+    l => { l.paths[0].id += '-changed'; },
+    l => { l.hpMul += 1e-10; },
+    l => { l.speedMul += 1e-10; },
+    l => { l.hangar.x += 1e-10; },
+    l => { l.waves[0].lesson += ' changed'; },
+    l => { l.waves[0].groups[0].count++; },
+    l => { l.waves[0].groups[0].path++; },
+    l => { l.waves[0].groups[0].kind = 'barge'; },
+    l => { l.waves[0].groups[0].interval += 1e-10; },
+    l => { l.waves[0].groups[0].delay += 1e-10; },
+    l => { l.waves[0].groups[0].speedMul += 1e-10; },
+    l => { l.continuation[0].groups[0].count++; },
+  ];
+  for (const mutate of mutations) {
+    const changed = structuredClone(reference); mutate(changed);
+    assert.throws(() => assertAuthoredBaseline(changed, reference), /exact authored settings and schedules/);
   }
 });
 test('Five finite, traversable routes stay within the existing flight cylinder and join the real core', () => {
