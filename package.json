@@ -1,7 +1,7 @@
 {
   "name": "helix-hold",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,7 +23,8 @@
     "trial:crown-growth": "node qa/crown-growth-trial.mjs",
     "study:drone-roles": "node qa/drone-role-study.mjs",
     "trial:crown-roles": "node qa/crown-growth-trial.mjs --roles",
-    "diagram:drones": "node qa/drone-roster.mjs"
+    "diagram:drones": "node qa/drone-roster.mjs",
+    "study:crown-late": "node qa/crown-late-trial.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

@@ -118,8 +118,8 @@ test('Authored reinforcement hull applies only to its group and the second carri
   const barge = run.enemies.find(e => e.alive && e.kind === 'barge');
   const wisp = run.enemies.find(e => e.alive && e.kind === 'wisp');
   assert.ok(barge && wisp);
-  assert.ok(Math.abs(barge.maxHp - 96 * 1.08 * 1.25) < 1e-9);
-  assert.ok(Math.abs(wisp.maxHp - 40 * 1.08) < 1e-9, 'unreinforced escorts keep ordinary hull');
+  assert.ok(Math.abs(barge.maxHp - 96 * 1.08 * 1.4) < 1e-9);
+  assert.ok(Math.abs(wisp.maxHp - 40 * 1.08 * 1.1) < 1e-9, 'escorts use their own modest reinforcement, not the Barge multiplier');
   for (const e of run.enemies) e.alive = false;
   run.carrierOutcome = 'destroyed'; beginWave(run, 11);
   assert.equal(run.carrierOutcome, 'pending');

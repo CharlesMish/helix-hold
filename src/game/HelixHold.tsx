@@ -10,7 +10,7 @@ import { DRONE_SPECS, HALO_RADIUS, PIN_DAMAGE, PIN_INTERVAL, PIN_SLOW_DURATION, 
 import { clamp, forwardOf } from './math';
 
 type Stick = { x: number; y: number; pointer: number | null };
-const BUILD_LABEL="0.8.0";
+const BUILD_LABEL="0.8.1";
 const MODE_KEYS: Record<DroneMode,number> = {pierce:1,sweep:2,stasis:3,halo:4,pin:5};
 const MODE_ROLES: Record<DroneMode,string> = {pierce:'Piercing beam',sweep:'Wide beam',stasis:'Passive slow field',halo:'Passive damage field',pin:'Aimed slow dart'};
 const isFieldMode=(mode:DroneMode)=>mode==='stasis'||mode==='halo';

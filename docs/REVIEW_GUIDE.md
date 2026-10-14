@@ -1,6 +1,6 @@
 # Helix Hold — outside review guide
 
-Repository: [CharlesMish/helix-hold](https://github.com/CharlesMish/helix-hold). Start from the current default branch and identify the commit you reviewed. Read the latest section of [HANDOFF.md](../HANDOFF.md), then [DRONE_ROLES_080.md](DRONE_ROLES_080.md), [CROWN_GROWTH.md](CROWN_GROWTH.md) and [SPLIT_CROWN.md](SPLIT_CROWN.md). Current source is authoritative when older notes differ.
+Repository: [CharlesMish/helix-hold](https://github.com/CharlesMish/helix-hold). Start from the current default branch and identify the commit you reviewed. Read the latest section of [HANDOFF.md](../HANDOFF.md), then [CROWN_LATE_TUNE_081.md](CROWN_LATE_TUNE_081.md), [DRONE_ROLES_080.md](DRONE_ROLES_080.md), [CROWN_GROWTH.md](CROWN_GROWTH.md) and [SPLIT_CROWN.md](SPLIT_CROWN.md). Current source is authoritative when older notes differ.
 
 ## Current state
 
@@ -12,7 +12,9 @@ Version 0.7.0 responds to Charlie's confirmed Crown playtest: scrap-funded fleet
 
 The user has confirmed Stasis now works in the live game. The earlier persistent-zero report was not reproduced or causally explained; a refresh was only a possibility. Do not describe that report as an active confirmed defect or claim a proven root-cause fix. Setup **Test Stasis fields**, per-field coverage, contact history and **Save field report** remain available to investigate a fresh reproduction.
 
-Version 0.8.0 is the current Crown roster experiment: Halo adds passive 5m-radius contact damage; Pin adds fixed-aim discrete shots with lingering slow. Crown prices each owned type independently. Distinct silhouettes, matching UI colors, exact field boundaries and brief Pin tracers clarify the roles. Stasis remains a passive sphere. Charlie has not yet played v0.7.0; this update follows new design requests, not invented new playtest evidence.
+Version 0.8.0 introduced the Crown roster experiment: Halo adds passive 5m-radius contact damage; Pin adds fixed-aim discrete shots with lingering slow. Crown prices each owned type independently. Distinct silhouettes, matching UI colors, exact field boundaries and brief Pin tracers clarify the roles. Stasis remains a passive sphere. That update followed design requests before the next playtest.
+
+Version 0.8.1 follows Charlie’s actual v0.8 playtest: roughly 32 drones, minor early leaks, then no later core loss, with a much longer but still comfortable carrier chase. Only optional waves 9–12 gain modest hull and earlier final escort overlap. First eight waves, prices, counts, rewards, speeds and weapons remain unchanged. The final carrier now has 3,207.6 hull (+10%). Stasis and uncapped Crown growth remain; the exact human fleet is unknown.
 
 ## Run and inspect
 
@@ -36,6 +38,7 @@ npm run study:crown-pilot
 npm run trial:crown-growth
 npm run trial:crown-roles
 npm run study:drone-roles
+npm run study:crown-late
 ```
 
 `npm run build` includes TypeScript checking and produces the static `dist/` directory. `trial:crown` compares funded fleet strategies and prints detailed results; it is not a human playtest. Further studies are listed in `package.json`, including `study:sweep`, `study:stasis` and `test:stasis-repro`.
@@ -69,15 +72,15 @@ npm run study:drone-roles
 
 ## What the evidence establishes
 
-Version 0.8.0 has 75 deterministic checks, including eight new role, five economy and four presentation checks. Separate geometry checks cover enemy solids and field boundaries. The original 43 passed on Node 24, but the old whole-level hash was brittle across exponentiation implementations. The retained historical fixture is still checked against the original hashes; live computed geometry now uses tolerances while authored schedules/settings remain exact. [Provenance and reproduction](../qa/fixtures/README.md). Rerun checks against the reviewed commit. Passing assertions establish their tested invariants, not complete game correctness.
+Version 0.8.1 retains 75 deterministic checks, including eight new role, five economy and four presentation checks. Separate geometry checks cover enemy solids and field boundaries. The original 43 passed on Node 24, but the old whole-level hash was brittle across exponentiation implementations. The retained historical fixture is still checked against the original hashes; live computed geometry now uses tolerances while authored schedules/settings remain exact. [Provenance and reproduction](../qa/fixtures/README.md). Rerun checks against the reviewed commit. Passing assertions establish their tested invariants, not complete game correctness.
 
 The retained historical Crown trial deliberately limits itself to eight drones; the retained JSON is historical and is not the current maximum-fleet result. Current scripts now use current price quotes; use the documented earlier commit for exact old outputs. Crown's ordinary-input opening uses automated steering, thrust and anchoring without teleporting or bonus currency: 6/6 kills, 100 core, 56 scrap. Longer trials use finite idealized placement candidates, normal earned purchases and a setup reposition. Shared-line fleets finish at 82 core with or without a late field; one dedicated fleet benefits from a late field. Those results establish feasible strategies and useful comparisons, not player win rates or optimal balance.
 
 The original v0.7 funded twelve-wave trial uses 19 drones before the finale. An idle 19-Pierce fleet loses 40 core to the final carrier; the actively pursuing pilot clears at 100 core with 19 Pierce or 17 Pierce plus two paid fields. Idealized setup poses and automated perfect-state pursuit do not measure player difficulty. See `CROWN_GROWTH_TRIAL.json` and the current growth note for methods.
 
-The current roster trial adds a paid 25-unit mixed fleet: 17 Pierce / 2 Stasis / 4 Halo / 2 Pin, finishing at 100 core with active pursuit. Both new damage roles contribute; separate fixed-budget local trials show useful limitations, including weak Halo-only coverage and Pin's poor crowded-convoy damage. No wave/hull changes follow from these bounded comparisons. Read the current role study before interpreting older prices or figures.
+The historical v0.8.0 roster trial adds a paid 25-unit mixed fleet: 17 Pierce / 2 Stasis / 4 Halo / 2 Pin, finishing at 100 core with active pursuit. Both new damage roles contribute; separate fixed-budget local trials show useful limitations, including weak Halo-only coverage and Pin's poor crowded-convoy damage. No wave changes followed from that study alone. The later human feedback motivates v0.8.1; read the new late-tune note before interpreting historical figures. Its nine paired runs preserve exact earned placements for 19-, 25- and 33-drone examples. All still clear at 100 core. More hull and D-convoy overlap create a modest workload increase; the large mixed fleets gain only about 1–1.5s of carrier lifetime. Do not claim optimized formations became difficult or that 33 units reconstruct the user’s fleet.
 
-Approved browser control was unavailable in the development environment. Charlie supplied Claude's automated Chromium/software-renderer observations of v0.6.1; those are external browser evidence, not human playtesting. Updated v0.6.2–v0.8.0 browser tests were not executed here. Growing-fleet performance remains unverified. They use state polling, include the field-check keyboard exit and narrow desktop/touch Survey layout, and retain Barge screenshots/pixel measurements as review evidence rather than an uncalibrated visibility threshold. Desktop/mobile HUD fit, contrast, depth reading and comfortable flight remain valuable review targets. Record browser/device, build, actions and observed state when reporting a visual or input defect.
+Approved browser control was unavailable in the development environment. Charlie supplied Claude's automated Chromium/software-renderer observations of v0.6.1; those are external browser evidence, not human playtesting. Updated v0.6.2–v0.8.1 browser tests were not executed here. Growing-fleet performance remains unverified. They use state polling, include the field-check keyboard exit and narrow desktop/touch Survey layout, and retain Barge screenshots/pixel measurements as review evidence rather than an uncalibrated visibility threshold. Desktop/mobile HUD fit, contrast, depth reading and comfortable flight remain valuable review targets. Record browser/device, build, actions and observed state when reporting a visual or input defect.
 
 ## Useful review questions
 

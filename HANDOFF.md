@@ -1,3 +1,24 @@
+# Helix Hold 0.8.1 — modest late-Crown pressure
+
+Started from authenticated Sites `e5c14b44a47af099d0686d81526a47a7a84d90b3` and GitHub `57e8ef4e81d0f36fc51645720944bd393119187f`. Preserve the existing owner-private Site and public repository.
+
+**New human playtest:** Charlie played v0.8.0, enjoyed it, had roughly 32 drones near the end, leaked a little while setting up early and then lost no further core. The carrier traveled much farther than before but died before completing the eastern return. He wants a modest late increase that keeps pace with fleet growth, while leaving the opening comfortable. Stasis felt more useful but its value is still uncertain. Exact fleet composition and poses are unknown. This supersedes the prior checkpoint's “not yet played” statement.
+
+- Only optional Crown waves **9–12** are tuned: total enemy hull rises about **11.6%, 13.3%, 17.5%, 13.1%**. Barges take most of the added durability. Final carrier hull rises **2,916 → 3,207.6 (+10%)**; speed and 40-core breach remain.
+- Final D Barges start at 12s instead of 14, C Wisps at 18 instead of 22, A Shards at 24 instead of 30. Counts, rewards and intervals stay fixed. More convoy work overlaps pursuit without additional scrap accelerating fleet growth.
+- Wisps stay at 47.52 hull throughout the extension, preserving two isolated 24-damage Pin shots. A larger apparently modest multiplier would abruptly require three. No weapon, price, cap, role, geometry, control or presentation change accompanies this pass.
+- Original waves 1–8 retain their exact schedule/text hash and normal score. Unlimited setup, coverage hover, placement by piloting, free selected reposition, actual-paid recall, uncapped Crown growth and Stasis remain.
+
+The paired study runs baseline plus hull-only A plus selected B with identical earned fleets/poses/purchase waves: 19 Pierce, 25 mixed and 33 diversified units. All nine finish at 100 core; no forced optimizer loss. The 33-unit example is not a reconstruction of Charlie's fleet. In that case B raises integrated remaining hull by 12.6–21.6% across the late waves and escort presence during the carrier from 82.9 to 110.0 enemy-seconds. Most added overlap is the D convoy; C Wisps/A Shards still take no damage before carrier death in that formation. Carrier lifetime rises only 21.98 → 23.32s there, versus 19.25 → 25.37s for 19 Pierce. Do not oversell this as a dramatic boss difficulty change.
+
+Validation: **75 deterministic checks**, solid/field geometry, nine paired funded simulations, independent source review and TypeScript/production build. First-eight outcomes, frozen legal paid plans, score preservation and effective-damage attribution are asserted in the study. Approved browser control remains unavailable; no preview server or browser was used. This pass does not establish new visual, performance or human-difficulty results.
+
+Read `docs/CROWN_LATE_TUNE_081.md` and `docs/CROWN_LATE_TRIAL.json`; reproduce with `npm run study:crown-late`. Older JSON files remain historical. Next playtest: do waves 10–12 give a large fleet useful work during the chase, with a smooth increase rather than a sudden wall? Observe D while pursuing and capture fleet composition before further tuning.
+
+---
+
+## Previous v0.8.0 checkpoint
+
 # Helix Hold 0.8.0 — distinct drone roles and independent Crown prices
 
 Started from authenticated Sites `c2c3e4f338b5be806bd743353823a871cccc8889` and GitHub `20243280fd9eedb0d09068318cd2885350c7b78c`. Preserve the existing owner-private Site and public repository.
