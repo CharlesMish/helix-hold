@@ -1,0 +1,2165 @@
+{
+  "question": "Do the two new roles produce distinct local-contact and aimed-support outcomes, and is core-only Halo clustering obviously dominant in a bounded Crown case?",
+  "method": {
+    "seed": 17,
+    "timestepSeconds": 0.016666666666666666,
+    "paths": "Unchanged Split Crown world-space curves and actual drifting enemy centers",
+    "setup": "Finite idealized pose search; all purchases go through ordinary tryAnchor and current per-type prices, minimum separation and availability checks. No combat repositioning.",
+    "budgets": "Fixed diagnostic allocations of 76, 96 and 200 scrap, not earned campaign fleets; unused initial scrap is reported. Single-weapon rows establish behavior and are not equal-cost balance comparisons.",
+    "groups": {
+      "local": [
+        {
+          "kind": "shard",
+          "path": 0,
+          "count": 6,
+          "interval": 0.9,
+          "delay": 1,
+          "hpMul": 1
+        },
+        {
+          "kind": "barge",
+          "path": 1,
+          "count": 4,
+          "interval": 1.4,
+          "delay": 2,
+          "hpMul": 1
+        }
+      ],
+      "aimed": [
+        {
+          "label": "isolated barge",
+          "groups": [
+            {
+              "kind": "barge",
+              "path": 0,
+              "count": 1,
+              "interval": 1.2,
+              "delay": 1,
+              "hpMul": 1
+            }
+          ]
+        },
+        {
+          "label": "isolated Wisp",
+          "groups": [
+            {
+              "kind": "wisp",
+              "path": 0,
+              "count": 1,
+              "interval": 1.2,
+              "delay": 1,
+              "hpMul": 1
+            }
+          ]
+        },
+        {
+          "label": "tight barge convoy",
+          "groups": [
+            {
+              "kind": "barge",
+              "path": 0,
+              "count": 6,
+              "interval": 0.7,
+              "delay": 1,
+              "hpMul": 1
+            }
+          ]
+        }
+      ],
+      "core": [
+        {
+          "kind": "shard",
+          "path": 0,
+          "count": 3,
+          "interval": 1.1,
+          "delay": 1,
+          "hpMul": 1
+        },
+        {
+          "kind": "barge",
+          "path": 0,
+          "count": 2,
+          "interval": 1.6,
+          "delay": 4,
+          "hpMul": 1
+        },
+        {
+          "kind": "wisp",
+          "path": 0,
+          "count": 2,
+          "interval": 1.3,
+          "delay": 7,
+          "hpMul": 1
+        },
+        {
+          "kind": "shard",
+          "path": 1,
+          "count": 3,
+          "interval": 1.1,
+          "delay": 1,
+          "hpMul": 1
+        },
+        {
+          "kind": "barge",
+          "path": 1,
+          "count": 2,
+          "interval": 1.6,
+          "delay": 4,
+          "hpMul": 1
+        },
+        {
+          "kind": "wisp",
+          "path": 1,
+          "count": 2,
+          "interval": 1.3,
+          "delay": 7,
+          "hpMul": 1
+        },
+        {
+          "kind": "shard",
+          "path": 2,
+          "count": 3,
+          "interval": 1.1,
+          "delay": 1,
+          "hpMul": 1
+        },
+        {
+          "kind": "barge",
+          "path": 2,
+          "count": 2,
+          "interval": 1.6,
+          "delay": 4,
+          "hpMul": 1
+        },
+        {
+          "kind": "wisp",
+          "path": 2,
+          "count": 2,
+          "interval": 1.3,
+          "delay": 7,
+          "hpMul": 1
+        },
+        {
+          "kind": "shard",
+          "path": 3,
+          "count": 3,
+          "interval": 1.1,
+          "delay": 1,
+          "hpMul": 1
+        },
+        {
+          "kind": "barge",
+          "path": 3,
+          "count": 2,
+          "interval": 1.6,
+          "delay": 4,
+          "hpMul": 1
+        },
+        {
+          "kind": "wisp",
+          "path": 3,
+          "count": 2,
+          "interval": 1.3,
+          "delay": 7,
+          "hpMul": 1
+        }
+      ]
+    },
+    "scoring": "Diagnostic core is 1000 to observe every target after breaches; report core damage, not a campaign win or survival claim. Drone damage credit independently checked against actual HP reductions.",
+    "contactMeasures": "Halo enemy-seconds count each living enemy once when inside any Halo, not once per overlapping Halo. Pin slow enemy-seconds count the active timer; stronger Stasis can take precedence. Neither measure is nominal route metres. The pilot remains outside all contacts.",
+    "limitations": "One seed, selected formations and finite pose search. No UI, browser rendering, human difficulty, performance, optimality, or general balance verdict. Long-run earned-scrap viability is a separate study. Nominal placement scores are approximations; all reported combat outcomes use actual step().",
+    "specs": {
+      "pierce": {
+        "label": "Pierce",
+        "dps": 20,
+        "radius": 1.45,
+        "range": 76,
+        "color": 11903743,
+        "description": "Long, narrow beam. Hits every enemy in its line.",
+        "pierces": true
+      },
+      "stasis": {
+        "label": "Stasis",
+        "dps": 0,
+        "radius": 6,
+        "range": 0,
+        "color": 16759673,
+        "description": "6m sphere. Slows enemies by 50%; no damage. Fields do not stack.",
+        "pierces": false
+      },
+      "halo": {
+        "label": "Halo",
+        "dps": 18,
+        "radius": 5,
+        "range": 0,
+        "color": 16742557,
+        "description": "Passive 5m sphere. Deals 18 damage per second to every enemy inside; no aiming needed.",
+        "pierces": true
+      },
+      "pin": {
+        "label": "Pin",
+        "dps": 15,
+        "radius": 1.1,
+        "range": 60,
+        "color": 10476679,
+        "description": "Fixed line. Every 1.6s, hits the nearest target for 24 damage and slows it 35% for 2.4s.",
+        "pierces": false
+      },
+      "sweep": {
+        "label": "Sweep",
+        "dps": 18,
+        "radius": 2.5,
+        "range": 38,
+        "color": 7464943,
+        "description": "Wide, short beam. Hits the nearest enemy in its line.",
+        "pierces": false
+      }
+    }
+  },
+  "sites": {
+    "west": {
+      "position": [
+        -21.745,
+        23.375,
+        -12.467
+      ],
+      "aim": [
+        0,
+        0,
+        -1
+      ],
+      "haloNominalMetresByGate": [
+        9.472,
+        10.493,
+        0,
+        0,
+        9.477
+      ]
+    },
+    "stasisPartner": {
+      "position": [
+        -23.737,
+        23.375,
+        -11.317
+      ],
+      "aim": [
+        0,
+        0,
+        -1
+      ]
+    },
+    "aimed": {
+      "position": [
+        0.951,
+        2.507,
+        -2.068
+      ],
+      "aim": [
+        -0.57,
+        0.813,
+        -0.118
+      ]
+    },
+    "coreCenter": {
+      "x": 0,
+      "y": 4.4,
+      "z": 0
+    }
+  },
+  "fieldResults": [
+    {
+      "label": "One Halo; saves scrap",
+      "budget": 76,
+      "spent": 44,
+      "unspentAtStart": 32,
+      "placements": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "position": [
+            -21.745,
+            23.375,
+            -12.467
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 10,
+      "coreDamage": 98,
+      "effectiveDamage": 226.8,
+      "elapsedSeconds": 19.867,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 12.6,
+      "simultaneousHaloTargets": 4,
+      "contributions": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "damage": 226.8,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 6,
+          "appliedDamage": 100.8,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 4,
+          "appliedDamage": 126,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "Halo + Stasis",
+      "budget": 76,
+      "spent": 76,
+      "unspentAtStart": 0,
+      "placements": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "position": [
+            -21.745,
+            23.375,
+            -12.467
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "mode": "stasis",
+          "paid": 32,
+          "position": [
+            -23.737,
+            23.375,
+            -11.317
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        }
+      ],
+      "kills": 6,
+      "breaches": 4,
+      "coreDamage": 56,
+      "effectiveDamage": 421.44,
+      "elapsedSeconds": 22.033,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 30.933,
+      "haloEnemySeconds": 23.333,
+      "simultaneousHaloTargets": 5,
+      "contributions": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "damage": 421.44,
+          "kills": 6
+        },
+        {
+          "mode": "stasis",
+          "paid": 32,
+          "damage": 0,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 6,
+          "leaked": 0,
+          "appliedDamage": 181.44,
+          "slowSeconds": 13.6
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 4,
+          "appliedDamage": 240,
+          "slowSeconds": 17.333
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "Halo + Pierce",
+      "budget": 76,
+      "spent": 64,
+      "unspentAtStart": 12,
+      "placements": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "position": [
+            -21.745,
+            23.375,
+            -12.467
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "aim": [
+            0.595,
+            -0.639,
+            0.488
+          ]
+        }
+      ],
+      "kills": 6,
+      "breaches": 4,
+      "coreDamage": 56,
+      "effectiveDamage": 388.773,
+      "elapsedSeconds": 19.867,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 12.6,
+      "simultaneousHaloTargets": 4,
+      "contributions": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "damage": 226.8,
+          "kills": 0
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 161.973,
+          "kills": 6
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 6,
+          "leaked": 0,
+          "appliedDamage": 181.44,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 4,
+          "appliedDamage": 207.333,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "Two Pierce + Sweep",
+      "budget": 76,
+      "spent": 76,
+      "unspentAtStart": 0,
+      "placements": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "aim": [
+            0.595,
+            -0.639,
+            0.488
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            -31.264,
+            23.228,
+            -9.947
+          ],
+          "aim": [
+            0.819,
+            -0.503,
+            0.277
+          ]
+        },
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "position": [
+            -30.048,
+            26.489,
+            -15.287
+          ],
+          "aim": [
+            0.746,
+            -0.548,
+            0.379
+          ]
+        }
+      ],
+      "kills": 10,
+      "breaches": 0,
+      "coreDamage": 0,
+      "effectiveDamage": 596.16,
+      "elapsedSeconds": 18.283,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 142.173,
+          "kills": 6
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "damage": 232.587,
+          "kills": 4
+        },
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "damage": 221.4,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 6,
+          "leaked": 0,
+          "appliedDamage": 181.44,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 4,
+          "leaked": 0,
+          "appliedDamage": 414.72,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    }
+  ],
+  "aimedResults": [
+    {
+      "label": "pierce: isolated barge",
+      "budget": 96,
+      "spent": 20,
+      "unspentAtStart": 76,
+      "placements": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 1,
+      "coreDamage": 14,
+      "effectiveDamage": 79.667,
+      "elapsedSeconds": 19.217,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 79.667,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 1,
+          "appliedDamage": 79.667,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "sweep: isolated barge",
+      "budget": 96,
+      "spent": 24,
+      "unspentAtStart": 72,
+      "placements": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 1,
+      "coreDamage": 14,
+      "effectiveDamage": 75.9,
+      "elapsedSeconds": 19.217,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "damage": 75.9,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 1,
+          "appliedDamage": 75.9,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "pin: isolated barge",
+      "budget": 96,
+      "spent": 48,
+      "unspentAtStart": 48,
+      "placements": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 1,
+      "coreDamage": 14,
+      "effectiveDamage": 96,
+      "elapsedSeconds": 21.317,
+      "pinShots": 4,
+      "pinSlowedEnemySeconds": 6.017,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "damage": 96,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 1,
+          "appliedDamage": 96,
+          "slowSeconds": 6.017
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "pierce: isolated Wisp",
+      "budget": 96,
+      "spent": 20,
+      "unspentAtStart": 76,
+      "placements": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 1,
+      "coreDamage": 9,
+      "effectiveDamage": 23.667,
+      "elapsedSeconds": 14.333,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 23.667,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 1,
+          "appliedDamage": 23.667,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "sweep: isolated Wisp",
+      "budget": 96,
+      "spent": 24,
+      "unspentAtStart": 72,
+      "placements": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 1,
+      "breaches": 0,
+      "coreDamage": 0,
+      "effectiveDamage": 43.2,
+      "elapsedSeconds": 14.083,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "damage": 43.2,
+          "kills": 1
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 1,
+          "leaked": 0,
+          "appliedDamage": 43.2,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "pin: isolated Wisp",
+      "budget": 96,
+      "spent": 48,
+      "unspentAtStart": 48,
+      "placements": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 1,
+      "breaches": 0,
+      "coreDamage": 0,
+      "effectiveDamage": 43.2,
+      "elapsedSeconds": 13.133,
+      "pinShots": 2,
+      "pinSlowedEnemySeconds": 1.6,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "damage": 43.2,
+          "kills": 1
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 1,
+          "leaked": 0,
+          "appliedDamage": 43.2,
+          "slowSeconds": 1.6
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "pierce: tight barge convoy",
+      "budget": 96,
+      "spent": 20,
+      "unspentAtStart": 76,
+      "placements": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 6,
+      "coreDamage": 84,
+      "effectiveDamage": 478,
+      "elapsedSeconds": 22.733,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 478,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 6,
+          "appliedDamage": 478,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "sweep: tight barge convoy",
+      "budget": 96,
+      "spent": 24,
+      "unspentAtStart": 72,
+      "placements": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 6,
+      "coreDamage": 84,
+      "effectiveDamage": 139.2,
+      "elapsedSeconds": 22.733,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "damage": 139.2,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 6,
+          "appliedDamage": 139.2,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "pin: tight barge convoy",
+      "budget": 96,
+      "spent": 48,
+      "unspentAtStart": 48,
+      "placements": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 0,
+      "breaches": 6,
+      "coreDamage": 84,
+      "effectiveDamage": 120,
+      "elapsedSeconds": 22.733,
+      "pinShots": 5,
+      "pinSlowedEnemySeconds": 6.7,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "damage": 120,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 0,
+          "leaked": 6,
+          "appliedDamage": 120,
+          "slowSeconds": 6.7
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    }
+  ],
+  "aimedBudgetResults": [
+    {
+      "label": "Three Pierce: convoy budget",
+      "budget": 96,
+      "spent": 96,
+      "unspentAtStart": 0,
+      "placements": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "aim": [
+            0.595,
+            -0.639,
+            0.488
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            -11.625,
+            22.509,
+            -5.907
+          ],
+          "aim": [
+            0.52,
+            -0.823,
+            0.228
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        }
+      ],
+      "kills": 6,
+      "breaches": 0,
+      "coreDamage": 0,
+      "effectiveDamage": 622.08,
+      "elapsedSeconds": 20.167,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 260,
+          "kills": 0
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "damage": 192.08,
+          "kills": 6
+        },
+        {
+          "mode": "pierce",
+          "paid": 44,
+          "damage": 170,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 6,
+          "leaked": 0,
+          "appliedDamage": 622.08,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "Two Sweep + Pierce: convoy budget",
+      "budget": 96,
+      "spent": 80,
+      "unspentAtStart": 16,
+      "placements": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "aim": [
+            0.595,
+            -0.639,
+            0.488
+          ]
+        },
+        {
+          "mode": "sweep",
+          "paid": 36,
+          "position": [
+            -22.045,
+            23.895,
+            -18.28
+          ],
+          "aim": [
+            0.618,
+            -0.323,
+            0.717
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -11.625,
+            22.509,
+            -5.907
+          ],
+          "aim": [
+            0.52,
+            -0.823,
+            0.228
+          ]
+        }
+      ],
+      "kills": 6,
+      "breaches": 0,
+      "coreDamage": 0,
+      "effectiveDamage": 622.08,
+      "elapsedSeconds": 20.35,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "damage": 138.407,
+          "kills": 3
+        },
+        {
+          "mode": "sweep",
+          "paid": 36,
+          "damage": 140.7,
+          "kills": 0
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 342.973,
+          "kills": 3
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 6,
+          "leaked": 0,
+          "appliedDamage": 622.08,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "Pin + Pierce + Sweep: convoy budget",
+      "budget": 96,
+      "spent": 92,
+      "unspentAtStart": 4,
+      "placements": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "position": [
+            0.951,
+            2.507,
+            -2.068
+          ],
+          "aim": [
+            -0.57,
+            0.813,
+            -0.118
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            -19.004,
+            25.897,
+            -15.41
+          ],
+          "aim": [
+            0.595,
+            -0.639,
+            0.488
+          ]
+        },
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "position": [
+            -22.045,
+            23.895,
+            -18.28
+          ],
+          "aim": [
+            0.618,
+            -0.323,
+            0.717
+          ]
+        }
+      ],
+      "kills": 6,
+      "breaches": 0,
+      "coreDamage": 0,
+      "effectiveDamage": 622.08,
+      "elapsedSeconds": 21.267,
+      "pinShots": 4,
+      "pinSlowedEnemySeconds": 1.767,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pin",
+          "paid": 48,
+          "damage": 80.86,
+          "kills": 2
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 400.773,
+          "kills": 3
+        },
+        {
+          "mode": "sweep",
+          "paid": 24,
+          "damage": 140.447,
+          "kills": 1
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 6,
+          "leaked": 0,
+          "appliedDamage": 622.08,
+          "slowSeconds": 1.767
+        },
+        {
+          "gate": "B",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    }
+  ],
+  "coreResults": [
+    {
+      "label": "Three core Halo",
+      "budget": 200,
+      "spent": 192,
+      "unspentAtStart": 8,
+      "placements": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "position": [
+            0,
+            5.9,
+            0
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "mode": "halo",
+          "paid": 64,
+          "position": [
+            -2.3,
+            5.9,
+            0
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "mode": "halo",
+          "paid": 84,
+          "position": [
+            -1.15,
+            5.9,
+            -1.992
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        }
+      ],
+      "kills": 7,
+      "breaches": 21,
+      "coreDamage": 217,
+      "effectiveDamage": 923.04,
+      "elapsedSeconds": 23.917,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 21.817,
+      "simultaneousHaloTargets": 4,
+      "contributions": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "damage": 315.72,
+          "kills": 3
+        },
+        {
+          "mode": "halo",
+          "paid": 64,
+          "damage": 310.92,
+          "kills": 4
+        },
+        {
+          "mode": "halo",
+          "paid": 84,
+          "damage": 296.4,
+          "kills": 0
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 4,
+          "leaked": 3,
+          "appliedDamage": 299.52,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 3,
+          "leaked": 4,
+          "appliedDamage": 277.32,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 7,
+          "appliedDamage": 169.8,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 0,
+          "leaked": 7,
+          "appliedDamage": 176.4,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "Two core Halo + Stasis + two Pierce",
+      "budget": 200,
+      "spent": 192,
+      "unspentAtStart": 8,
+      "placements": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "position": [
+            0,
+            5.9,
+            0
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "mode": "halo",
+          "paid": 64,
+          "position": [
+            -2.3,
+            5.9,
+            0
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "mode": "stasis",
+          "paid": 32,
+          "position": [
+            -1.15,
+            5.9,
+            -1.992
+          ],
+          "aim": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            3.322,
+            2.307,
+            0.764
+          ],
+          "aim": [
+            -0.83,
+            0.523,
+            -0.191
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            -1.838,
+            3.34,
+            2.339
+          ],
+          "aim": [
+            -0.706,
+            0.574,
+            -0.416
+          ]
+        }
+      ],
+      "kills": 20,
+      "breaches": 8,
+      "coreDamage": 92,
+      "effectiveDamage": 1352.567,
+      "elapsedSeconds": 24.7,
+      "pinShots": 0,
+      "pinSlowedEnemySeconds": 0,
+      "stasisEnemySeconds": 24.15,
+      "haloEnemySeconds": 21.783,
+      "simultaneousHaloTargets": 3,
+      "contributions": [
+        {
+          "mode": "halo",
+          "paid": 44,
+          "damage": 355.653,
+          "kills": 5
+        },
+        {
+          "mode": "halo",
+          "paid": 64,
+          "damage": 285.52,
+          "kills": 3
+        },
+        {
+          "mode": "stasis",
+          "paid": 32,
+          "damage": 0,
+          "kills": 0
+        },
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 422.173,
+          "kills": 8
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "damage": 289.22,
+          "kills": 4
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 7,
+          "leaked": 0,
+          "appliedDamage": 384.48,
+          "slowSeconds": 9.6
+        },
+        {
+          "gate": "B",
+          "killed": 7,
+          "leaked": 0,
+          "appliedDamage": 384.48,
+          "slowSeconds": 0.083
+        },
+        {
+          "gate": "C",
+          "killed": 3,
+          "leaked": 4,
+          "appliedDamage": 286.853,
+          "slowSeconds": 5.95
+        },
+        {
+          "gate": "D",
+          "killed": 3,
+          "leaked": 4,
+          "appliedDamage": 296.753,
+          "slowSeconds": 8.517
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    },
+    {
+      "label": "Four approach Pierce + Pin",
+      "budget": 200,
+      "spent": 200,
+      "unspentAtStart": 0,
+      "placements": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "position": [
+            3.322,
+            2.307,
+            0.764
+          ],
+          "aim": [
+            -0.83,
+            0.523,
+            -0.191
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "position": [
+            -1.838,
+            3.34,
+            2.339
+          ],
+          "aim": [
+            -0.706,
+            0.574,
+            -0.416
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 44,
+          "position": [
+            -3.176,
+            2.951,
+            -1.952
+          ],
+          "aim": [
+            0.794,
+            0.362,
+            0.488
+          ]
+        },
+        {
+          "mode": "pierce",
+          "paid": 56,
+          "position": [
+            -4.379,
+            4.396,
+            1.297
+          ],
+          "aim": [
+            -0.704,
+            0.588,
+            -0.399
+          ]
+        },
+        {
+          "mode": "pin",
+          "paid": 48,
+          "position": [
+            5.944,
+            4.865,
+            -4.77
+          ],
+          "aim": [
+            0.506,
+            0.417,
+            0.755
+          ]
+        }
+      ],
+      "kills": 17,
+      "breaches": 11,
+      "coreDamage": 118,
+      "effectiveDamage": 1188.867,
+      "elapsedSeconds": 23.917,
+      "pinShots": 6,
+      "pinSlowedEnemySeconds": 1.95,
+      "stasisEnemySeconds": 0,
+      "haloEnemySeconds": 0,
+      "simultaneousHaloTargets": 0,
+      "contributions": [
+        {
+          "mode": "pierce",
+          "paid": 20,
+          "damage": 282,
+          "kills": 0
+        },
+        {
+          "mode": "pierce",
+          "paid": 32,
+          "damage": 223.947,
+          "kills": 6
+        },
+        {
+          "mode": "pierce",
+          "paid": 44,
+          "damage": 368.973,
+          "kills": 5
+        },
+        {
+          "mode": "pierce",
+          "paid": 56,
+          "damage": 220.4,
+          "kills": 2
+        },
+        {
+          "mode": "pin",
+          "paid": 48,
+          "damage": 93.547,
+          "kills": 4
+        }
+      ],
+      "perLane": [
+        {
+          "gate": "A",
+          "killed": 4,
+          "leaked": 3,
+          "appliedDamage": 337.587,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "B",
+          "killed": 7,
+          "leaked": 0,
+          "appliedDamage": 384.48,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "C",
+          "killed": 0,
+          "leaked": 7,
+          "appliedDamage": 106,
+          "slowSeconds": 0
+        },
+        {
+          "gate": "D",
+          "killed": 6,
+          "leaked": 1,
+          "appliedDamage": 360.8,
+          "slowSeconds": 1.95
+        },
+        {
+          "gate": "E",
+          "killed": 0,
+          "leaked": 0,
+          "appliedDamage": 0,
+          "slowSeconds": 0
+        }
+      ],
+      "pilotContactFrames": 0
+    }
+  ],
+  "conclusions": {
+    "halo": "At the selected west crossing, one Halo deals partial damage but kills none of the ten fresh targets. Buying Stasis beside it raises kills to six; Halo plus cheaper Pierce also kills six, and two Pierce plus Sweep clears all ten within the same 76-scrap allocation. This supports Halo as supplemental contact damage and demonstrates useful Stasis synergy without showing that the pair dominates good aimed lines.",
+    "pin": "On the same physical line, Pin and Sweep catch the isolated drifting Wisp that Pierce misses. Pin applies the most damage to the isolated barge and delays it 2.1 seconds, but does not kill it. Pierce deals far more total damage to the six-barge convoy. All three 96-scrap allocations clear that convoy, with the Pin mixture taking longest. Keep Pin explicitly single-target support; its 48-scrap entry price remains a playtest question.",
+    "core": "Three core-clustered Halo kill 7/28. A same-spend mixed Halo/Stasis/Pierce group kills 20/28; the 200-scrap aimed group kills 17/28. Core field synergy is useful in this finite formation, but pure Halo clustering is not dominant. No exclusion zone or general wave increase is justified by this evidence.",
+    "provisionalDecision": "Retain the proposed stats for the small Crown role experiment and check paid campaign viability separately. The playtest should ask whether the visible field/shot feedback makes these supplemental roles understandable, and whether buying one feels worthwhile beside a good Pierce or Sweep line. Do not infer human balance or optimal fleet composition from this search."
+  }
+}

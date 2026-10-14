@@ -1,4 +1,4 @@
-// Browser regression checks for Helix Hold. Updated 2026-10-13; these revisions
+// Browser regression checks for Helix Hold. Updated 2026-10-14; these revisions
 // are prepared, NOT browser-executed in the managed Sites environment.
 // Run these later in an environment where browser testing is permitted:
 //   npm run build && npm run preview      (leave running; default http://127.0.0.1:4173)
@@ -237,9 +237,11 @@ try {
   await page.getByRole("button", { name: "Enter test flight", exact: true }).click();
   await page.keyboard.press("Digit3");
   await waitState({ mode: "stasis" });
-  await waitText(".beam-description", "6m radius · 12m across · 50% slower");
+  await waitText(".beam-description", "Passive sphere · 6m radius / 12m across · 50% slow · no shots");
   check((await snap()).mode === "stasis", "3 selects Stasis in the optional encounter");
-  check(await page.locator('.beam-description').textContent() === "6m radius · 12m across · 50% slower", "field rules are visible");
+  await page.keyboard.press("Digit4");
+  check((await snap()).mode === "stasis" && await page.locator(".mode-buttons button").count() === 3, "Crown-only Halo is unavailable in the carrier lab");
+  check(await page.locator('.beam-description').textContent() === "Passive sphere · 6m radius / 12m across · 50% slow · no shots", "field rules are visible");
   await page.evaluate(() => window.__helixDebug.place(11.3,22.6,6.4,0,0));
   await page.waitForFunction(() => window.__helixDebug.snap().coverage > 0);
   check((await snap()).coverage > 0, "actual 3D crossing has previewed field coverage");
@@ -248,7 +250,7 @@ try {
   check((await snap()).drones === 1 && (await snap()).scrap === 40, "Stasis consumes one paid slot");
   await page.keyboard.press('Tab');
   await waitState({ phase: 'pause' });
-  await page.getByRole('button', {name:'Test placed fields',exact:true}).click();
+  await page.getByRole('button', {name:'Test Stasis fields',exact:true}).click();
   await waitState({ checking: true, phase: 'play' });
   await page.waitForFunction(() => document.pointerLockElement === document.querySelector('canvas'));
   check(await page.evaluate(() => document.pointerLockElement === document.querySelector('canvas')), 'desktop field check captures the pointer');
@@ -300,6 +302,45 @@ try {
   await page.keyboard.press('Digit3');
   await waitState({ mode: 'stasis', waveIndex: -1 });
   check((await snap()).mode === 'stasis' && (await snap()).waveIndex === -1, "Crown permits Stasis while first wave waits");
+  check(await page.locator('.mode-buttons button').count() === 5, 'Crown offers all five drone roles');
+  check((await snap()).nextCost === 32 && (await snap()).quotes.pierce === 20, 'Stasis quote is independent from Pierce');
+  await page.waitForFunction(() => document.querySelector('.anchor strong')?.textContent.includes('32'));
+  check(await page.locator('.pilot-weapon-note').innerText().then(t => t.includes('pilot gun stays the same')), 'mode selector distinguishes next drone from the pilot gun');
+  await page.evaluate(() => window.__helixDebug.place(0,18,14,0,0));
+  await page.keyboard.press('KeyF');
+  await waitState({ drones: 1, scrap: 28 });
+  check((await snap()).quotes.stasis === 52 && (await snap()).quotes.pierce === 20, 'buying Stasis raises only its own next price');
+  await page.keyboard.press('Tab');
+  await page.locator('.fleet-list button').first().click();
+  check(await page.locator('.fleet-list button').first().innerText().then(t => t.includes('Passive slow field') && t.includes('paid 32')), 'fleet shows Stasis role and actual paid value');
+  await page.getByRole('button', {name:'Reposition · free',exact:true}).click();
+  await page.waitForFunction(() => window.__helixDebug.snap().repositionId !== null);
+  await page.waitForFunction(() => document.querySelector('.fleet-cost')?.textContent === 'Move · free');
+  await page.keyboard.press('Digit5');
+  check((await snap()).mode === 'stasis', 'free reposition locks the existing drone type');
+  check(await page.locator('.anchor strong').textContent() === 'Free', 'reposition shows Free instead of a purchase quote');
+  await page.keyboard.press('KeyC');
+  await waitState({ repositionId: null });
+  await page.keyboard.press('KeyR');
+  await waitState({ drones: 0, scrap: 60 });
+  for (const [key, mode, price] of [['Digit4','halo',44],['Digit5','pin',48]]) {
+    await page.keyboard.press(key);
+    await waitState({ mode, nextCost: price });
+    await page.waitForFunction(({mode,price}) => {
+      const button=document.querySelector(`.mode-buttons button[data-mode="${mode}"]`);
+      return button?.getAttribute('aria-pressed') === 'true' && button.textContent.includes(`${price} scrap`)
+        && document.querySelector('.anchor strong')?.textContent.includes(`${price}`);
+    }, {mode,price});
+    check((await snap()).mode === mode && (await snap()).nextCost === price, `${mode} shortcut updates selected role and quote`);
+    await page.evaluate(() => window.__helixDebug.place(0,18,14,0,0));
+    await page.keyboard.press('KeyF');
+    await waitState({ drones: 1, scrap: 60-price });
+    await page.keyboard.press('KeyR');
+    await waitState({ drones: 0, scrap: 60 });
+    check((await snap()).scrap === 60, `${mode} anchor and recall use its actual paid price`);
+  }
+  await page.keyboard.press('Digit3');
+  await waitState({ mode: 'stasis' });
   await page.keyboard.press('Tab');
   await page.getByRole('button', {name:/Show 8-wave gate plan/}).click();
   await page.locator('.survey-card .gate-plan li').nth(7).waitFor({ state: 'visible' });
@@ -323,6 +364,23 @@ try {
     await waitState({ phase: 'play', waveIndex: -1 }, touchPage);
     await touchPage.waitForFunction(() => document.querySelector('.game-root')?.dataset.touch === '1');
     check(await touchPage.evaluate(() => matchMedia('(pointer: coarse)').matches && !document.pointerLockElement), 'touch context uses coarse-pointer controls without pointer lock');
+    await touchPage.locator('.mode-buttons button[data-mode="halo"]').tap();
+    await waitState({ mode: 'halo', nextCost: 44 }, touchPage);
+    await touchPage.locator('.mode-buttons button[data-mode="pin"]').tap();
+    await waitState({ mode: 'pin', nextCost: 48 }, touchPage);
+    const roleLayout = await touchPage.locator('.mode-buttons').evaluate(el => {
+      const parent=el.getBoundingClientRect();
+      const boxes=[...el.querySelectorAll('button')].map(button => {
+        const b=button.getBoundingClientRect();
+        return {top:Math.round(b.top),fits:b.left>=parent.left-1&&b.right<=parent.right+1&&button.scrollWidth<=button.clientWidth+1};
+      });
+      const panel=el.closest('.placement').getBoundingClientRect();
+      const gatesClear=[...document.querySelectorAll('.lane-intel .lane')].every(gate=>gate.getBoundingClientRect().bottom<=panel.top);
+      return {count:boxes.length,rows:[...new Set(boxes.map(b=>b.top))].map(top=>boxes.filter(b=>b.top===top).length),fits:boxes.every(b=>b.fits),gatesClear};
+    });
+    check(roleLayout.count === 5 && roleLayout.rows.join(',') === '3,2' && roleLayout.fits, 'touch roster fits five priced roles in a 3 + 2 grid');
+    check(roleLayout.gatesClear, 'touch placement panel stays below the five gate cards');
+    await touchPage.screenshot({ path: `${OUT}split-crown-touch-roles.png` });
     await touchPage.getByRole('button', { name: 'Survey arena', exact: true }).tap();
     await touchPage.getByRole('button', { name: /Show 8-wave gate plan/ }).tap();
     await touchPage.locator('.survey-card .gate-plan li').nth(7).waitFor({ state: 'visible' });

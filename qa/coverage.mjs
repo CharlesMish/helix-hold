@@ -75,7 +75,7 @@ test('Pierce, Sweep and Stasis timing sums use the same Fan/Slide and retained-u
     near(moved.nowMetres + moved.laterMetres + moved.idleMetres, movedRaw.metres);
     assert.equal(tryAnchor(run), null);
     assert.deepEqual(retained, moved.drone);
-    assert.equal(retained.paid, 20);
+    assert.equal(retained.paid, { pierce: 20, sweep: 24, stasis: 32 }[mode]);
   }
 });
 

@@ -1,8 +1,14 @@
 /** Weapon geometry lives here so combat and placement previews use the same hit test. */
-export type DroneMode = "pierce" | "sweep" | "stasis";
+export type DroneMode = "pierce" | "sweep" | "stasis" | "halo" | "pin";
 
 export const STASIS_RADIUS = 6;
 export const STASIS_SPEED_SCALE = 0.5;
+export const HALO_RADIUS = 5;
+export const PIN_DAMAGE = 24;
+export const PIN_INTERVAL = 1.6;
+export const PIN_SLOW_DURATION = 2.4;
+export const PIN_SPEED_SCALE = 0.65;
+export const PIN_FLASH_DURATION = 0.18;
 
 export const DRONE_SPECS = {
   pierce: {
@@ -17,6 +23,14 @@ export const DRONE_SPECS = {
   stasis: {
     label: "Stasis", dps: 0, radius: STASIS_RADIUS, range: 0, color: 0xffbb79,
     description: "6m sphere. Slows enemies by 50%; no damage. Fields do not stack.", pierces: false,
+  },
+  halo: {
+    label: "Halo", dps: 18, radius: HALO_RADIUS, range: 0, color: 0xff789d,
+    description: "Passive 5m sphere. Deals 18 damage per second to every enemy inside; no aiming needed.", pierces: true,
+  },
+  pin: {
+    label: "Pin", dps: PIN_DAMAGE / PIN_INTERVAL, radius: 1.1, range: 60, color: 0x9fdc87,
+    description: "Fixed line. Every 1.6s, hits the nearest target for 24 damage and slows it 35% for 2.4s.", pierces: false,
   },
   sweep: {
     label: "Sweep",
@@ -64,7 +78,7 @@ export function beamContact(beam: Beam, target: BeamTarget): number | null {
   return ex * ex + ey * ey + ez * ez <= reach * reach ? t : null;
 }
 
-/** Pierce keeps every contact; Sweep chooses the nearest along the firing line. */
+/** Pierce keeps every contact; Sweep and Pin choose the nearest along the firing line. */
 export function selectBeamTargets<T extends BeamTarget>(beam: Beam, targets: readonly T[]): T[] {
   const hits: T[] = [];
   let nearest: T | undefined;
@@ -82,7 +96,11 @@ export function selectBeamTargets<T extends BeamTarget>(beam: Beam, targets: rea
   return hits;
 }
 
-/** Field membership follows the enemy center in world space, not its path or screen position. */
+/** Field membership follows the enemy center in world space, not hull radius or screen position. */
+export function insideSphere(center: { x: number; y: number; z: number }, point: { x: number; y: number; z: number }, radius: number): boolean {
+  return (center.x - point.x) ** 2 + (center.y - point.y) ** 2 + (center.z - point.z) ** 2 <= radius ** 2;
+}
+
 export function insideStasis(center: { x: number; y: number; z: number }, point: { x: number; y: number; z: number }): boolean {
-  return (center.x - point.x) ** 2 + (center.y - point.y) ** 2 + (center.z - point.z) ** 2 <= STASIS_RADIUS ** 2;
+  return insideSphere(center, point, STASIS_RADIUS);
 }

@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 const bundle = await build({ stdin: { contents: 'export * from "./src/game/sim"; export * from "./src/game/paths"; export * from "./src/game/combat";', resolveDir: new URL('../', import.meta.url).pathname }, bundle: true, platform: 'node', format: 'esm', write: false });
 export const api = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
-const { createRun, step, nextWaveNow, tryAnchor, beginReposition, anchorCost, getBeamCoverage, getFieldCoverage, beamContact, LEVELS, DRONE_SPECS } = api;
+const { createRun, step, nextWaveNow, tryAnchor, beginReposition, getAnchorCost, getBeamCoverage, getFieldCoverage, beamContact, LEVELS, DRONE_SPECS } = api;
 globalThis.localStorage = { getItem: () => null, setItem() {} };
 const index = LEVELS.findIndex(l => l.id === 'split-crown');
 assert.ok(index >= 0, 'Split Crown must exist');
@@ -92,9 +92,9 @@ export function fullTrial(strategy, withField, refit = true, fieldSlot = 6, carr
   const run = createRun(index, 17), placements = [], waves = [], revisions = [];
   function buy() {
     const slot = run.drones.length;
-    if (slot >= 8 || run.scrap < anchorCost(slot)) return false;
-    const lane = Math.min(level.paths.length - 1, purchaseLanes[slot]);
     const field = withField && slot === fieldSlot;
+    if (slot >= 8 || run.scrap < getAnchorCost(run, field ? 'stasis' : 'pierce')) return false;
+    const lane = Math.min(level.paths.length - 1, purchaseLanes[slot]);
     const candidates = field ? fieldOptions(run) : slot < 2 ? openingOptions : ranked(run, strategy, lane);
     for (const p of candidates) {
       setPose(run, p, field ? 'stasis' : 'pierce');
@@ -196,7 +196,7 @@ function realInputOpening() {
     if (run.shipHitting) pilotContactFrames++;
   }
   assert.ok(seconds < 180);
-  return { method: 'Automated steering/thrust and step(anchor), zero pose assignments or bonus resources; not a human control-usability test.', flights, core: run.core, kills: run.kills, scrap: run.scrap, canAffordThird: run.scrap >= anchorCost(run.drones.length), seconds: round(seconds), pilotContactFrames };
+  return { method: 'Automated steering/thrust and step(anchor), zero pose assignments or bonus resources; not a human control-usability test.', flights, core: run.core, kills: run.kills, scrap: run.scrap, canAffordThird: run.scrap >= getAnchorCost(run), seconds: round(seconds), pilotContactFrames };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 const opening = realInputOpening();

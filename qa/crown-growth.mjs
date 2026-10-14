@@ -5,7 +5,7 @@ import { build } from 'esbuild';
 
 const bundle = await build({ stdin: { contents: 'export * from "./src/game/sim"; export * from "./src/game/paths";', resolveDir: new URL('../', import.meta.url).pathname }, bundle: true, platform: 'node', format: 'esm', write: false });
 const api = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
-const { LEVELS, SPLIT_CROWN_INDEX, MAX_DRONES, createRun, getDroneLimit, anchorCost, tryAnchor, beginReposition, recallSelected, beginContinuation, beginWave, nextWaveNow, step } = api;
+const { LEVELS, SPLIT_CROWN_INDEX, MAX_DRONES, createRun, getDroneLimit, getAnchorCost, tryAnchor, beginReposition, recallSelected, beginContinuation, beginWave, nextWaveNow, step } = api;
 const level = LEVELS[SPLIT_CROWN_INDEX];
 const neutral = () => ({ thrust: 0, steer: 0, pitch: 0, boost: false, anchor: false, expand: false, shift: 0 });
 let checks = 0;
@@ -47,18 +47,18 @@ function advance(run, seconds) {
   for (let t = 0; t < seconds; t += 1 / 60) step(run, neutral(), 1 / 60);
 }
 
-test('Crown buys past eight with the original increasing scrap prices; other arenas retain their limit', () => {
+test('Crown buys past eight with per-type prices; other arenas retain their limit', () => {
   assert.equal(MAX_DRONES, 8);
   assert.equal(getDroneLimit(level), Infinity);
   const run = fundedFleet(SPLIT_CROWN_INDEX, 12);
   assert.equal(run.drones.length, 12);
   assert.equal(run.drones[8].mode, 'stasis');
-  assert.equal(run.drones[8].paid, 116);
-  assert.deepEqual(run.drones.map(d => d.paid), Array.from({ length: 12 }, (_, i) => 20 + 12 * i));
-  assert.equal(run.scrap, 10_000 - 1032);
-  run.scrap = anchorCost(run.drones.length) - 1;
+  assert.equal(run.drones[8].paid, 32);
+  assert.deepEqual(run.drones.map(d => d.paid), [24, 20, 32, 44, 56, 68, 80, 92, 32, 104, 116, 128]);
+  assert.equal(run.scrap, 10_000 - 796);
+  run.scrap = getAnchorCost(run) - 1;
   Object.assign(run.ship, { x: 35, y: 20, z: 12 });
-  assert.match(tryAnchor(run), /Need 164 scrap/);
+  assert.match(tryAnchor(run), /Need 140 scrap/);
   for (const [index, other] of LEVELS.entries()) {
     if (index === SPLIT_CROWN_INDEX) continue;
     assert.equal(getDroneLimit(other), 8);
@@ -81,7 +81,7 @@ test('A larger fleet repositions its oldest unit for free and recalls its actual
   assert.deepEqual({ id: first.id, mode: first.mode, paid: first.paid, kills: first.kills, damage: first.damage }, original);
   assert.equal(first.bz, 20);
   assert.equal(recallSelected(run, first.id), null);
-  assert.equal(run.scrap, 20); assert.equal(run.drones.length, 11);
+  assert.equal(run.scrap, original.paid); assert.equal(run.drones.length, 11);
 });
 
 test('The optional four waves retain all five routes and reserve E for the later carrier', () => {

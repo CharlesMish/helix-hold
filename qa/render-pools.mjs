@@ -19,7 +19,7 @@ function disposeScene(scene) {
   const pool = buildDroneVisualPool(scene, geometry);
   const first = { drone: pool.drones[0], beam: pool.beams[1], shell: pool.droneShells[0], ring: pool.targetRings[0], field: pool.fields[0] };
   const pilot = pool.beams[0];
-  for (const size of [9, 24]) {
+  for (const size of [9, 40]) {
     pool.ensure(size);
     assert.equal(pool.drones.length, size);
     assert.equal(pool.beams.length, size + 1);
@@ -36,7 +36,7 @@ function disposeScene(scene) {
     }
   }
   pool.ensure(8);
-  assert.equal(pool.drones.length, 24, 'reuse retained slots after a smaller fleet loads');
+  assert.equal(pool.drones.length, 40, 'reuse retained slots after a smaller fleet loads');
   assert.equal(pool.beams[0], pilot, 'growing the fleet never takes the pilot beam');
   assert.deepEqual({ drone: pool.drones[0], beam: pool.beams[1], shell: pool.droneShells[0], ring: pool.targetRings[0], field: pool.fields[0] }, first, 'existing visual identity survives growth');
   disposeScene(scene);

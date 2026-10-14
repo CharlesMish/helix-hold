@@ -49,6 +49,9 @@ export type LevelDef = {
   stasisAvailable?: boolean;
   /** Crown grows through earned scrap; other arenas retain their eight-drone limit. */
   fleetGrowth?: "scrap";
+  /** The Crown experiment introduces distinct specialist roles and independent prices. */
+  droneRoster?: "expanded";
+  dronePricing?: "per-type";
   presentation?: "split-crown";
   primaryPath?: number;
   sweepDps?: number;
@@ -410,6 +413,8 @@ LEVELS.push({
   accent: 0xe8c58b,
   stasisAvailable: true,
   fleetGrowth: "scrap",
+  droneRoster: "expanded",
+  dronePricing: "per-type",
   presentation: "split-crown",
   primaryPath: 4,
   hpMul: 1.08,

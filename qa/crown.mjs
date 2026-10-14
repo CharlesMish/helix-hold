@@ -5,7 +5,7 @@ import { build } from 'esbuild';
 import { assertAuthoredBaseline, historical, GEOMETRY_TOLERANCE } from './authored-baseline.mjs';
 const bundle = await build({ stdin: { contents: 'export * from "./src/game/sim"; export * from "./src/game/paths"; export * from "./src/game/save";', resolveDir: new URL('../', import.meta.url).pathname }, bundle: true, platform: 'node', format: 'esm', write: false });
 const api = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
-const { LEVELS, CORE, createRun, step, nextWaveNow, getLaneStatus, getLaneFirstWave, hasStasis, tryAnchor, anchorCost, MAX_DRONES, beginContinuation, loadSave, recordWin } = api;
+const { LEVELS, CORE, createRun, step, nextWaveNow, getLaneStatus, getLaneFirstWave, hasStasis, tryAnchor, getAnchorCost, MAX_DRONES, beginContinuation, loadSave, recordWin } = api;
 const index = LEVELS.findIndex(l => l.id === 'split-crown');
 assert.ok(index >= 0, 'Split Crown has its own stable identity');
 const level = LEVELS[index];
@@ -134,10 +134,10 @@ test('Stasis is available as an ordinary paid slot without raising the starting 
   assert.equal(run.scrap, 60); assert.equal(MAX_DRONES, 8); assert.equal(run.waveMode, 'manual');
   assert.equal(run.level.experiment, undefined); assert.equal(run.level.sweepDps, undefined); assert.ok(hasStasis(run.level));
   Object.assign(run.ship, { x: -22.3, y: 23.3, z: -13.9 }); run.droneMode = 'stasis';
-  assert.equal(tryAnchor(run), null); assert.equal(run.drones[0].paid, 20); assert.equal(run.scrap, 40);
+  assert.equal(tryAnchor(run), null); assert.equal(run.drones[0].paid, 32); assert.equal(run.scrap, 28);
   Object.assign(run.ship, { x: 22.3, y: 21.3, z: -5.9 }); run.droneMode = 'pierce';
-  assert.equal(tryAnchor(run), null); assert.equal(run.drones[1].paid, 32); assert.equal(run.scrap, 8);
-  assert.equal(anchorCost(run.drones.length), 44);
+  assert.equal(tryAnchor(run), null); assert.equal(run.drones[1].paid, 20); assert.equal(run.scrap, 8);
+  assert.equal(getAnchorCost(run), 32);
   assert.equal(beginContinuation(run), false, 'Crown continuation requires the completed eight-wave campaign');
 });
 test('A Crown clear writes its own score and preserves Orbital, Shear and tutorial identities', () => {

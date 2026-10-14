@@ -1,5 +1,7 @@
 # Split Crown: funded growth and the long flight · v0.7.0
 
+Historical v0.7.0 snapshot. Current Crown has independent prices and two additional roles; see [v0.8.0 roles](DRONE_ROLES_080.md). Current trial scripts use current prices. Restore Sites `c2c3e4f338b5be806bd743353823a871cccc8889` or GitHub `20243280fd9eedb0d09068318cd2885350c7b78c` for exact reproduction of this version.
+
 ## Latest human feedback
 
 Charlie confirms he played Split Crown before the v0.6.2 review corrections. The longer voice report was lost, but this replacement report is direct human playtest evidence: he enjoyed the lines and the map, reached eight drones early, could not add his intended ninth Stasis drone, and destroyed the carrier too near its entrance while pursuing it with the pilot. He wanted more room to build, a stronger later encounter, and possibly 10–12 waves. Do not let the older handoff's missing-transcript note override this report.

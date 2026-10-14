@@ -105,3 +105,47 @@
 .gate-plan-option{font:8px/1.6 var(--font-mono);color:#abc5ce;margin:0 0 9px}
 .gate-plan-extra{border-top:1px solid #a8c0d52c;margin:10px 0}
 @media(max-width:760px){.fleet-cost{font-size:7px}.fleet-growth-note,.survey-card .fleet-growth-note{font-size:8px}}
+
+/* Drone roles: five controls stay in a compact 3 + 2 grid, with visible prices. */
+.mode-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.mode-buttons[data-count='3']{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mode-buttons[data-count='5']{grid-template-columns:repeat(6,minmax(0,1fr))}
+.mode-buttons[data-count='5'] button{grid-column:span 2}
+.mode-buttons[data-count='5'] button:nth-child(n+4){grid-column:span 3}
+.mode-buttons button{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:5px;min-width:0;min-height:49px;padding:8px 6px;font-size:10px}
+.mode-name{display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap}
+.mode-buttons .beam-icon{width:12px;height:14px}
+.mode-buttons button small{font:7px/1.45 var(--font-mono);white-space:normal;color:#a2b7ce}
+.mode-buttons button.selected small{color:inherit}
+.mode-buttons kbd{font-size:7px;padding:1px 2px;flex-shrink:0}
+.mode-buttons button[data-mode='stasis'].selected{color:#ffdcaf;border-color:#f6b57080;background:#d8933b22}
+.mode-buttons button[data-mode='halo'].selected{color:#ffc3d3;border-color:#ff789da6;background:#dc4d7824}
+.mode-buttons button[data-mode='pin'].selected{color:#d0f2bd;border-color:#9fdc87a6;background:#63974b24}
+.beam-icon.stasis{color:#ffc17d}
+.beam-icon.stasis:before{top:1px;left:1px;width:11px;height:11px;background:none;box-shadow:none;border:1px solid currentColor;border-radius:50%}
+.beam-icon.stasis:after{content:'';position:absolute;top:5px;left:5px;width:3px;height:3px;border-radius:50%;background:currentColor}
+.beam-icon.halo{color:#ff789d}
+.beam-icon.halo:before{top:1px;left:1px;width:11px;height:11px;background:none;box-shadow:none;border:2px dotted currentColor;border-radius:50%}
+.beam-icon.halo:after{content:'';position:absolute;top:4px;left:4px;width:5px;height:5px;background:currentColor;transform:rotate(45deg)}
+.beam-icon.pin{color:#9fdc87}
+.beam-icon.pin:before{top:6px;height:2px;box-shadow:none}
+.beam-icon.pin:after{content:'';position:absolute;top:3px;right:0;width:6px;height:6px;border-top:2px solid currentColor;border-right:2px solid currentColor;transform:rotate(45deg)}
+.placement[data-mode='halo'] .coverage-track i{background:#ff789d}
+.placement[data-mode='halo'] .coverage-read b{color:#ffc3d3}
+.placement[data-mode='pin'] .coverage-track i{background:#9fdc87}
+.placement[data-mode='pin'] .coverage-read b{color:#d0f2bd}
+.pilot-weapon-note{font:7px/1.5 var(--font-mono);color:#b0c8d8;margin:7px 0 0}
+.beam-description{margin:5px 0 12px}
+.fleet-list b{display:flex;align-items:center;gap:6px}
+.fleet-role{display:block;font:7px/1.5 var(--font-mono);color:#bed0e0;margin-top:3px}
+.fleet-list small{line-height:1.55}
+.pricing-guide{font:9px/1.8 var(--font-mono);color:#b6cce0;margin:12px 0 16px;padding:12px;border:1px solid #8caacb38;border-radius:8px}
+.guide-extra{margin-top:12px}
+@media(max-width:760px){.mode-buttons button{min-height:46px;padding:7px 6px}.mode-buttons[data-count='5'] .mode-name{font-size:10px}.mode-buttons button small{font-size:7px}.pilot-weapon-note{font-size:7px}.beam-description{font-size:8px;margin:5px 0 9px}}
+@media(max-width:380px){.mode-buttons .beam-icon{display:none}.mode-name{gap:3px}.mode-buttons button{padding:7px 4px;font-size:9px}.mode-buttons button small{font-size:6.5px}}
+@media(max-height:520px) and (orientation:landscape){.mode-buttons button{min-height:40px;padding:5px 4px;gap:3px}.mode-buttons .beam-icon{display:none}.mode-buttons button small{font-size:6.5px}.pilot-weapon-note{display:none}}
+/* The expanded roster must scroll below Crown's two gate rows in portrait. */
+@media(max-width:760px) and (orientation:portrait){
+ .game-root[data-arena='split-crown'] .placement{max-height:calc(100dvh - 330px)}
+ .game-root[data-arena='split-crown'][data-touch='1'] .placement{max-height:calc(100dvh - 500px)}
+}

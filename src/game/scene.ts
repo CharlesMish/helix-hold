@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { CORE, PATH_COLORS, type Kind } from "./paths";
-import { beamContact, DRONE_SPECS, insideStasis, STASIS_RADIUS, type Beam } from "./combat";
-import { BEAM_RANGE, MAX_DRONES, SHIP_DPS, SHIP_RADIUS, droneBeam, getFieldCoverage, getBeamCoverage, getLaneFirstWave, getLaneStatus, getPlacementPreview, type Run } from "./sim";
+import { beamContact, DRONE_SPECS, insideSphere, STASIS_RADIUS, STASIS_SPEED_SCALE, type Beam, type DroneMode } from "./combat";
+import { BEAM_RANGE, MAX_DRONES, SHIP_DPS, SHIP_RADIUS, droneBeam, getDroneCoverage, getBeamCoverage, getLaneFirstWave, getLaneStatus, getPlacementPreview, type Run } from "./sim";
 
 export type Projection = { x: number; y: number; visible: boolean; behind: boolean };
 export type World = {
@@ -157,41 +157,87 @@ function buildShip() {
   return group;
 }
 
-function buildDrone(ghost = false) {
+/** Role silhouettes carry the same identity in the fleet and placement ghost.
+ * Each role uses two merged meshes; hidden alternatives add no draw calls. */
+export function buildDrone(ghost = false) {
   const group = new THREE.Group();
-  const metal = new THREE.MeshStandardMaterial({ color: ghost ? 0xc3b5ff : 0xc4c6e3, metalness: 0.45, roughness: 0.32, transparent: ghost, opacity: ghost ? 0.4 : 1 });
-  const accent = glowMaterial(PALETTE.lavender, ghost ? 0.48 : 1);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.56, 0.05, 8, 28), metal);
-  const inner = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.035, 6, 20), accent);
-  inner.name = "iris";
-  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.09, 0.8, 8), metal);
-  barrel.rotation.x = Math.PI / 2;
-  barrel.position.z = 0.2;
-  const eye = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), accent);
-  eye.position.z = 0.65;
-  eye.name = "eye";
-  group.add(ring, inner, barrel, eye);
-  for (let i = 0; i < 3; i++) {
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.36, 0.48), metal);
-    const angle = (i / 3) * Math.PI * 2;
-    fin.position.set(Math.sin(angle) * 0.65, Math.cos(angle) * 0.65, -0.16);
-    fin.rotation.z = -angle;
-    group.add(fin);
+  const metal = new THREE.MeshStandardMaterial({ color: 0xc4cbdc, metalness: 0.45, roughness: 0.32, transparent: ghost, opacity: ghost ? 0.36 : 1 });
+  const accent = glowMaterial(DRONE_SPECS.pierce.color, ghost ? 0.58 : 1);
+  function merge(parts: THREE.BufferGeometry[]) {
+    const normalized = parts.map(source => {
+      const geometry = source.index ? source.toNonIndexed() : source;
+      if (geometry !== source) source.dispose();
+      geometry.deleteAttribute("uv"); return geometry;
+    });
+    const geometry = mergeGeometries(normalized, false)!;
+    normalized.forEach(part => part.dispose()); return geometry;
   }
+  function bar(x: number, y: number, z: number, px = 0, py = 0, pz = 0) {
+    return new THREE.BoxGeometry(x, y, z).translate(px, py, pz);
+  }
+  function ring(radius: number, tube: number, plane: "xy" | "xz" | "yz" = "xy") {
+    const geometry = new THREE.TorusGeometry(radius, tube, 6, 28);
+    if (plane === "xz") geometry.rotateX(Math.PI / 2);
+    if (plane === "yz") geometry.rotateY(Math.PI / 2);
+    return geometry;
+  }
+  function role(mode: DroneMode, hull: THREE.BufferGeometry[], marks: THREE.BufferGeometry[]) {
+    const root = new THREE.Group(); root.name = `role-${mode}`;
+    root.add(new THREE.Mesh(merge(hull), metal), new THREE.Mesh(merge(marks), accent));
+    root.visible = mode === "pierce"; group.add(root);
+  }
+  // Pierce: a long, narrow tuning fork. Sweep: broad twin pods and a short nose.
+  role("pierce", [bar(0.28, 0.28, 1.7), bar(0.16, 0.32, 1.3, -0.38, 0, 0.12), bar(0.16, 0.32, 1.3, 0.38, 0, 0.12), bar(0.88, 0.18, 0.22, 0, 0, -0.62)],
+    [bar(0.09, 0.12, 1.5, -0.39, 0.2, 0.2), bar(0.09, 0.12, 1.5, 0.39, 0.2, 0.2), ring(0.23, 0.04).translate(0, 0, 0.88)]);
+  role("sweep", [bar(1.95, 0.18, 0.36, 0, 0, -0.18), bar(0.42, 0.48, 0.74, -0.76), bar(0.42, 0.48, 0.74, 0.76), bar(0.42, 0.3, 0.8)],
+    [ring(0.2, 0.06).translate(-0.76, 0, 0.4), ring(0.2, 0.06).translate(0.76, 0, 0.4), bar(1.92, 0.08, 0.08, 0, 0.14, -0.3)]);
+  // Stasis: three-axis cage, with no forward barrel or firing eye.
+  role("stasis", [ring(0.76, 0.055), ring(0.76, 0.055, "xz"), ring(0.76, 0.055, "yz"), new THREE.SphereGeometry(0.28, 12, 8)],
+    [ring(0.56, 0.055, "xz"), ...[-1, 1].flatMap(side => [new THREE.OctahedronGeometry(0.14).translate(side * 0.76, 0, 0), new THREE.OctahedronGeometry(0.14).translate(0, side * 0.76, 0), new THREE.OctahedronGeometry(0.14).translate(0, 0, side * 0.76)])]);
+  // Halo: a radial pincushion, recognizable from any aim angle.
+  const haloHull: THREE.BufferGeometry[] = [new THREE.OctahedronGeometry(0.47)];
+  const haloMarks: THREE.BufferGeometry[] = [ring(0.46, 0.05, "xz")];
+  for (let i = 0; i < 6; i++) {
+    const angle = i / 6 * Math.PI * 2;
+    haloHull.push(new THREE.ConeGeometry(0.13, 0.64, 5).translate(0, 0.64, 0).rotateZ(angle));
+    haloMarks.push(new THREE.OctahedronGeometry(0.095).translate(Math.sin(angle) * 0.93, Math.cos(angle) * 0.93, 0));
+  }
+  haloHull.push(new THREE.ConeGeometry(0.13, 0.64, 5).translate(0, 0.64, 0).rotateX(Math.PI / 2), new THREE.ConeGeometry(0.13, 0.64, 5).translate(0, 0.64, 0).rotateX(-Math.PI / 2));
+  role("halo", haloHull, haloMarks);
+  // Pin: asymmetric sight rail above a long cannon, visually distinct from the fork.
+  role("pin", [bar(0.46, 0.4, 0.68, 0, 0, -0.3), new THREE.CylinderGeometry(0.09, 0.13, 1.48, 8).rotateX(Math.PI / 2).translate(0, 0, 0.52), bar(0.12, 0.5, 0.15, 0, 0.34, -0.25), bar(0.19, 0.13, 0.75, 0, 0.57, -0.02), bar(0.8, 0.12, 0.24, 0, 0, -0.52)],
+    [ring(0.115, 0.045).translate(0, 0, 1.27), bar(0.1, 0.09, 0.74, 0, 0.69, -0.02), bar(0.8, 0.07, 0.1, 0, 0.11, -0.52)]);
+  group.userData.mode = "pierce"; group.userData.accent = accent;
   return group;
+}
+
+/** Use one role at a time; recoloring never leaves a weapon from the previous slot. */
+export function setDroneVisualMode(group: THREE.Group, mode: DroneMode) {
+  if (group.userData.mode !== mode) {
+    for (const child of group.children) child.visible = child.name === `role-${mode}`;
+    group.userData.mode = mode;
+  }
+  (group.userData.accent as THREE.MeshBasicMaterial).color.setHex(DRONE_SPECS[mode].color);
+}
+
+export function isFieldVisualMode(mode: DroneMode) { return mode === "stasis" || mode === "halo"; }
+
+/** The harmless check diagnoses Stasis only; Halo damage is deliberately held. */
+export function showFieldVisual(mode: DroneMode, fieldCheck: Run["fieldCheck"]) {
+  return isFieldVisualMode(mode) && (!fieldCheck || mode === "stasis");
 }
 
 /** Boundary samples share the simulation's radius. Dashed outlines are only a proposal;
  * an anchored field has solid outlines and a faint skin, never a larger glow volume. */
-export function buildStasisFieldVisual(preview = false) {
+export function buildStasisFieldVisual(preview = false, radius = STASIS_RADIUS, color: number = DRONE_SPECS.stasis.color) {
   const group = new THREE.Group();
-  const options = { color: DRONE_SPECS.stasis.color, transparent: true, opacity: preview ? 0.62 : 0.3, depthWrite: false, fog: false };
+  const options = { color, transparent: true, opacity: preview ? 0.62 : 0.3, depthWrite: false, fog: false };
   const boundary = preview
     ? new THREE.LineDashedMaterial({ ...options, dashSize: 0.55, gapSize: 0.4 })
     : new THREE.LineBasicMaterial(options);
   const points = Array.from({ length: 97 }, (_, i) => {
     const angle = i / 96 * Math.PI * 2;
-    return new THREE.Vector3(Math.cos(angle) * STASIS_RADIUS, Math.sin(angle) * STASIS_RADIUS, 0);
+    return new THREE.Vector3(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
   });
   const circle = new THREE.BufferGeometry().setFromPoints(points);
   for (let i = 0; i < 3; i++) {
@@ -200,10 +246,35 @@ export function buildStasisFieldVisual(preview = false) {
     if (i === 2) ring.rotation.y = Math.PI / 2;
     ring.computeLineDistances(); group.add(ring);
   }
-  const skin = preview ? null : glowMaterial(DRONE_SPECS.stasis.color, 0.012);
-  if (skin) group.add(new THREE.Mesh(new THREE.SphereGeometry(STASIS_RADIUS, 24, 16), skin));
+  const skin = preview ? null : glowMaterial(color, 0.012);
+  if (skin) group.add(new THREE.Mesh(new THREE.SphereGeometry(radius, 24, 16), skin));
   group.visible = false;
-  return { group, boundary, skin };
+  return { group, boundary, skin, radius };
+}
+
+/** A shared slot changes radius through world scale; every boundary remains exact. */
+export function setFieldVisualMode(field: ReturnType<typeof buildStasisFieldVisual>, mode: "stasis" | "halo") {
+  const spec = DRONE_SPECS[mode];
+  field.group.scale.setScalar(spec.radius / field.radius);
+  field.boundary.color.setHex(spec.color); field.skin?.color.setHex(spec.color);
+}
+
+/** An empty setup has no firing event. The pilot weapon remains unchanged in combat. */
+export function showPilotBeam(run: Pick<Run, "phase" | "fieldCheck" | "rest" | "waveIndex" | "enemies">) {
+  return run.phase !== "title" && !run.fieldCheck && (!(run.rest > 0 || run.waveIndex < 0) || run.enemies.some(enemy => enemy.alive));
+}
+
+/** Pin is an instant impact with a short tracer; it never draws a standing beam. */
+export function syncPinTracer(mesh: THREE.Mesh, drone: Run["drones"][number], hidden = false) {
+  const target = drone.shotTarget;
+  mesh.visible = !hidden && drone.shotFlash > 0 && !!target;
+  if (!mesh.visible || !target) return;
+  const x = target.x - drone.x, y = target.y - drone.y, z = target.z - drone.z;
+  const length = Math.hypot(x, y, z);
+  mesh.position.set(drone.x, drone.y, drone.z); aimAlong(mesh, x, y, z);
+  mesh.scale.set(0.065, 0.065, length);
+  const material = mesh.material as THREE.MeshBasicMaterial;
+  material.color.setHex(DRONE_SPECS.pin.color); material.opacity = 0.8 * Math.min(1, drone.shotFlash / 0.18);
 }
 
 type EnemyGeometry = { hull: THREE.BufferGeometry; accent: THREE.BufferGeometry };
@@ -434,7 +505,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   }
   const slowBracketGeometry = mergeGeometries(bracketParts)!;
   bracketParts.forEach(part => part.dispose());
-  const slowBrackets = new THREE.InstancedMesh(slowBracketGeometry, glowMaterial(DRONE_SPECS.stasis.color, 0.92), 256);
+  const slowBrackets = new THREE.InstancedMesh(slowBracketGeometry, glowMaterial(0xffffff, 0.92), 256);
   const wispTetherPos = new Float32Array(64 * 6);
   const wispTetherGeo = new THREE.BufferGeometry();
   wispTetherGeo.setAttribute("position", new THREE.BufferAttribute(wispTetherPos, 3).setUsage(THREE.DynamicDrawUsage));
@@ -595,7 +666,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   function syncCoverage(run: Run, preview: ReturnType<typeof getPlacementPreview>) {
     const batches: CoverageBatch[] = [];
     if (overview || run.rest > 0 || run.expand > 0.05 || Math.abs(run.shift) > 0.05) {
-      for (const drone of run.drones.filter(d => !run.fieldCheck || d.mode === "stasis")) batches.push({ segments: (drone.mode === "stasis" ? getFieldCoverage(run, drone) : getBeamCoverage(run, droneBeam(drone))).segments, color: DRONE_SPECS[drone.mode].color, width: 0.85 });
+      for (const drone of run.drones.filter(d => !run.fieldCheck || showFieldVisual(d.mode, run.fieldCheck))) batches.push({ segments: getDroneCoverage(run, drone).segments, color: DRONE_SPECS[drone.mode].color, width: 0.85 });
     }
     if (run.phase !== "title" && !overview && !run.fieldCheck) batches.push({ segments: preview.segments, color: DRONE_SPECS[run.droneMode].color, width: 2.2 });
     coverage.sync(batches);
@@ -652,7 +723,10 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       _dummy.quaternion.copy(camera.quaternion);
       if (enemy.speedScale < 1) {
         _dummy.scale.setScalar(enemy.radius + 0.3); _dummy.updateMatrix();
-        slowBrackets.setMatrixAt(slowCount++, _dummy.matrix);
+        slowBrackets.setMatrixAt(slowCount, _dummy.matrix);
+        _color.setHex(enemy.speedScale <= STASIS_SPEED_SCALE ? DRONE_SPECS.stasis.color : DRONE_SPECS.pin.color);
+        slowBrackets.setColorAt(slowCount++, _color);
+        _color.setHex(enemyColor); if (enemy.hit) _color.multiplyScalar(1.2);
       }
       const haloSize = enemy.kind === "carrier" ? 6 : enemy.kind === "barge" ? 3.8 : enemy.kind === "wisp" ? 2.8 : 2.5;
       _dummy.scale.set(haloSize, haloSize, 1); _dummy.updateMatrix(); enemyHalos.setMatrixAt(total, _dummy.matrix); enemyHalos.setColorAt(total, _color);
@@ -676,6 +750,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
     }
     for (const mesh of [enemyHalos, enemyTrails]) { mesh.count = total; mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true; }
     slowBrackets.count = slowCount; slowBrackets.instanceMatrix.needsUpdate = true;
+    if (slowBrackets.instanceColor) slowBrackets.instanceColor.needsUpdate = true;
     wispTetherGeo.setDrawRange(0, wispCount * 2); wispTetherGeo.attributes.position!.needsUpdate = true;
     wispFootprints.count = wispCount; wispFootprints.instanceMatrix.needsUpdate = true;
   }
@@ -708,7 +783,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       ship.getObjectByName("glow")?.scale.set(1, 1, 0.8 + Math.max(0, run.thrustVisual) * 2);
       const playerBeam: Beam = { x: run.ship.x + run.aimx * 1.15, y: run.ship.y + run.aimy * 1.15, z: run.ship.z + run.aimz * 1.15, dx: run.aimx, dy: run.aimy, dz: run.aimz, range: BEAM_RANGE, radius: SHIP_RADIUS, dps: SHIP_DPS, pierces: true };
       placeBeam(beams[0]!, playerBeam, 0xf5f8e8, run.shipHitting, run);
-      beams[0]!.visible = run.phase !== "title" && !run.fieldCheck;
+      beams[0]!.visible = showPilotBeam(run);
       const selectedDrone = run.drones.find(drone => drone.id === run.selectedDroneId);
       selectedDroneRing.visible = !!selectedDrone && (run.rest > 0 || run.waveIndex < 0) && run.phase !== "title";
       if (selectedDrone) {
@@ -719,16 +794,21 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         const drone = run.drones[i], mesh = drones[i]!, beam = beams[i + 1]!;
         const field = fields[i]!;
         const relocating = !!drone && run.repositionId === drone.id;
-        const fieldOccupied = !!drone && drone.mode === "stasis" && run.enemies.some(enemy => enemy.alive && insideStasis(drone, enemy));
-        field.group.visible = !!drone && drone.mode === "stasis";
-        if (drone?.mode === "stasis") {
+        const fieldMode = drone?.mode === "halo" ? "halo" : "stasis";
+        const fieldOccupied = !!drone && isFieldVisualMode(drone.mode) && run.enemies.some(enemy => enemy.alive && insideSphere(drone, enemy, DRONE_SPECS[drone.mode].radius));
+        field.group.visible = !!drone && showFieldVisual(drone.mode, run.fieldCheck);
+        if (drone && isFieldVisualMode(drone.mode)) {
+          setFieldVisualMode(field, fieldMode);
           field.group.position.set(drone.x, drone.y, drone.z);
           field.boundary.opacity = relocating ? 0.14 : fieldOccupied ? 0.58 : 0.3;
           field.skin!.opacity = relocating ? 0.005 : fieldOccupied ? 0.022 : 0.012;
         }
         if (!drone) { mesh.visible = false; beam.visible = false; droneShells[i]!.visible = false; targetRings[i]!.visible = false; continue; }
         const color = DRONE_SPECS[drone.mode].color;
-        mesh.visible = true; mesh.position.set(drone.x, drone.y, drone.z); aimAlong(mesh, drone.ax, drone.ay, drone.az);
+        mesh.visible = true; mesh.position.set(drone.x, drone.y, drone.z);
+        setDroneVisualMode(mesh, drone.mode);
+        if (isFieldVisualMode(drone.mode)) mesh.quaternion.identity();
+        else aimAlong(mesh, drone.ax, drone.ay, drone.az);
         if (mesh.userData.relocating !== relocating) {
           mesh.traverse(object => {
             if (!(object instanceof THREE.Mesh)) return;
@@ -747,22 +827,23 @@ export function createWorld(canvas: HTMLCanvasElement): World {
           });
           mesh.userData.relocating = relocating;
         }
-        const iris = mesh.getObjectByName("iris") as THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
-        iris.material.color.setHex(color); iris.rotation.z = elapsed * (reduce ? 0 : 0.3);
-        iris.scale.setScalar(drone.mode === "sweep" ? 1.25 : 1);
-        mesh.getObjectByName("eye")?.scale.setScalar(fieldOccupied || drone.hit ? 1.6 : 1);
-        if (drone.mode === "stasis") { beam.visible = false; droneShells[i]!.visible = false; targetRings[i]!.visible = false; }
-        else if (run.fieldCheck) { beam.visible = false; droneShells[i]!.visible = false; targetRings[i]!.visible = false; }
-        else placeBeam(beam, droneBeam(drone), color, drone.hit, run, i);
+        if (isFieldVisualMode(drone.mode) || run.fieldCheck) {
+          beam.visible = false; droneShells[i]!.visible = false; targetRings[i]!.visible = false;
+        } else if (drone.mode === "pin") {
+          syncPinTracer(beam, drone); droneShells[i]!.visible = false; targetRings[i]!.visible = false;
+        } else placeBeam(beam, droneBeam(drone), color, drone.hit, run, i);
       }
+
       const showPreview = run.phase === "play" && !overview && !run.fieldCheck;
       const previewColor = DRONE_SPECS[run.droneMode].color;
-      ghost.visible = showPreview; previewVolume.visible = showPreview && run.droneMode !== "stasis";
-      fieldPreview.group.visible = showPreview && run.droneMode === "stasis";
+      ghost.visible = showPreview; previewVolume.visible = showPreview && !isFieldVisualMode(run.droneMode);
+      fieldPreview.group.visible = showPreview && isFieldVisualMode(run.droneMode);
+      if (isFieldVisualMode(run.droneMode)) setFieldVisualMode(fieldPreview, run.droneMode === "halo" ? "halo" : "stasis");
       fieldPreview.group.position.set(preview.drone.x, preview.drone.y, preview.drone.z);
       if (showPreview) {
-        ghost.position.set(preview.drone.x, preview.drone.y, preview.drone.z); aimAlong(ghost, preview.drone.ax, preview.drone.ay, preview.drone.az);
-        const iris = ghost.getObjectByName("iris") as THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>; iris.material.color.setHex(previewColor);
+        ghost.position.set(preview.drone.x, preview.drone.y, preview.drone.z); setDroneVisualMode(ghost, run.droneMode);
+        if (isFieldVisualMode(run.droneMode)) ghost.quaternion.identity();
+        else aimAlong(ghost, preview.drone.ax, preview.drone.ay, preview.drone.az);
         previewVolume.position.set(preview.beam.x, preview.beam.y, preview.beam.z); aimAlong(previewVolume, preview.beam.dx, preview.beam.dy, preview.beam.dz);
         volume.scale.set(preview.beam.radius, preview.beam.radius, preview.beam.range); volumeMat.color.setHex(previewColor);
         hoops.forEach((hoop, i) => { hoop.position.z = i * preview.beam.range / 4; hoop.scale.setScalar(preview.beam.radius); hoop.material.color.setHex(previewColor); });

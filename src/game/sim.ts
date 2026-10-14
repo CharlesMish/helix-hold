@@ -1,5 +1,7 @@
 import { clamp, forwardOf, hypot3, type Vec3 } from "./math";
-import { beamContact, DRONE_SPECS, insideStasis, STASIS_SPEED_SCALE, selectBeamTargets, type Beam, type DroneMode } from "./combat";
+import { beamContact, DRONE_SPECS, insideSphere, insideStasis, STASIS_RADIUS, STASIS_SPEED_SCALE, PIN_DAMAGE, PIN_INTERVAL, PIN_SLOW_DURATION, PIN_SPEED_SCALE, PIN_FLASH_DURATION, selectBeamTargets, type Beam, type DroneMode } from "./combat";
+import { getAnchorCost } from "./economy";
+export { anchorCost, getAnchorCost } from "./economy";
 import {
   CORE,
   HANGAR,
@@ -63,10 +65,12 @@ export type Enemy = {
   hp: number;
   maxHp: number;
   speed: number;
-  /** Current field multiplier; speed itself always remains the unmodified base speed. */
+  /** Strongest current field/timed multiplier; speed remains the unmodified base speed. */
   speedScale: number;
   /** Count an enemy once when any anchored field has actually slowed it. */
   stasisSeen: boolean;
+  /** Timed Pin slow persists after leaving its firing line; refreshed, never stacked. */
+  pinSlowRemaining: number;
   radius: number;
   reward: number;
   leak: number;
@@ -90,6 +94,9 @@ export type Drone = {
   kills: number;
   damage: number;
   hit: boolean;
+  shotCooldown: number;
+  shotFlash: number;
+  shotTarget: Vec3 | null;
   bx: number;
   by: number;
   bz: number;
@@ -191,10 +198,6 @@ export type Run = {
   save?: SaveData;
 };
 
-export function anchorCost(droneCount: number): number {
-  return 20 + droneCount * 12;
-}
-
 /** Only arenas authored for scrap-funded growth omit the ordinary fleet limit. */
 export function getDroneLimit(level: LevelDef): number {
   return level.fleetGrowth === "scrap" ? Infinity : MAX_DRONES;
@@ -202,6 +205,17 @@ export function getDroneLimit(level: LevelDef): number {
 
 export function hasStasis(level: LevelDef): boolean {
   return !!(level.stasisAvailable || level.experiment);
+}
+
+export function availableDroneModes(level: LevelDef): DroneMode[] {
+  const modes: DroneMode[] = ["pierce", "sweep"];
+  if (hasStasis(level)) modes.push("stasis");
+  if (level.droneRoster === "expanded") modes.push("halo", "pin");
+  return modes;
+}
+
+export function isModeAvailable(level: LevelDef, mode: DroneMode): boolean {
+  return availableDroneModes(level).includes(mode);
 }
 
 /** First authored opening, in the same 1-based numbering shown to the player. */
@@ -241,6 +255,7 @@ function emptyEnemy(): Enemy {
     speed: 1,
     speedScale: 1,
     stasisSeen: false,
+    pinSlowRemaining: 0,
     radius: 1,
     reward: 0,
     leak: 0,
@@ -314,6 +329,7 @@ function spawnEnemy(run: Run, kind: Kind, pathIndex: number, speedMul = 1, hpMul
   slot.speed = spec.speed * run.level.speedMul * speedMul;
   slot.speedScale = 1;
   slot.stasisSeen = false;
+  slot.pinSlowRemaining = 0;
   slot.radius = spec.radius;
   slot.reward = spec.reward;
   slot.leak = spec.leak;
@@ -450,14 +466,14 @@ export function getBeamCoverage(run: Pick<Run, "paths">, beam: Beam): BeamCovera
 }
 
 /** Sample nominal route centers; Wisps are tested at their actual drifting centers in combat. */
-export function getFieldCoverage(run: Pick<Run, "paths">, center: Vec3): BeamCoverage {
+export function getFieldCoverage(run: Pick<Run, "paths">, center: Vec3, radius = STASIS_RADIUS): BeamCoverage {
   const segments: CoverageSegment[] = [];
   let metres = 0;
   run.paths.forEach((path, pathIndex) => {
     const count = Math.ceil(path.length / 0.5), ds = path.length / count;
     let segment: CoverageSegment | undefined;
     for (let i = 0; i < count; i++) {
-      if (insideStasis(center, path.pointAt((i + 0.5) * ds))) {
+      if (insideSphere(center, path.pointAt((i + 0.5) * ds), radius)) {
         if (!segment) { segment = { pathIndex, points: [path.pointAt(i * ds)], metres: 0 }; segments.push(segment); }
         segment.points.push(path.pointAt((i + 1) * ds)); segment.metres += ds; metres += ds;
       } else segment = undefined;
@@ -465,12 +481,23 @@ export function getFieldCoverage(run: Pick<Run, "paths">, center: Vec3): BeamCov
   });
   return { segments, metres, sampleRadius: 0 };
 }
-export function enemySpeedScale(run: Pick<Run, "drones">, point: Vec3): number {
-  return run.drones.some(d => d.mode === "stasis" && insideStasis(d, point)) ? STASIS_SPEED_SCALE : 1;
+export function getDroneCoverage(run: Pick<Run, "paths">, drone: Drone): BeamCoverage {
+  return drone.mode === "stasis" || drone.mode === "halo"
+    ? getFieldCoverage(run, drone, DRONE_SPECS[drone.mode].radius)
+    : getBeamCoverage(run, droneBeam(drone));
+}
+
+function insideAnyStasis(run: Pick<Run, "drones">, point: Vec3): boolean {
+  return run.drones.some(d => d.mode === "stasis" && insideStasis(d, point));
+}
+
+export function enemySpeedScale(run: Pick<Run, "drones">, point: Vec3 & { pinSlowRemaining?: number }): number {
+  const fieldScale = insideAnyStasis(run, point) ? STASIS_SPEED_SCALE : 1;
+  return Math.min(fieldScale, (point.pinSlowRemaining ?? 0) > 0 ? PIN_SPEED_SCALE : 1);
 }
 
 function noteStasisContact(run: Run, enemy: Enemy): void {
-  if (enemy.speedScale >= 1 || enemy.stasisSeen) return;
+  if (enemy.stasisSeen || !insideAnyStasis(run, enemy)) return;
   enemy.stasisSeen = true;
   run.stasisTouched += 1;
 }
@@ -524,10 +551,11 @@ export function getStasisReport(run: Run, build: string) {
     })),
     enemies: alive.map(e => ({ kind: e.kind, lane: e.pathIndex + 1, center: center(e), distanceAlongRoute: e.dist,
       baseSpeed: e.speed, actualScale: e.speedScale, expectedScale: enemySpeedScale(run, e), effectiveSpeed: e.speed * e.speedScale,
+      pinSlowRemaining: e.pinSlowRemaining,
       nearestFieldDistance: fields.length ? Math.min(...fields.map(d => Math.hypot(d.x - e.x, d.y - e.y, d.z - e.z))) : null,
       insideFieldIds: fields.filter(d => insideStasis(d, e)).map(d => d.id), stasisSeen: e.stasisSeen,
     })),
-    contact: { alive: alive.length, slowedNow: alive.filter(e => e.speedScale < 1).length,
+    contact: { alive: alive.length, slowedNow: alive.filter(e => insideAnyStasis(run, e)).length,
       geometricallyInsideNow: alive.filter(e => fields.some(d => insideStasis(d, e))).length,
       touched: run.stasisTouched, enemySeconds: run.stasisExposure },
   };
@@ -539,8 +567,8 @@ function proposedDrone(run: Run): Drone {
     id: run.nextDroneId,
     mode: run.droneMode,
     dps: run.droneMode === "sweep" ? run.level.sweepDps ?? DRONE_SPECS.sweep.dps : DRONE_SPECS[run.droneMode].dps,
-    paid: anchorCost(run.drones.length),
-    kills: 0, damage: 0, hit: false,
+    paid: getAnchorCost(run),
+    kills: 0, damage: 0, hit: false, shotCooldown: 0, shotFlash: 0, shotTarget: null,
     ...moving,
     bx: run.ship.x, by: run.ship.y, bz: run.ship.z,
     fx: run.aimx, fy: run.aimy, fz: run.aimz,
@@ -552,7 +580,7 @@ function proposedDrone(run: Run): Drone {
 export function getPlacementPreview(run: Run): PlacementPreview {
   const drone = proposedDrone(run);
   const beam = droneBeam(drone);
-  let coverage = drone.mode === "stasis" ? getFieldCoverage(run, drone) : getBeamCoverage(run, beam);
+  let coverage = getDroneCoverage(run, drone);
   if (run.level.id === "tutorial") {
     // Match the scene's route announcements: introduce the next route during
     // setup, then retain it. A dormant lesson must not look like useful coverage.
@@ -567,40 +595,72 @@ export function getPlacementPreview(run: Run): PlacementPreview {
   return { ...coverage, ...getCoverageTiming(run, coverage), drone, beam, status: placementStatus(run) };
 }
 
+/** All damage sources credit only remaining hull and award a kill exactly once. */
+function damageEnemy(run: Run, enemy: Enemy, amount: number, drone?: Drone): void {
+  if (!enemy.alive || amount <= 0) return;
+  const damage = Math.min(enemy.hp, amount);
+  enemy.hp -= damage;
+  enemy.hit = true;
+  if (drone) {
+    drone.hit = true;
+    drone.damage += damage;
+  } else run.shipHitting = true;
+  if (run.fxCooldown <= 0) {
+    run.fx.push({ type: "hit", x: enemy.x, y: enemy.y, z: enemy.z });
+    run.fxCooldown = 0.07;
+  }
+  if (enemy.hp <= 0) {
+    if (drone) drone.kills += 1;
+    killEnemy(run, enemy);
+  }
+}
+
 function weapons(run: Run, dt: number) {
   for (const e of run.enemies) e.hit = false;
   for (const d of run.drones) d.hit = false;
   run.shipHitting = false;
   if (run.phase !== "play") return;
-  const shooters: { beam: Beam; drone?: Drone }[] = [{
-    beam: {
+  const shipBeam: Beam = {
       x: run.ship.x + run.aimx * 1.15,
       y: run.ship.y + run.aimy * 1.15,
       z: run.ship.z + run.aimz * 1.15,
       dx: run.aimx, dy: run.aimy, dz: run.aimz,
       dps: SHIP_DPS, radius: SHIP_RADIUS, range: BEAM_RANGE, pierces: true,
-    },
-  }];
-  for (const drone of run.drones) if (drone.mode !== "stasis") shooters.push({ beam: droneBeam(drone), drone });
-  for (const shooter of shooters) {
-    const { beam, drone } = shooter;
-    const hits = selectBeamTargets(beam, run.enemies.filter((e) => e.alive));
-    for (const e of hits) {
-      const damage = Math.min(e.hp, beam.dps * dt);
-      e.hp -= damage;
-      e.hit = true;
-      if (drone) {
-        drone.hit = true;
-        drone.damage += damage;
-      } else run.shipHitting = true;
-      if (run.fxCooldown <= 0) {
-        run.fx.push({ type: "hit", x: e.x, y: e.y, z: e.z });
-        run.fxCooldown = 0.07;
+  };
+  for (const enemy of selectBeamTargets(shipBeam, run.enemies.filter(e => e.alive))) {
+    damageEnemy(run, enemy, shipBeam.dps * dt);
+  }
+  for (const drone of run.drones) {
+    if (drone.mode === "stasis") continue;
+    if (drone.mode === "halo") {
+      for (const enemy of run.enemies) {
+        if (enemy.alive && insideSphere(drone, enemy, DRONE_SPECS.halo.radius)) {
+          damageEnemy(run, enemy, DRONE_SPECS.halo.dps * dt, drone);
+        }
       }
-      if (e.hp <= 0) {
-        if (drone) drone.kills += 1;
-        killEnemy(run, e);
+      continue;
+    }
+    const beam = droneBeam(drone);
+    if (drone.mode === "pin") {
+      drone.shotCooldown = Math.max(0, (drone.shotCooldown ?? 0) - dt);
+      drone.shotFlash = Math.max(0, (drone.shotFlash ?? 0) - dt);
+      if (drone.shotFlash === 0) drone.shotTarget = null;
+      if (drone.shotCooldown > 1e-9) continue;
+      const target = selectBeamTargets(beam, run.enemies.filter(e => e.alive))[0];
+      if (!target) continue;
+      // A ready weapon fires once. Time spent without a target never banks a burst.
+      drone.shotCooldown = PIN_INTERVAL;
+      drone.shotFlash = PIN_FLASH_DURATION;
+      drone.shotTarget = { x: target.x, y: target.y, z: target.z };
+      damageEnemy(run, target, PIN_DAMAGE, drone);
+      if (target.alive) {
+        target.pinSlowRemaining = PIN_SLOW_DURATION;
+        target.speedScale = enemySpeedScale(run, target);
       }
+      continue;
+    }
+    for (const enemy of selectBeamTargets(beam, run.enemies.filter(e => e.alive))) {
+      damageEnemy(run, enemy, beam.dps * dt, drone);
     }
   }
   run.fxCooldown = Math.max(0, run.fxCooldown - dt);
@@ -641,7 +701,7 @@ function updateWaves(run: Run, dt: number) {
     } else {
       run.rest = 8;
       run.banner = run.waveMode === "manual" ? "Lane clear · launch when ready" : "Lane clear  8";
-      const cost = anchorCost(run.drones.length);
+      const cost = getAnchorCost(run);
       const placement = run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
         ? `Next drone costs ${cost} scrap. ` : "Adjust your defense. ";
       run.hint = placement + (run.waveMode === "manual"
@@ -657,8 +717,13 @@ function moveEnemies(run: Run, dt: number) {
     const path = run.paths[e.pathIndex] ?? run.paths[0]!;
     e.speedScale = enemySpeedScale(run, e);
     noteStasisContact(run, e);
-    if (e.speedScale < 1) run.stasisExposure += dt;
-    e.dist += e.speed * e.speedScale * dt;
+    const inField = insideAnyStasis(run, e);
+    if (inField) run.stasisExposure += dt;
+    const fieldScale = inField ? STASIS_SPEED_SCALE : 1;
+    const pinTime = Math.min(dt, e.pinSlowRemaining ?? 0);
+    // A timed slow expiring partway through this step affects only that fraction.
+    e.dist += e.speed * (pinTime * Math.min(fieldScale, PIN_SPEED_SCALE) + (dt - pinTime) * fieldScale);
+    e.pinSlowRemaining = Math.max(0, (e.pinSlowRemaining ?? 0) - dt);
     if (e.dist >= path.length - 0.35) {
       if (run.fieldCheck) {
         e.dist %= Math.max(0.01, path.length - 0.35);
@@ -681,12 +746,14 @@ function moveEnemies(run: Run, dt: number) {
 export function placementStatus(run: Run): string | null {
   if (run.fieldCheck) return "End the field check before anchoring";
   if (run.phase !== "play") return "Resume flight to anchor";
-  if (run.droneMode === "stasis" && !hasStasis(run.level)) return "Stasis is available in Carrier Test Flight and Split Crown";
+  if (!isModeAvailable(run.level, run.droneMode)) return run.droneMode === "stasis"
+    ? "Stasis is available in Carrier Test Flight and Split Crown"
+    : "Halo and Pin are available in Split Crown";
   const moving = run.drones.find(d => d.id === run.repositionId);
   if (run.repositionId !== null && (!moving || run.rest <= 0)) return "Reposition only during setup";
   if (!moving) {
     if (run.drones.length >= getDroneLimit(run.level)) return "Lattice is full";
-    const cost = anchorCost(run.drones.length);
+    const cost = getAnchorCost(run);
     if (run.scrap < cost) return `Need ${cost} scrap to anchor`;
   }
   const hangar = hangarOf(run);

@@ -1,4 +1,4 @@
-# Helix Hold · Sightline Lab (0.7.0)
+# Helix Hold · Sightline Lab (0.8.0)
 
 A 3D defense game in which placement is piloting. Fly into a useful line, anchor a weaker drone there, and return to the launch cradle to build the next.
 
@@ -6,9 +6,12 @@ A 3D defense game in which placement is piloting. Fly into a useful line, anchor
 
 - **Plan & launch is the default.** Take unlimited time before every wave. Fly, aim, anchor and recall, then press Enter or Launch wave when ready.
 - **Auto waves** is optional in the observatory or Pause menu: 12 seconds before the first wave and 8 seconds between waves. The preference is remembered. Changing it does not interrupt a wave already in flight.
-- Start with 60 scrap. Drones cost 20, 32, 44, …; the first two are funded.
+- Start with 60 scrap. Two opening Pierces cost 20 + 32. Crown now prices each drone type independently; other arenas use the shared 20, 32, 44, … curve.
 - **Pierce:** a long narrow beam that damages every enemy it intersects.
 - **Sweep:** a shorter, wider beam that damages only its nearest target.
+- **Stasis:** a passive 6m-radius slowing sphere, available in Crown and the lab.
+- **Halo (Crown):** a passive 5m-radius sphere dealing 18 DPS to every enemy inside.
+- **Pin (Crown):** an aimed shot every 1.6s, hitting the nearest target for 24 damage plus a brief 35% slow.
 - Coverage highlights show potential contact with shard-sized enemies using the combat hit test. In Split Crown, the main number and bar count the upcoming wave's routes during setup, or routes with traffic still pending/alive during combat; future-wave coverage is listed separately. Hover still shows every route. Exposure time, Sweep obstruction and Wisp weaving still matter.
 - Recall the most recent drone for its original purchase price. During setup, Survey lets you select any drone and **Reposition** it for free, preserving its type, paid value and contribution. Anchor commits; Cancel keeps the old placement.
 - Survey pauses the simulation and shows the whole 3D arena.
@@ -16,21 +19,23 @@ A 3D defense game in which placement is piloting. Fly into a useful line, anchor
 
 **Flight School** combines two Glass Needle waves with three Twin Ribbon waves. **Shear Lane** keeps its three-route geometry with a slower short dive. **Orbital Garden** explores two recognizable tilted rings and their inward exits. After clearing Shear or Orbital’s original five waves, choose **Continue to waves 6–8** to keep your fleet, scrap and core for three authored extra waves. Your five-wave score is recorded before continuing; the extension cannot overwrite it. Flight School stays five waves and the lab stays three.
 
-Desktop: W/S thrust/reverse; A/D or left/right arrows yaw; mouse or up/down arrows aim; Space boost; F anchor; 1/2 drone mode; R recall; Shift fan; Q/E slide; Tab survey; Tab/Shift+Tab navigate Survey controls; Esc resume from Survey or pause flight; C cancel a move; Enter launch prepared wave, or end an active field check. Click the sky to capture mouse aim. Keyboard aiming remains usable without pointer lock.
+Desktop: W/S thrust/reverse; A/D or left/right arrows yaw; mouse or up/down arrows aim; Space boost; F anchor; 1/2 beam mode, 3 Stasis where offered, 4 Halo and 5 Pin in Crown; R recall; Shift fan; Q/E slide; Tab survey; Tab/Shift+Tab navigate Survey controls; Esc resume from Survey or pause flight; C cancel a move; Enter launch prepared wave, or end an active field check. Click the sky to capture mouse aim. Keyboard aiming remains usable without pointer lock.
 
 Touch: left stick aims, right stick flies forward/backward. Fan and Slide are toggles to leave both thumbs available. Anchor and Recall sit between the sticks. Survey pauses time.
 
-Your hull does not collide with enemies or ribbons. Lasers use a finite cylindrical hit volume with each enemy's spherical collision radius. Barges and Shards stay on their routes; Wisps deliberately drift and have faint tethers to the ribbon. This is continuous damage, not projectile simulation; see `src/game/combat.ts`.
+Your hull does not collide with enemies or ribbons. Lasers use a finite cylindrical hit volume with each enemy's spherical collision radius. Barges and Shards stay on their routes; Wisps deliberately drift and have faint tethers to the ribbon. Pierce/Sweep and Halo apply continuous damage; Pin applies discrete instantaneous shots, with no projectile flight-time simulation. See `src/game/combat.ts`.
 
 ## Split Crown
 
 Choose **Split Crown** for eight authored waves across two separated helix districts. A/B are the west crown and coil; C/D are their eastern counterparts. They first open in waves 1/2/3/5. Gate **E** is reserved for one final carrier in wave 8. Its distinct transfer visits useful defense neighborhoods in both crowns and the lower approaches. It stays visible as a dashed route before opening.
 
-Stasis is available from setup, with the same 6m radius, half-speed effect, normal paid slot and no stacking. Sweep uses the regular 18 DPS here. Start with 60 scrap. **Crown has no fixed drone cap:** grow through the same rising scrap prices, adding Stasis when you can afford the next unit. Other arenas retain eight slots. Use free selected-drone repositioning between waves. Split Crown records its eight-wave score, then offers **Continue to waves 9–12** with your fleet, scrap and core. Four authored extra waves shift convoy pressure between crowns and coils, ending with a 2,916-hull carrier on E. The original wave-eight carrier remains 486 hull. The extension cannot overwrite the recorded eight-wave score.
+Stasis is available from setup, with the same passive 6m radius, half-speed effect, paid purchase and no stacking. Sweep uses the regular 18 DPS here. Start with 60 scrap. **Crown has no fixed drone cap:** grow through independent per-type prices. Buying Stasis does not raise the next Pierce price. Other arenas retain eight slots. Use free selected-drone repositioning between waves. Split Crown records its eight-wave score, then offers **Continue to waves 9–12** with your fleet, scrap and core. Four authored extra waves shift convoy pressure between crowns and coils, ending with a 2,916-hull carrier on E. The original wave-eight carrier remains 486 hull. The extension cannot overwrite the recorded eight-wave score.
+
+**Five distinct bodies:** Pierce fork, Sweep twin pods, Stasis cage, Halo spines and Pin cannon. Passive fields have no muzzle; the pilot beam is hidden during empty setup. Crown buttons show each role's price and owned count. See the [model roster](public/drone-roster.svg) and [current role/pricing study](docs/DRONE_ROLES_080.md). First prices are Pierce 20, Sweep 24, Stasis 32, Halo 44 and Pin 48; only purchases of that type raise its quote.
 
 **Show 8-wave gate plan** in the observatory or Survey reveals the full authored schedule, enemy counts and first arrival time after launch for each gate. The optional waves 9–12 have a separate forecast; continued Survey shows all twelve. Letters and route colors distinguish A–E. Two low crown platforms mark the districts without adding collision obstacles. The floating upper arches and their support lines were removed in v0.6.1 after screenshot feedback.
 
-`npm run trial:crown` retains the historical eight-drone comparisons and an ordinary-input opening. `npm run trial:crown-growth` tests normally funded larger fleets through twelve waves, including an automated pursuing pilot; `npm run study:crown-pilot` isolates the original short carrier encounter. See [funded growth and the long flight](docs/CROWN_GROWTH.md) for results and limits. In the historical trial, shared-line layouts finish with and without Stasis; one dedicated-line layout benefits from a late field and a free carrier-wave reposition. These establish feasibility and a useful tradeoff, not human difficulty or an optimal solution. Browser visuals remain unverified in this environment.
+`npm run trial:crown` retains the historical eight-drone comparisons and an ordinary-input opening. `npm run trial:crown-growth` tests normally funded larger fleets through twelve waves, including an automated pursuing pilot; `npm run study:crown-pilot` isolates the original short carrier encounter. Current funded roster results are in [the v0.8 role study](docs/DRONE_ROLES_080.md); `npm run trial:crown-roles` includes the Halo/Pin fleet. [The original growth note](docs/CROWN_GROWTH.md) is a v0.7 historical snapshot, whose stored figures use the old shared prices. In the historical trial, shared-line layouts finish with and without Stasis; one dedicated-line layout benefits from a late field and a free carrier-wave reposition. These establish feasibility and a useful tradeoff, not human difficulty or an optimal solution. Browser visuals remain unverified in this environment.
 
 ## Optional Carrier Test Flight
 
@@ -42,7 +47,7 @@ Established beams are quieter during combat; Survey, setup and lattice adjustmen
 
 ## Checking a field
 
-Charlie confirms the v0.5.1 live field effect works. The earlier persistent-zero session has no established cause; diagnostics remain available. With at least one anchored Stasis drone, choose **Test placed fields** during setup. Harmless blue targets loop along every real route; amber brackets mean actually slowed. There is no damage, weapon fire, wave advance or economy change. Only placed fields are shown. **End check** or **Enter** during flight returns to the original setup without launching its wave.
+Charlie confirms the v0.5.1 live field effect works. The earlier persistent-zero session has no established cause; diagnostics remain available. With at least one anchored Stasis drone, choose **Test Stasis fields** during setup. Harmless blue targets loop along every real route; amber brackets mean actually slowed. There is no damage, weapon fire, wave advance or economy change. Only anchored Stasis field boundaries and coverage are shown; Halo and Pin are held. **End check** or **Enter** during flight returns to the original setup without launching its wave.
 
 The field counter retains how many enemies have ever been affected in this flight (or check), alongside current slowed count. **Save field report** downloads game coordinates, build and membership/speed state for diagnosis. It sends nothing externally. Survey lists each selected anchored field's route coverage.
 
@@ -57,16 +62,16 @@ npm run build
 npm test
 ```
 
-`npm test` runs 58 deterministic simulation, revision, field-check, Split Crown, coverage, growth and renderer-allocation checks, including manual/automatic pacing, paused launch, group-specific speeds, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
+`npm test` runs 75 deterministic simulation, revision, field-check, Split Crown, coverage, growth and renderer-allocation checks, including manual/automatic pacing, paid per-type growth, discrete shot cadence, actual-3D fields, slow expiry, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
 
 ### Verification for this revision
 
 - TypeScript and production build checked as part of publication.
-- All 58 deterministic checks pass on Node 24.19.0. New checks cover growth past eight, continuation score integrity and real Three object allocations beyond the old visual limits. The historical guard was also verified under alternate exponentiation in v0.6.2; Node 20–22 were not available here.
+- All 75 deterministic checks pass on Node 24.19.0. New checks cover role damage/slow contracts, independent prices/refunds, five silhouettes and field/tracer presentation. Real Three object allocations cover 40 units and more than 4,096 highlight segments. The historical guard was also verified under alternate exponentiation in v0.6.2; Node 20–22 were not available here.
 - Geometry calculations place every opening gate inside desktop and 390×844 portrait camera views.
 - Enemy solid vertices fit their collision spheres; sampled Barge/Shard centers remain exactly on their paths.
 - Score migration preserves Shear across reordering and archives original Needle/Twin records.
-- Three funded idealized twelve-wave Crown layouts finish at 60/100/100 core. The two active-pilot cases reach the eastern crown before intercepting the final carrier. Earlier five-wave-arena extensions also have feasible idealized layouts. These are simulation cases, not human difficulty claims.
+- The current funded mixed 25-drone Crown fleet finishes twelve waves at 100 core with an automated pursuing pilot; Halo and Pin both contribute. Active Pierce and Pierce/Stasis controls also finish at 100 core. Earlier five-wave-arena extensions also have feasible idealized layouts. These are simulation cases, not human difficulty claims.
 - Browser suite and final appearance: **not executed for this revision**. The managed Sites environment lacks the required browser-control capability. Source and mathematical checks do not replace visual or human playtesting.
 
 The v0.6.2 review follow-up also adds Enter-to-end for the desktop field check, separates portrait Survey from the gate rows, and prepares browser assertions that poll actual state instead of assuming a fast renderer. See [review findings and limits](docs/REVIEW_FOLLOWUP_062.md).
@@ -80,7 +85,8 @@ The v0.6.2 review follow-up also adds Enter-to-end for the desktop field check, 
 - `src/game/HelixHold.tsx`: input, lifecycle, responsive HUD, guide and controls.
 - `src/game/save.ts`: arena-ID records and legacy migration.
 - `qa/simulation.mjs`: source-bundled simulation checks.
-- `docs/CROWN_GROWTH.md`: current funded growth, optional twelve-wave flight and active-pilot evidence.
+- `docs/DRONE_ROLES_080.md`: current roles, independent Crown pricing, studies and limits.
+- `docs/CROWN_GROWTH.md`: original v0.7 funded growth and active-pilot evidence.
 - `docs/SPLIT_CROWN.md`: original eight-wave arena, fifth route, measured contacts and historical defense trials.
 - `qa/crown-trial.mjs`: funded matched defenses and ordinary-input opening.
 - `docs/STASIS_REPORT_051.md`: historical live report, subsequent confirmation and diagnostic workflow.
