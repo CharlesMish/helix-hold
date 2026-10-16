@@ -52,7 +52,12 @@ export type LevelDef = {
   /** The Crown experiment introduces distinct specialist roles and independent prices. */
   droneRoster?: "expanded";
   dronePricing?: "per-type";
-  presentation?: "split-crown";
+  presentation?: "split-crown" | "protected-prism";
+  /** Optional spatial experiments keep their own stable identities and records. */
+  prototype?: "route-expansion" | "relay";
+  /** Holographic defended enclosure; each route ends at its own breach port. */
+  protectedVolume?: { center: Vec3; size: Vec3 };
+  startingScrap?: number;
   primaryPath?: number;
   sweepDps?: number;
   hpMul: number;
@@ -452,5 +457,98 @@ LEVELS.push({
     { chapter: "10 · Lower clamp", lesson: "The heavier convoys move to B and D. Upper Wisps split your attention, then a late Shard burst follows B. Long lower contact matters more than covering every gate once.", groups: [g("barge", 1, 5, 2, 1, 1, 1.6), g("barge", 3, 5, 2, 4, 1, 1.6), g("wisp", 0, 6, 1.25, 6, 1, 1.1), g("wisp", 2, 6, 1.25, 9, 1, 1.1), g("shard", 1, 6, 1.05, 18, 1, 1.15)] },
     { chapter: "11 · Crown exchange", lesson: "A west convoy overlaps a lower-east burst; the eastern convoy and west-coil Wisps follow. Watch both districts before committing your pilot to a chase. E's stronger carrier comes next.", groups: [g("barge", 0, 5, 2, 1, 1, 1.9), g("barge", 2, 5, 2, 10, 1, 1.9), g("shard", 3, 8, 1, 4, 1, 1.2), g("wisp", 1, 8, 1.2, 17, 1, 1.1)] },
     { chapter: "12 · The long pursuit", lesson: "A reinforced carrier takes E: about 3208 hull, 40 core on breach. Lower convoys and upper escorts overlap the pursuit. Keep both districts covered while chasing; your eight-wave result is already recorded.", groups: [g("carrier", 4, 1, 1, 1.5, 1, 6.6), g("barge", 1, 5, 2.1, 5, 1, 1.9), g("barge", 3, 5, 2.1, 12, 1, 1.9), g("wisp", 0, 6, 1.2, 8, 1, 1.1), g("wisp", 2, 6, 1.2, 18, 1, 1.1), g("shard", 0, 6, 1, 24, 1, 1.2)] },
+  ],
+});
+
+/** A coil joins one box-face port, without funneling through the old central core.
+ * The transfer starts along the coil tangent. Its last control point stays outside
+ * the port face, so the route reaches the protected volume only at its endpoint.
+ */
+function frontierCoil(o: {
+  center: Vec3; rx: number; rz: number; drop: number;
+  turns: number; endAngle: number; port: Vec3; approach: Vec3;
+}): (t: number) => Vec3 {
+  const coil = (u: number): Vec3 => {
+    const angle = o.endAngle + (u - 1) * o.turns * Math.PI * 2;
+    return { x: o.center.x + o.rx * Math.cos(angle), y: o.center.y - o.drop * u, z: o.center.z + o.rz * Math.sin(angle) };
+  };
+  const end = coil(1);
+  const tangent = { x: -o.rx * Math.sin(o.endAngle) * o.turns * Math.PI * 2, y: -o.drop, z: o.rz * Math.cos(o.endAngle) * o.turns * Math.PI * 2 };
+  const length = Math.hypot(tangent.x, tangent.y, tangent.z);
+  const transfer = arcSample([[
+    end,
+    { x: end.x + tangent.x / length * 5, y: end.y + tangent.y / length * 5, z: end.z + tangent.z / length * 5 },
+    o.approach,
+    o.port,
+  ]]);
+  return t => t <= 0.75 ? coil(t / 0.75) : transfer((t - 0.75) / 0.25);
+}
+
+/** The third coil winds around a horizontal axis. Its near-west quarter can borrow
+ * existing coverage, while its northern entrance and roofward exit need new lines.
+ */
+function frontierCrossCoil(t: number): Vec3 {
+  const coil = (u: number): Vec3 => {
+    const angle = (u - 1) * 1.15 * Math.PI * 2;
+    return { x: -4 + 14 * Math.cos(angle), y: 29 + 7 * Math.sin(angle), z: -30 + 20 * u };
+  };
+  const end = coil(1);
+  const length = Math.hypot(7 * 1.15 * Math.PI * 2, 20);
+  const transfer = arcSample([[
+    end,
+    { x: end.x, y: end.y + 7 * 1.15 * Math.PI * 2 / length * 5, z: end.z + 20 / length * 5 },
+    { x: 0, y: 18, z: -11 },
+    { x: 0, y: 16, z: -6 },
+  ]]);
+  return t <= 0.75 ? coil(t / 0.75) : transfer((t - 0.75) / 0.25);
+}
+
+const frontierVolume = { center: { x: 0, y: 10, z: 0 }, size: { x: 16, y: 16, z: 12 } };
+const frontierHangar = lookingAt({ x: -13, y: 31, z: -24 }, { x: -24, y: 32, z: -11 });
+const frontierPaths = [
+  buildPath("west-spindle", frontierCoil({ center: { x: -27, y: 36, z: -3 }, rx: 11, rz: 11, drop: 22, turns: 1.2, endAngle: 0, port: { x: -8, y: 8, z: -3 }, approach: { x: -13, y: 8, z: -3 } }), 480),
+  buildPath("east-return", frontierCoil({ center: { x: 27, y: 39, z: 4 }, rx: 10, rz: 10, drop: 22, turns: -1.25, endAngle: Math.PI, port: { x: 8, y: 12, z: 2 }, approach: { x: 13, y: 12, z: 2 } }), 480),
+  buildPath("north-vault", frontierCrossCoil, 480),
+];
+
+/** A finite first study of route expansion, not a claim of endless balance. */
+export const FRONTIER_INDEX = LEVELS.length;
+LEVELS.push({
+  id: "helix-frontier", name: "Helix Frontier", experiment: true, prototype: "route-expansion",
+  subtitle: "Three frontiers · 9-wave spatial prototype",
+  blurb: "Defend separate ports of a protected prism. Two opposite spindles give way to a high crosswise coil: keep old lines useful while finding the next gap.",
+  briefing: "A opens in the west; B opens across the prism in wave 3; the horizontal North Vault C opens in wave 6. All opened routes remain in use. The holographic enclosure marks separate breach ports, not a solid wall. This nine-wave prototype studies the space before survival balance. Unlimited setup, independent prices and free setup reposition remain available.",
+  hangar: frontierHangar, accent: 0x91c8a8,
+  stasisAvailable: true, fleetGrowth: "scrap", droneRoster: "expanded", dronePricing: "per-type",
+  presentation: "protected-prism", protectedVolume: frontierVolume, startingScrap: 60,
+  hpMul: 1, speedMul: 0.9, paths: frontierPaths,
+  waves: [
+    { chapter: "01 · West spindle", lesson: "Only A is open. Begin with a long line on its descending coil; its breach port is on the west face of the prism.", groups: [g("shard", 0, 6, 1.8, 1)] },
+    { chapter: "02 · Hold the west", lesson: "Keep a useful west line. B opens on the opposite side next wave: save room to extend your defense.", groups: [g("shard", 0, 7, 1.5, 1), g("barge", 0, 2, 3, 4)] },
+    { chapter: "03 · East return", lesson: "B opens higher on the opposite side. The west still needs its defense; build a new eastern line or move a redundant drone during setup.", groups: [g("shard", 1, 6, 1.6, 1), g("shard", 0, 5, 1.7, 4)] },
+    { chapter: "04 · Opposite winding", lesson: "The east winds the other way. Compare a broad slice across both districts with dedicated contact on each coil.", groups: [g("barge", 0, 3, 2.7, 1), g("shard", 1, 7, 1.5, 3), g("wisp", 0, 3, 1.9, 7)] },
+    { chapter: "05 · Two ports", lesson: "Both ports need coverage. The high horizontal North Vault opens next: inspect where its western arc passes near your existing lines.", groups: [g("barge", 1, 3, 2.5, 1), g("shard", 0, 7, 1.4, 3), g("wisp", 1, 4, 1.7, 7)] },
+    { chapter: "06 · North vault", lesson: "C opens around a horizontal axis above the north face. Part of it can borrow west coverage, but its entrance and roofward approach need a new line.", groups: [g("shard", 2, 7, 1.6, 1), g("barge", 0, 2, 2.8, 3), g("shard", 1, 5, 1.5, 6)] },
+    { chapter: "07 · Three frontiers", lesson: "Keep the older defenses working. Follow the North Vault through its full turn: a screen crossing does not guarantee contact at the same height.", groups: [g("barge", 2, 3, 2.5, 1), g("shard", 0, 6, 1.4, 3), g("wisp", 1, 4, 1.6, 5), g("shard", 2, 4, 1.4, 9)] },
+    { chapter: "08 · Western weight", lesson: "The west convoy is heavier while both newer routes send escorts. Reposition only the lines you can spare; each port remains independent.", groups: [g("barge", 0, 4, 2.2, 1), g("shard", 1, 6, 1.4, 3), g("wisp", 2, 5, 1.6, 5)] },
+    { chapter: "09 · All ports held", lesson: "The final trial shifts the convoy to the North Vault. Hold all three ports. This is the end of the authored spatial prototype, not an endless difficulty ramp.", groups: [g("barge", 2, 4, 2.3, 1), g("barge", 1, 3, 2.5, 3), g("shard", 0, 7, 1.4, 5), g("wisp", 1, 4, 1.6, 9)] },
+  ],
+});
+
+export const RELAY_LAB_INDEX = LEVELS.length;
+LEVELS.push({
+  id: "relay-lab", name: "Relay Lab", experiment: true, prototype: "relay",
+  subtitle: "Slowing light + one turn · 4-wave experiment",
+  blurb: "One slowing-light emitter and an aimed relay turn a fixed line. Find a clear incoming connection, then redirect its remaining reach between the two coils.",
+  briefing: "Place one Lumen emitter, then fly into its line and aim a Relay. It redirects the remaining beam range once, along the direction you chose. An earlier enemy can block the connection. Reposition or re-aim individual drones freely during setup; Fan and Slide can move a live link apart. Stasis and Pin remain available for comparison. This is a separate four-wave lab, not a Crown balance change.",
+  hangar: frontierHangar, accent: 0xc9b8ff,
+  stasisAvailable: true, fleetGrowth: "scrap", droneRoster: "expanded", dronePricing: "per-type",
+  presentation: "protected-prism", protectedVolume: frontierVolume, startingScrap: 100,
+  hpMul: 0.9, speedMul: 0.8, paths: frontierPaths.slice(0, 2),
+  waves: [
+    { chapter: "01 · Incoming light", lesson: "A is open. Start with damage coverage, then place a slowing-light emitter and one aimed relay. Check that the incoming beam really reaches the receiver.", groups: [g("shard", 0, 5, 2.2, 1)] },
+    { chapter: "02 · Redirect east", lesson: "Only B sends traffic this wave. Try a free setup reposition to turn a relay toward the east, keeping its incoming connection clear.", groups: [g("shard", 1, 6, 2, 1), g("barge", 1, 1, 3, 5)] },
+    { chapter: "03 · Shared attention", lesson: "Both gates send escorts. A target before the relay can block its outgoing light: compare the potential line with the powered segment.", groups: [g("shard", 0, 5, 1.8, 1), g("shard", 1, 5, 1.8, 3), g("wisp", 1, 2, 2.2, 8)] },
+    { chapter: "04 · Two convoys", lesson: "Choose which convoy needs the redirected slow. Other weapons still supply the damage; Stasis remains a passive comparison.", groups: [g("barge", 0, 3, 2.8, 1), g("barge", 1, 3, 2.8, 4), g("shard", 0, 4, 1.8, 7)] },
   ],
 });

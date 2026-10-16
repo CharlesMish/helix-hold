@@ -1,5 +1,5 @@
 /** Weapon geometry lives here so combat and placement previews use the same hit test. */
-export type DroneMode = "pierce" | "sweep" | "stasis" | "halo" | "pin";
+export type DroneMode = "pierce" | "sweep" | "stasis" | "halo" | "pin" | "lumen" | "relay";
 
 export const STASIS_RADIUS = 6;
 export const STASIS_SPEED_SCALE = 0.5;
@@ -9,8 +9,19 @@ export const PIN_INTERVAL = 1.6;
 export const PIN_SLOW_DURATION = 2.4;
 export const PIN_SPEED_SCALE = 0.65;
 export const PIN_FLASH_DURATION = 0.18;
+export const LUMEN_SLOW_DURATION = 2.4;
+export const LUMEN_SPEED_SCALE = 0.6;
+export const RELAY_RADIUS = 1;
 
 export const DRONE_SPECS = {
+  lumen: {
+    label: "Lumen", dps: 8, radius: 1.1, range: 76, color: 0xa4ecff,
+    description: "One emitter. Fixed light slows the nearest enemy 40% for 2.4s and deals 8 DPS. One Relay can turn its remaining range.", pierces: false,
+  },
+  relay: {
+    label: "Relay", dps: 0, radius: RELAY_RADIUS, range: 0, color: 0xf1bdff,
+    description: "No weapon. Receives Lumen light and redirects it along your aim. One turn; shared range. Re-aim free during setup.", pierces: false,
+  },
   pierce: {
     label: "Pierce",
     dps: 20,

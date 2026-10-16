@@ -33,9 +33,9 @@ function enemy(run, slot, dist, options = {}) {
   return e;
 }
 
-test('Only the expanded Crown roster permits Halo and Pin purchases', () => {
+test('Legacy arenas keep their original rosters; Crown retains Halo and Pin', () => {
   assert.deepEqual(availableDroneModes(LEVELS[crown]), ['pierce', 'sweep', 'stasis', 'halo', 'pin']);
-  for (let i = 0; i < LEVELS.length; i++) if (i !== crown) {
+  for (let i = 0; i < LEVELS.length; i++) if (i !== crown && !LEVELS[i].prototype) {
     for (const mode of ['halo', 'pin']) {
       assert.equal(isModeAvailable(LEVELS[i], mode), false);
       const run = createRun(i); run.droneMode = mode; run.scrap = 10000;

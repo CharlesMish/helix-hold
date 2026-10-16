@@ -60,7 +60,7 @@ test('Crown buys past eight with per-type prices; other arenas retain their limi
   Object.assign(run.ship, { x: 35, y: 20, z: 12 });
   assert.match(tryAnchor(run), /Need 140 scrap/);
   for (const [index, other] of LEVELS.entries()) {
-    if (index === SPLIT_CROWN_INDEX) continue;
+    if (index === SPLIT_CROWN_INDEX || other.prototype) continue;
     assert.equal(getDroneLimit(other), 8);
     const capped = fundedFleet(index, 8);
     Object.assign(capped.ship, { x: 5, y: 20, z: 12 });

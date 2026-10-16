@@ -7,6 +7,8 @@ export const DRONE_PRICES = {
   stasis: { base: 32, increment: 20 },
   halo: { base: 44, increment: 20 },
   pin: { base: 48, increment: 24 },
+  lumen: { base: 48, increment: 24 },
+  relay: { base: 16, increment: 8 },
 } as const satisfies Record<DroneMode, { base: number; increment: number }>;
 
 type PricingFleet = {

@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { CORE, PATH_COLORS, type Kind } from "./paths";
 import { beamContact, DRONE_SPECS, insideSphere, STASIS_RADIUS, STASIS_SPEED_SCALE, type Beam, type DroneMode } from "./combat";
-import { BEAM_RANGE, MAX_DRONES, SHIP_DPS, SHIP_RADIUS, droneBeam, getDroneCoverage, getBeamCoverage, getLaneFirstWave, getLaneStatus, getPlacementPreview, type Run } from "./sim";
+import { BEAM_RANGE, MAX_DRONES, SHIP_DPS, SHIP_RADIUS, droneBeam, getDroneCoverage, getBeamCoverage, getLaneFirstWave, getLaneStatus, getPlacementPreview, getRelayTraces, type RelayTrace, type Run } from "./sim";
 
 export type Projection = { x: number; y: number; visible: boolean; behind: boolean };
 export type World = {
@@ -18,7 +18,7 @@ const PALETTE = { ice: 0x71e7ef, lavender: 0xb5a2ff, coral: 0xff826f, gold: 0xff
 const KIND_COLOR = { shard: PALETTE.coral, barge: PALETTE.gold, wisp: PALETTE.orchid, carrier: 0xff7259 } as const;
 const SPLIT_PATH_COLORS = [0x71e7ef, 0xb5a2ff, 0xffb277, 0x84d7ac, 0xff92a2] as const;
 function pathColor(run: Run, index: number): number {
-  if (run.level.presentation === "split-crown") return SPLIT_PATH_COLORS[index] ?? PALETTE.ice;
+  if (run.level.presentation === "split-crown" || run.level.presentation === "protected-prism") return SPLIT_PATH_COLORS[index] ?? PALETTE.ice;
   return run.level.primaryPath === index ? 0xffb692 : PATH_COLORS[index] ?? PALETTE.ice;
 }
 
@@ -207,6 +207,13 @@ export function buildDrone(ghost = false) {
   // Pin: asymmetric sight rail above a long cannon, visually distinct from the fork.
   role("pin", [bar(0.46, 0.4, 0.68, 0, 0, -0.3), new THREE.CylinderGeometry(0.09, 0.13, 1.48, 8).rotateX(Math.PI / 2).translate(0, 0, 0.52), bar(0.12, 0.5, 0.15, 0, 0.34, -0.25), bar(0.19, 0.13, 0.75, 0, 0.57, -0.02), bar(0.8, 0.12, 0.24, 0, 0, -0.52)],
     [ring(0.115, 0.045).translate(0, 0, 1.27), bar(0.1, 0.09, 0.74, 0, 0.69, -0.02), bar(0.8, 0.07, 0.1, 0, 0.11, -0.52)]);
+  // Lumen: a luminous open lens inside a long triangular optical cage.
+  role("lumen", [bar(0.25, 0.25, 1.5), ...[-1, 1].map(side => bar(0.12, 0.15, 1.6, side * 0.48, 0, 0.12)), ring(0.58, 0.07).translate(0, 0, 0.8)],
+    [ring(0.38, 0.05).translate(0, 0, 0.88), new THREE.OctahedronGeometry(0.18).translate(0, 0, 0.48), bar(0.08, 0.1, 1.6, 0, 0.3)]);
+  // Relay: the three-axis receiver cage has exactly the collision radius; the
+  // forward arrow communicates directed redirection, not optical reflection.
+  role("relay", [ring(0.965, 0.035), ring(0.965, 0.035, "xz"), ring(0.965, 0.035, "yz"), new THREE.OctahedronGeometry(0.22)],
+    [ring(0.73, 0.05), bar(0.07, 0.07, 1.35, 0, 0, 0.67), new THREE.ConeGeometry(0.18, 0.43, 4).rotateX(Math.PI / 2).translate(0, 0, 1.5)]);
   group.userData.mode = "pierce"; group.userData.accent = accent;
   return group;
 }
@@ -275,6 +282,59 @@ export function syncPinTracer(mesh: THREE.Mesh, drone: Run["drones"][number], hi
   mesh.scale.set(0.065, 0.065, length);
   const material = mesh.material as THREE.MeshBasicMaterial;
   material.color.setHex(DRONE_SPECS.pin.color); material.opacity = 0.8 * Math.min(1, drone.shotFlash / 0.18);
+}
+
+/** Dashed potential connections never imply live power through an obstruction.
+ * Both sets of endpoints come directly from the simulation trace. */
+export function buildRelayTraceVisual(scene: THREE.Scene, beamGeo: THREE.CylinderGeometry, preview = false) {
+  const group = new THREE.Group(); scene.add(group);
+  type Slot = { root: THREE.Group; planned: THREE.Line<THREE.BufferGeometry, THREE.LineDashedMaterial>; active: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial>; volume: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial>; end: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> };
+  const slots: Slot[] = [];
+  function ensure(count: number) {
+    while (slots.length < count) {
+      const root = new THREE.Group(); group.add(root);
+      const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 0, 1)]);
+      const planned = new THREE.Line(geometry, new THREE.LineDashedMaterial({ color: DRONE_SPECS.lumen.color, transparent: true, opacity: preview ? 0.72 : 0.2, dashSize: 0.65, gapSize: 0.45, depthWrite: false, fog: false }));
+      const active = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: DRONE_SPECS.lumen.color, transparent: true, opacity: 0.65, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+      const volume = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: DRONE_SPECS.lumen.color, transparent: true, opacity: preview ? 0.028 : 0.01, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+      const end = new THREE.Mesh(new THREE.TorusGeometry(1, 0.015, 5, 32), glowMaterial(DRONE_SPECS.lumen.color, preview ? 0.52 : 0.16));
+      root.add(planned, active, volume, end); root.visible = false;
+      planned.frustumCulled = active.frustumCulled = volume.frustumCulled = false;
+      slots.push({ root, planned, active, volume, end });
+    }
+  }
+  return {
+    group,
+    sync(plannedTraces: readonly RelayTrace[], liveTraces: readonly RelayTrace[] = [], showVolumes = false) {
+      ensure(plannedTraces.reduce((n, trace) => n + trace.segments.length, 0));
+      let index = 0;
+      for (const trace of plannedTraces) {
+        const live = liveTraces.find(item => item.sourceId === trace.sourceId);
+        for (const segment of trace.segments) {
+          const beam = segment.beam, slot = slots[index++]!;
+          const powered = live?.segments.find(item => item.stage === segment.stage && item.relayId === segment.relayId);
+          // Incoming can be blocked before reaching its planned receiver, so its
+          // live relayId differs while the initial segment remains powered.
+          const actual = segment.stage === "incoming" ? live?.segments[0] : powered;
+          slot.root.visible = true; slot.root.position.set(beam.x, beam.y, beam.z); aimAlong(slot.root, beam.dx, beam.dy, beam.dz);
+          slot.planned.geometry.attributes.position!.setXYZ(1, 0, 0, beam.range);
+          slot.planned.geometry.attributes.position!.needsUpdate = true; slot.planned.computeLineDistances();
+          slot.planned.material.color.setHex(segment.stage === "outgoing" ? DRONE_SPECS.relay.color : DRONE_SPECS.lumen.color);
+          slot.planned.material.opacity = preview ? 0.72 : actual ? 0.11 : 0.26;
+          slot.active.visible = !!actual && !preview;
+          if (actual) slot.active.scale.set(0.038, 0.038, actual.beam.range);
+          slot.volume.visible = preview || showVolumes;
+          slot.volume.scale.set(beam.radius, beam.radius, beam.range);
+          // A powered receiver can graze the cylinder away from its centerline.
+          // Show the true cross-section at that coupling, so a valid wide-beam
+          // contact does not look like a disconnected thin line.
+          slot.end.visible = preview || showVolumes || (!!actual && segment.stage === "incoming" && live?.relayId !== null && live?.relayId !== undefined);
+          slot.end.position.z = beam.range; slot.end.scale.setScalar(beam.radius);
+        }
+      }
+      for (; index < slots.length; index++) slots[index]!.root.visible = false;
+    },
+  };
 }
 
 type EnemyGeometry = { hull: THREE.BufferGeometry; accent: THREE.BufferGeometry };
@@ -348,6 +408,75 @@ export function buildEnemyGeometries(): Record<Kind, EnemyGeometry> {
   };
 }
 
+/** All live-enemy visuals share a growing capacity; no render-only population cap.
+ * Replaced instance buffers are disposed while their shared geometry stays alive. */
+export function buildEnemyVisualPool(scene: THREE.Scene, beamGeo: THREE.CylinderGeometry, glowTexture: THREE.Texture) {
+  const enemyGeometry = buildEnemyGeometries();
+  const hullMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.42, roughness: 0.34, emissive: 0x536b91, emissiveIntensity: 0.2, fog: false });
+  const accentMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true, fog: false });
+  let meshes = {
+    carrier: new THREE.InstancedMesh(enemyGeometry.carrier.hull, hullMaterial, 64),
+    shard: new THREE.InstancedMesh(enemyGeometry.shard.hull, hullMaterial, 64),
+    barge: new THREE.InstancedMesh(enemyGeometry.barge.hull, hullMaterial, 64),
+    wisp: new THREE.InstancedMesh(enemyGeometry.wisp.hull, hullMaterial, 64),
+  };
+  let accentMeshes = {
+    carrier: new THREE.InstancedMesh(enemyGeometry.carrier.accent, accentMaterial, 64),
+    shard: new THREE.InstancedMesh(enemyGeometry.shard.accent, accentMaterial, 64),
+    barge: new THREE.InstancedMesh(enemyGeometry.barge.accent, accentMaterial, 64),
+    wisp: new THREE.InstancedMesh(enemyGeometry.wisp.accent, accentMaterial, 64),
+  };
+  let enemyHalos = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, map: glowTexture, transparent: true, opacity: 0.36, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }), 64);
+  let enemyTrails = new THREE.InstancedMesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }), 64);
+  // Small screen-facing corner brackets encode actual slow state without recoloring the hull.
+  const bracketParts: THREE.BufferGeometry[] = [];
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    bracketParts.push(new THREE.PlaneGeometry(0.38, 0.045).translate(sx * 0.88, sy * 1.05, 0));
+    bracketParts.push(new THREE.PlaneGeometry(0.045, 0.38).translate(sx * 1.05, sy * 0.88, 0));
+  }
+  const slowBracketGeometry = mergeGeometries(bracketParts)!;
+  bracketParts.forEach(part => part.dispose());
+  let slowBrackets = new THREE.InstancedMesh(slowBracketGeometry, glowMaterial(0xffffff, 0.92), 64);
+  let wispTetherPos = new Float32Array(64 * 6);
+  let wispTetherGeo = new THREE.BufferGeometry();
+  wispTetherGeo.setAttribute("position", new THREE.BufferAttribute(wispTetherPos, 3).setUsage(THREE.DynamicDrawUsage));
+  wispTetherGeo.setDrawRange(0, 0);
+  const wispTethers = new THREE.LineSegments(wispTetherGeo, new THREE.LineBasicMaterial({ color: PALETTE.orchid, transparent: true, opacity: 0.24, depthWrite: false, fog: false }));
+  wispTethers.frustumCulled = false; scene.add(wispTethers);
+  let wispFootprints = new THREE.InstancedMesh(new THREE.TorusGeometry(0.12, 0.009, 4, 16), glowMaterial(PALETTE.orchid, 0.45), 64);
+  for (const mesh of [...Object.values(meshes), ...Object.values(accentMeshes), enemyHalos, enemyTrails, slowBrackets, wispFootprints]) {
+    // Dynamic populations may be empty on their first frame. Never cache their initial empty bounds.
+    mesh.count = 0; mesh.frustumCulled = false; mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(mesh);
+  }
+
+  let capacity = 64;
+  function ensure(count: number) {
+    if (count <= capacity) return;
+    while (capacity < count) capacity *= 2;
+    function grow<G extends THREE.BufferGeometry, M extends THREE.Material | THREE.Material[]>(old: THREE.InstancedMesh<G, M>) {
+      const mesh = new THREE.InstancedMesh(old.geometry, old.material, capacity);
+      mesh.count = 0; mesh.frustumCulled = false; mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      scene.add(mesh); scene.remove(old); old.dispose();
+      return mesh;
+    }
+    meshes = { carrier: grow(meshes.carrier), shard: grow(meshes.shard), barge: grow(meshes.barge), wisp: grow(meshes.wisp) };
+    accentMeshes = { carrier: grow(accentMeshes.carrier), shard: grow(accentMeshes.shard), barge: grow(accentMeshes.barge), wisp: grow(accentMeshes.wisp) };
+    enemyHalos = grow(enemyHalos); enemyTrails = grow(enemyTrails); slowBrackets = grow(slowBrackets); wispFootprints = grow(wispFootprints);
+    const old = wispTetherGeo;
+    wispTetherPos = new Float32Array(capacity * 6);
+    wispTetherGeo = new THREE.BufferGeometry();
+    wispTetherGeo.setAttribute("position", new THREE.BufferAttribute(wispTetherPos, 3).setUsage(THREE.DynamicDrawUsage));
+    wispTetherGeo.setDrawRange(0, 0); wispTethers.geometry = wispTetherGeo; old.dispose();
+  }
+  return {
+    ensure, get capacity() { return capacity; },
+    get meshes() { return meshes; }, get accentMeshes() { return accentMeshes; },
+    get enemyHalos() { return enemyHalos; }, get enemyTrails() { return enemyTrails; },
+    get slowBrackets() { return slowBrackets; }, get wispFootprints() { return wispFootprints; },
+    get wispTetherPos() { return wispTetherPos; }, get wispTetherGeo() { return wispTetherGeo; }, wispTethers,
+  };
+}
+
 type Spark = { life: number; max: number; x: number; y: number; z: number; vx: number; vy: number; vz: number; r: number; g: number; b: number };
 type Gate = { root: THREE.Group; ring: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>; iris: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>; halo: THREE.Sprite; label?: THREE.Sprite; labelTexture?: THREE.CanvasTexture };
 
@@ -369,6 +498,36 @@ export function buildSplitCrownArchitecture() {
 
   }
   return group;
+}
+
+/** A protected holographic volume, not opaque world geometry or a beam blocker. */
+export function buildProtectedPrismVisual(volume: { center: { x: number; y: number; z: number }; size: { x: number; y: number; z: number } }) {
+  const group = new THREE.Group();
+  group.position.set(volume.center.x, volume.center.y, volume.center.z);
+  const { x, y, z } = volume.size;
+  const box = new THREE.BoxGeometry(x, y, z);
+  const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x8ccfdf, transparent: true, opacity: 0.25, depthWrite: false, fog: false });
+  group.add(new THREE.LineSegments(new THREE.EdgesGeometry(box), edgeMaterial)); box.dispose();
+  const corners = new THREE.Group();
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
+    const lengths = [1.8, 1.8, 1.8];
+    for (let axis = 0; axis < 3; axis++) {
+      const geometry = new THREE.BoxGeometry(axis === 0 ? lengths[0] : 0.035, axis === 1 ? lengths[1] : 0.035, axis === 2 ? lengths[2] : 0.035);
+      const bracket = new THREE.Mesh(geometry, glowMaterial(0xa3e8e7, 0.7));
+      bracket.position.set(sx * (x / 2 - (axis === 0 ? 0.9 : 0)), sy * (y / 2 - (axis === 1 ? 0.9 : 0)), sz * (z / 2 - (axis === 2 ? 0.9 : 0)));
+      corners.add(bracket);
+    }
+  }
+  group.add(corners);
+  // One broken calibration plane gives the enclosure depth without drawing a
+  // translucent solid face across the routes and enemies behind it.
+  const bottom = new THREE.Group(); bottom.position.y = -y / 2;
+  for (let i = -2; i <= 2; i++) {
+    const mark = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.025, 0.55), glowMaterial(0x90b5c9, 0.35));
+    mark.position.set(i * x / 6, 0, 0); bottom.add(mark);
+  }
+  group.add(bottom);
+  return { group, edgeMaterial };
 }
 
 export function createWorld(canvas: HTMLCanvasElement): World {
@@ -477,46 +636,14 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   const fieldPreview = buildStasisFieldVisual(true);
   scene.add(fieldPreview.group);
 
+  const relayVisual = buildRelayTraceVisual(scene, beamGeo);
+  const relayPreviewVisual = buildRelayTraceVisual(scene, beamGeo, true);
+  const relayContactRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.035, 6, 40), glowMaterial(DRONE_SPECS.lumen.color, 0.8));
+  relayContactRing.visible = false; scene.add(relayContactRing);
   const coverage = buildCoverageVisual(scene);
   let coverageClock = 1;
 
-  const enemyGeometry = buildEnemyGeometries();
-  const hullMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.42, roughness: 0.34, emissive: 0x536b91, emissiveIntensity: 0.2, fog: false });
-  const accentMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true, fog: false });
-  const meshes = {
-    carrier: new THREE.InstancedMesh(enemyGeometry.carrier.hull, hullMaterial, 64),
-    shard: new THREE.InstancedMesh(enemyGeometry.shard.hull, hullMaterial, 64),
-    barge: new THREE.InstancedMesh(enemyGeometry.barge.hull, hullMaterial, 64),
-    wisp: new THREE.InstancedMesh(enemyGeometry.wisp.hull, hullMaterial, 64),
-  };
-  const accentMeshes = {
-    carrier: new THREE.InstancedMesh(enemyGeometry.carrier.accent, accentMaterial, 64),
-    shard: new THREE.InstancedMesh(enemyGeometry.shard.accent, accentMaterial, 64),
-    barge: new THREE.InstancedMesh(enemyGeometry.barge.accent, accentMaterial, 64),
-    wisp: new THREE.InstancedMesh(enemyGeometry.wisp.accent, accentMaterial, 64),
-  };
-  const enemyHalos = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, map: glowTexture, transparent: true, opacity: 0.36, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }), 192);
-  const enemyTrails = new THREE.InstancedMesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }), 192);
-  // Small screen-facing corner brackets encode actual slow state without recoloring the hull.
-  const bracketParts: THREE.BufferGeometry[] = [];
-  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
-    bracketParts.push(new THREE.PlaneGeometry(0.38, 0.045).translate(sx * 0.88, sy * 1.05, 0));
-    bracketParts.push(new THREE.PlaneGeometry(0.045, 0.38).translate(sx * 1.05, sy * 0.88, 0));
-  }
-  const slowBracketGeometry = mergeGeometries(bracketParts)!;
-  bracketParts.forEach(part => part.dispose());
-  const slowBrackets = new THREE.InstancedMesh(slowBracketGeometry, glowMaterial(0xffffff, 0.92), 256);
-  const wispTetherPos = new Float32Array(64 * 6);
-  const wispTetherGeo = new THREE.BufferGeometry();
-  wispTetherGeo.setAttribute("position", new THREE.BufferAttribute(wispTetherPos, 3).setUsage(THREE.DynamicDrawUsage));
-  wispTetherGeo.setDrawRange(0, 0);
-  const wispTethers = new THREE.LineSegments(wispTetherGeo, new THREE.LineBasicMaterial({ color: PALETTE.orchid, transparent: true, opacity: 0.24, depthWrite: false, fog: false }));
-  wispTethers.frustumCulled = false; scene.add(wispTethers);
-  const wispFootprints = new THREE.InstancedMesh(new THREE.TorusGeometry(0.12, 0.009, 4, 16), glowMaterial(PALETTE.orchid, 0.45), 64);
-  for (const mesh of [...Object.values(meshes), ...Object.values(accentMeshes), enemyHalos, enemyTrails, slowBrackets, wispFootprints]) {
-    // Dynamic populations may be empty on their first frame. Never cache their initial empty bounds.
-    mesh.count = 0; mesh.frustumCulled = false; mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(mesh);
-  }
+  const enemyVisuals = buildEnemyVisualPool(scene, beamGeo, glowTexture);
 
   const SPARK_N = 180;
   const sparkPos = new Float32Array(SPARK_N * 3), sparkCol = new Float32Array(SPARK_N * 3);
@@ -525,9 +652,11 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   const sparkPoints = new THREE.Points(sparkGeo, new THREE.PointsMaterial({ size: 0.29, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
   sparkPoints.frustumCulled = false; scene.add(sparkPoints);
   const sparks: Spark[] = Array.from({ length: SPARK_N }, () => ({ life: 0, max: 1, x: 0, y: -500, z: 0, vx: 0, vy: 0, vz: 0, r: 1, g: 1, b: 1 }));
-  const pathRoot = new THREE.Group(), portalRoot = new THREE.Group();
-  scene.add(pathRoot, portalRoot);
-  const pathMats: { tube: THREE.MeshBasicMaterial; line: THREE.LineBasicMaterial; dormant?: THREE.LineDashedMaterial }[] = [];
+  const pathRoot = new THREE.Group(), portalRoot = new THREE.Group(), objectiveRoot = new THREE.Group();
+  scene.add(pathRoot, portalRoot, objectiveRoot);
+  let prismVisual: ReturnType<typeof buildProtectedPrismVisual> | null = null;
+  const breachPorts: { root: THREE.Group; material: THREE.MeshBasicMaterial; flash: number; color: number }[] = [];
+  const pathMats: { tube: THREE.MeshBasicMaterial; line: THREE.LineBasicMaterial; dormant?: THREE.LineDashedMaterial; ghost?: THREE.MeshBasicMaterial }[] = [];
   const gates: Gate[] = [];
   let builtId = "", moteMesh: THREE.InstancedMesh | null = null;
   const dock = new THREE.Group();
@@ -579,9 +708,16 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   }
   function rebuild(run: Run) {
     for (const gate of gates) gate.labelTexture?.dispose();
-    clearGroup(pathRoot); clearGroup(portalRoot); pathMats.length = 0; gates.length = 0;
+    clearGroup(pathRoot); clearGroup(portalRoot); clearGroup(objectiveRoot);
+    pathMats.length = 0; gates.length = 0; breachPorts.length = 0; prismVisual = null;
     const splitCrown = run.level.presentation === "split-crown";
-    splitArchitecture.visible = splitCrown; architecture.visible = !splitCrown;
+    const protectedPrism = run.level.presentation === "protected-prism";
+    splitArchitecture.visible = splitCrown; architecture.visible = !splitCrown && !protectedPrism;
+    core.visible = !protectedPrism; coreColumn.visible = !protectedPrism;
+    if (protectedPrism && run.level.protectedVolume) {
+      prismVisual = buildProtectedPrismVisual(run.level.protectedVolume); objectiveRoot.add(prismVisual.group);
+      coreLight.position.set(run.level.protectedVolume.center.x, run.level.protectedVolume.center.y, run.level.protectedVolume.center.z);
+    } else coreLight.position.set(CORE.x, CORE.y, CORE.z);
     if (moteMesh) { scene.remove(moteMesh); moteMesh.geometry.dispose(); (moteMesh.material as THREE.Material).dispose(); }
     moteMesh = new THREE.InstancedMesh(new THREE.ConeGeometry(0.14, 0.45, 3), glowMaterial(0xa4e0eb, 0.5), Math.max(1, run.paths.length * 12));
     moteMesh.geometry.rotateX(Math.PI / 2); moteMesh.frustumCulled = false; scene.add(moteMesh);
@@ -592,11 +728,20 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       // Use the simulation's actual polyline, not a smoothed spline that departs from the hit path.
       const tube = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false });
       const line = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.43 });
-      const dormant = splitCrown && index === run.level.primaryPath
+      const dormant = (splitCrown && index === run.level.primaryPath) || protectedPrism
         ? new THREE.LineDashedMaterial({ color, transparent: true, opacity: 0.18, dashSize: 0.7, gapSize: 0.9, depthWrite: false }) : undefined;
-      pathMats.push({ tube, line, dormant });
+
       const curve = new THREE.CurvePath<THREE.Vector3>();
       for (let i = 1; i < points.length; i++) curve.add(new THREE.LineCurve3(points[i - 1]!, points[i]!));
+      let routeGhost: THREE.MeshBasicMaterial | undefined;
+      if (protectedPrism) {
+        // The true polyline gains a quiet broad band only when this route is
+        // first opening. This is a spatial guide, never an enemy or hit volume.
+        routeGhost = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, fog: false });
+        const band = new THREE.Mesh(new THREE.TubeGeometry(curve, points.length, 0.36, 4, false), routeGhost);
+        band.frustumCulled = false; pathRoot.add(band);
+      }
+      pathMats.push({ tube, line, dormant, ghost: routeGhost });
       pathRoot.add(new THREE.Mesh(new THREE.TubeGeometry(curve, points.length * 2, 0.13, 5, false), tube));
       pathRoot.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), line));
       if (dormant) {
@@ -612,7 +757,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       gate.add(ring, iris, rim, halo);
       gate.position.set(entry.x, entry.y, entry.z); aimAlong(gate, entry.tx, entry.ty, entry.tz);
       const view: Gate = { root: gate, ring, iris, halo };
-      if (splitCrown) {
+      if (splitCrown || protectedPrism) {
         const canvas = document.createElement("canvas"); canvas.width = 128; canvas.height = 128;
         const context = canvas.getContext("2d")!;
         context.fillStyle = "rgba(16,22,41,0.9)"; context.beginPath(); context.roundRect(9, 5, 110, 118, 18); context.fill();
@@ -625,10 +770,25 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         portalRoot.add(view.label);
       }
       portalRoot.add(gate); gates.push(view);
+      if (protectedPrism) {
+        const end = path.pointAt(path.length);
+        const port = new THREE.Group(); port.position.set(end.x, end.y, end.z); aimAlong(port, end.tx, end.ty, end.tz);
+        const material = glowMaterial(color, 0.76);
+        port.add(new THREE.Mesh(new THREE.TorusGeometry(1.12, 0.045, 5, 32), material));
+        for (const side of [-1, 1]) {
+          const rail = new THREE.Mesh(new THREE.BoxGeometry(0.045, 2.8, 0.045), material); rail.position.x = side * 1.4; port.add(rail);
+          const cap = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.045, 0.045), material); cap.position.y = side * 1.4; port.add(cap);
+        }
+        objectiveRoot.add(port); breachPorts.push({ root: port, material, flash: 0, color });
+      }
       const stem = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(entry.x, -1.9, entry.z), new THREE.Vector3(entry.x, entry.y - 2.4, entry.z)]), new THREE.LineDashedMaterial({ color: 0x90b5c9, transparent: true, opacity: 0.22, dashSize: 0.25, gapSize: 0.8 }));
       stem.computeLineDistances(); portalRoot.add(stem);
     }
-    bounds.expandByPoint(new THREE.Vector3(CORE.x, CORE.y, CORE.z));
+    if (protectedPrism && run.level.protectedVolume) {
+      const { center, size } = run.level.protectedVolume;
+      bounds.expandByPoint(new THREE.Vector3(center.x - size.x / 2, center.y - size.y / 2, center.z - size.z / 2));
+      bounds.expandByPoint(new THREE.Vector3(center.x + size.x / 2, center.y + size.y / 2, center.z + size.z / 2));
+    } else bounds.expandByPoint(new THREE.Vector3(CORE.x, CORE.y, CORE.z));
     const home = run.level.hangar;
     dock.position.set(home.x, home.y - 1.1, home.z);
     bounds.expandByPoint(new THREE.Vector3(home.x, home.y, home.z));
@@ -681,7 +841,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       const angle = elapsed * (reduce ? 0.012 : 0.035), radius = surveyPosition.distanceTo(surveyCenter) * 0.83;
       camPos.set(surveyCenter.x + Math.sin(angle + 0.4) * radius, surveyCenter.y + radius * 0.36, surveyCenter.z + Math.cos(angle + 0.4) * radius);
       look.copy(surveyCenter); camera.fov = 55;
-      if (run.level.presentation === "split-crown" && camera.aspect < 1) camPos.sub(look).multiplyScalar(1 / camera.aspect).add(look);
+      if ((run.level.presentation === "split-crown" || run.level.presentation === "protected-prism") && camera.aspect < 1) camPos.sub(look).multiplyScalar(1 / camera.aspect).add(look);
     } else {
       const follow = 10.8;
       _v.set(run.ship.x - run.aimx * follow, run.ship.y - run.aimy * follow + 2.65, run.ship.z - run.aimz * follow);
@@ -695,18 +855,22 @@ export function createWorld(canvas: HTMLCanvasElement): World {
     }
     // Overview moves back to fit the wider arena, especially in portrait.
     // Move its fog window too so distant routes and landmarks stay legible.
-    const fogShift = run.level.presentation === "split-crown" && (overview || run.phase === "title")
+    const fogShift = (run.level.presentation === "split-crown" || run.level.presentation === "protected-prism") && (overview || run.phase === "title")
       ? Math.max(0, camPos.distanceTo(look) - 135) : 0;
     sceneFog.near = 95 + fogShift; sceneFog.far = 235 + fogShift;
+    camera.far = Math.max(600, camPos.distanceTo(look) + 180);
     camera.position.copy(camPos);
+    sky.position.copy(camPos);
     if (!reduce && !overview && run.shake > 0) { camera.position.x += (random() - 0.5) * run.shake * 0.22; camera.position.y += (random() - 0.5) * run.shake * 0.18; }
     camera.up.set(0, 1, 0); camera.lookAt(look); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
     lastShip.set(run.ship.x, run.ship.y, run.ship.z); wasOverview = overview; previousAnchorFlash = run.anchorFlash;
   }
   function syncEnemies(run: Run, elapsed: number) {
+    enemyVisuals.ensure(run.enemies.length);
+    const { meshes, accentMeshes, enemyHalos, enemyTrails, slowBrackets, wispFootprints, wispTetherPos, wispTetherGeo } = enemyVisuals;
     const counts = { shard: 0, barge: 0, wisp: 0, carrier: 0 }; let total = 0, wispCount = 0, slowCount = 0;
     for (const enemy of run.enemies) {
-      if (!enemy.alive || counts[enemy.kind] >= 64) continue;
+      if (!enemy.alive) continue;
       const index = counts[enemy.kind]++;
       _dummy.position.set(enemy.x, enemy.y, enemy.z);
       aimAlong(_dummy, enemy.tx, enemy.ty, enemy.tz, enemy.kind === "wisp" && !reduce ? elapsed * 0.55 : 0);
@@ -724,7 +888,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       if (enemy.speedScale < 1) {
         _dummy.scale.setScalar(enemy.radius + 0.3); _dummy.updateMatrix();
         slowBrackets.setMatrixAt(slowCount, _dummy.matrix);
-        _color.setHex(enemy.speedScale <= STASIS_SPEED_SCALE ? DRONE_SPECS.stasis.color : DRONE_SPECS.pin.color);
+        _color.setHex(enemy.speedScale <= STASIS_SPEED_SCALE ? DRONE_SPECS.stasis.color : enemy.lumenSlowRemaining > 0 && enemy.speedScale <= 0.6 ? DRONE_SPECS.lumen.color : DRONE_SPECS.pin.color);
         slowBrackets.setColorAt(slowCount++, _color);
         _color.setHex(enemyColor); if (enemy.hit) _color.multiplyScalar(1.2);
       }
@@ -784,6 +948,15 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       const playerBeam: Beam = { x: run.ship.x + run.aimx * 1.15, y: run.ship.y + run.aimy * 1.15, z: run.ship.z + run.aimz * 1.15, dx: run.aimx, dy: run.aimy, dz: run.aimz, range: BEAM_RANGE, radius: SHIP_RADIUS, dps: SHIP_DPS, pierces: true };
       placeBeam(beams[0]!, playerBeam, 0xf5f8e8, run.shipHitting, run);
       beams[0]!.visible = showPilotBeam(run);
+      const plannedRelayTraces = getRelayTraces(run, false);
+      const liveRelayTraces = getRelayTraces(run, true);
+      relayVisual.sync(plannedRelayTraces, liveRelayTraces, overview || run.rest > 0 || run.waveIndex < 0);
+      const relayTarget = liveRelayTraces.find(trace => trace.target)?.target;
+      relayContactRing.visible = !!relayTarget;
+      if (relayTarget) {
+        relayContactRing.position.set(relayTarget.x, relayTarget.y, relayTarget.z);
+        relayContactRing.quaternion.copy(camera.quaternion); relayContactRing.scale.setScalar(relayTarget.radius + 0.32);
+      }
       const selectedDrone = run.drones.find(drone => drone.id === run.selectedDroneId);
       selectedDroneRing.visible = !!selectedDrone && (run.rest > 0 || run.waveIndex < 0) && run.phase !== "title";
       if (selectedDrone) {
@@ -807,6 +980,10 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         const color = DRONE_SPECS[drone.mode].color;
         mesh.visible = true; mesh.position.set(drone.x, drone.y, drone.z);
         setDroneVisualMode(mesh, drone.mode);
+        if (drone.mode === "relay") {
+          const connected = liveRelayTraces.some(trace => trace.relayId === drone.id && trace.segments.some(segment => segment.stage === "outgoing"));
+          (mesh.userData.accent as THREE.MeshBasicMaterial).color.setHex(connected ? 0xe3f8ff : DRONE_SPECS.relay.color).multiplyScalar(connected ? 1 : 0.45);
+        }
         if (isFieldVisualMode(drone.mode)) mesh.quaternion.identity();
         else aimAlong(mesh, drone.ax, drone.ay, drone.az);
         if (mesh.userData.relocating !== relocating) {
@@ -827,7 +1004,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
           });
           mesh.userData.relocating = relocating;
         }
-        if (isFieldVisualMode(drone.mode) || run.fieldCheck) {
+        if (isFieldVisualMode(drone.mode) || drone.mode === "lumen" || drone.mode === "relay" || run.fieldCheck) {
           beam.visible = false; droneShells[i]!.visible = false; targetRings[i]!.visible = false;
         } else if (drone.mode === "pin") {
           syncPinTracer(beam, drone); droneShells[i]!.visible = false; targetRings[i]!.visible = false;
@@ -836,7 +1013,10 @@ export function createWorld(canvas: HTMLCanvasElement): World {
 
       const showPreview = run.phase === "play" && !overview && !run.fieldCheck;
       const previewColor = DRONE_SPECS[run.droneMode].color;
-      ghost.visible = showPreview; previewVolume.visible = showPreview && !isFieldVisualMode(run.droneMode);
+      ghost.visible = showPreview;
+      const relayPreview = run.droneMode === "lumen" || run.droneMode === "relay";
+      previewVolume.visible = showPreview && !isFieldVisualMode(run.droneMode) && !relayPreview;
+      relayPreviewVisual.sync(showPreview && relayPreview ? preview.relayTraces ?? [] : []);
       fieldPreview.group.visible = showPreview && isFieldVisualMode(run.droneMode);
       if (isFieldVisualMode(run.droneMode)) setFieldVisualMode(fieldPreview, run.droneMode === "halo" ? "halo" : "stasis");
       fieldPreview.group.position.set(preview.drone.x, preview.drone.y, preview.drone.z);
@@ -869,7 +1049,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         const imminent = !manualWaiting && run.phase !== "title" && countdown < 3.5;
         const pulse = reduce ? 0.75 : 0.65 + Math.sin(elapsed * 6) * 0.25;
         const laneStatus = getLaneStatus(run, index);
-        const splitCrown = run.level.presentation === "split-crown";
+        const splitCrown = run.level.presentation === "split-crown" || run.level.presentation === "protected-prism";
         gate.ring.material.opacity = splitCrown ? imminent ? 0.95 : laneStatus === "active" ? 0.86 : laneStatus === "upcoming" ? 0.72 : laneStatus === "cleared" ? 0.3 : 0.17
           : imminent ? 0.95 : selected ? 0.78 : routeKnown(index) ? 0.4 : 0.12;
         gate.iris.material.color.setHex(imminent ? PALETTE.coral : pathColor(run, index));
@@ -882,12 +1062,16 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         if (!reduce) gate.root.children[2]!.rotation.z = elapsed * 0.12;
       });
       pathMats.forEach((materials, index) => {
-        if (run.level.presentation === "split-crown") {
+        if (run.level.presentation === "split-crown" || run.level.presentation === "protected-prism") {
           const status = getLaneStatus(run, index);
           const waiting = status === "dormant";
           // The late carrier approach stays discoverable as a true-path dashed
           // line until its first wave is forecast, then joins the solid ribbons.
           const pendingPrimary = !!materials.dormant && run.waveIndex + (pending ? 2 : 1) < getLaneFirstWave(run, index);
+          if (materials.ghost) {
+            const newlyOpening = pending && run.waveIndex + 2 === getLaneFirstWave(run, index);
+            materials.ghost.opacity = run.routeGhost && newlyOpening && run.phase !== "title" && !run.fieldCheck ? 0.17 : 0;
+          }
           if (materials.dormant) materials.dormant.opacity = pendingPrimary ? overview ? 0.24 : 0.16 : 0;
           materials.tube.opacity = pendingPrimary ? 0 : waiting ? 0.02 : overview ? 0.15 : 0.075;
           materials.line.opacity = pendingPrimary ? 0 : waiting ? overview ? 0.28 : 0.18 : status === "cleared" ? 0.29 : overview ? 0.65 : 0.46;
@@ -920,10 +1104,25 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         if (fx.type === "hit") burst(fx.x, fx.y, fx.z, 3, 0xfff3d7, 3);
         else if (fx.type === "kill") burst(fx.x, fx.y, fx.z, 10, PALETTE.coral, 7);
         else if (fx.type === "anchor") burst(fx.x, fx.y, fx.z, 14, PALETTE.lavender, 6);
-        else if (fx.type === "leak") { breachFlash = 1; burst(CORE.x, CORE.y, CORE.z, 18, PALETTE.coral, 8); }
+        else if (fx.type === "leak") {
+          breachFlash = 1;
+          if (run.level.presentation === "protected-prism") {
+            burst(fx.x, fx.y, fx.z, 18, PALETTE.coral, 8);
+            _v.set(fx.x, fx.y, fx.z);
+            let nearest: typeof breachPorts[number] | undefined;
+            for (const port of breachPorts) if (!nearest || port.root.position.distanceToSquared(_v) < nearest.root.position.distanceToSquared(_v)) nearest = port;
+            if (nearest) nearest.flash = 1;
+          } else burst(CORE.x, CORE.y, CORE.z, 18, PALETTE.coral, 8);
+        }
       }
       run.fx.length = 0;
       breachFlash = Math.max(0, breachFlash - dt * 1.5);
+      if (prismVisual) prismVisual.edgeMaterial.color.setHex(breachFlash > 0 ? PALETTE.coral : 0x8ccfdf);
+      for (const port of breachPorts) {
+        port.flash = Math.max(0, port.flash - dt * 1.5);
+        port.material.color.setHex(port.flash > 0 ? PALETTE.coral : port.color);
+        port.material.opacity = 0.76 + port.flash * 0.24;
+      }
       coreMat.emissive.setHex(breachFlash > 0 ? PALETTE.coral : PALETTE.ice);
       coreMat.emissiveIntensity = 0.9 + breachFlash * 2;
       coreHalo.material.color.setHex(breachFlash > 0 ? PALETTE.coral : PALETTE.ice);

@@ -1,0 +1,587 @@
+{
+  "question": "Do the authored route openings create new coverage gaps while old paid drones remain useful?",
+  "method": {
+    "seed": 17,
+    "dt": 0.0167,
+    "candidates": 428,
+    "setup": "Finite legal idealized Pierce poses; ordinary purchases with earned scrap. Greedy current-wave contact selection. No combat pose changes, no bonus resources, no repositions. Pilot deliberately idle.",
+    "comparisons": "One growing fleet and the same policy frozen after wave2. Coarse feasibility only; no search over wave schedules or hull values.",
+    "limits": "One seed, one purchase policy, no human aiming, no browser or performance measurement. Summed contact metres may count a route more than once when multiple drones cover it; it is not unique coverage."
+  },
+  "results": [
+    {
+      "policy": "grow",
+      "phase": "win",
+      "core": 100,
+      "kills": 117,
+      "spent": 1032,
+      "purchases": [
+        {
+          "beforeWave": 1,
+          "id": 1,
+          "paid": 20,
+          "pose": {
+            "x": -22.4803,
+            "y": 17.8274,
+            "z": -15.3103,
+            "f": {
+              "x": 0.4709,
+              "y": -0.2643,
+              "z": 0.8417
+            },
+            "metres": [
+              18.9922,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 1,
+          "id": 2,
+          "paid": 32,
+          "pose": {
+            "x": -4.9795,
+            "y": 6.2149,
+            "z": -1.079,
+            "f": {
+              "x": -0.7551,
+              "y": 0.4463,
+              "z": -0.4803
+            },
+            "metres": [
+              17.9926,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 2,
+          "id": 3,
+          "paid": 44,
+          "pose": {
+            "x": -13.366,
+            "y": 9.4586,
+            "z": 2.4013,
+            "f": {
+              "x": -0.3107,
+              "y": 0.4643,
+              "z": -0.8294
+            },
+            "metres": [
+              17.9926,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 3,
+          "id": 4,
+          "paid": 56,
+          "pose": {
+            "x": 24.8513,
+            "y": 21.237,
+            "z": -8.0706,
+            "f": {
+              "x": -0.5671,
+              "y": -0.2796,
+              "z": 0.7748
+            },
+            "metres": [
+              0,
+              19.9387,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 4,
+          "id": 5,
+          "paid": 68,
+          "pose": {
+            "x": -34.9805,
+            "y": 19.4941,
+            "z": -13.7515,
+            "f": {
+              "x": 0.9908,
+              "y": 0.045,
+              "z": 0.1279
+            },
+            "metres": [
+              8.9963,
+              12.4617,
+              4.9931
+            ]
+          }
+        },
+        {
+          "beforeWave": 5,
+          "id": 6,
+          "paid": 80,
+          "pose": {
+            "x": 30.6026,
+            "y": 23.1219,
+            "z": -7.3946,
+            "f": {
+              "x": -0.8407,
+              "y": -0.4137,
+              "z": 0.3494
+            },
+            "metres": [
+              0,
+              18.9418,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 5,
+          "id": 7,
+          "paid": 92,
+          "pose": {
+            "x": 4.6372,
+            "y": 10.3453,
+            "z": 3.3977,
+            "f": {
+              "x": 0.8407,
+              "y": 0.4137,
+              "z": -0.3494
+            },
+            "metres": [
+              0,
+              18.9418,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 6,
+          "id": 8,
+          "paid": 104,
+          "pose": {
+            "x": -18.7729,
+            "y": 24.6903,
+            "z": -17.6796,
+            "f": {
+              "x": 0.9757,
+              "y": -0.0253,
+              "z": 0.2177
+            },
+            "metres": [
+              0,
+              5.9816,
+              23.4674
+            ]
+          }
+        },
+        {
+          "beforeWave": 7,
+          "id": 9,
+          "paid": 116,
+          "pose": {
+            "x": 34.6337,
+            "y": 22.5282,
+            "z": -4.2349,
+            "f": {
+              "x": -0.9664,
+              "y": -0.0115,
+              "z": -0.2569
+            },
+            "metres": [
+              0,
+              9.4709,
+              21.4701
+            ]
+          }
+        },
+        {
+          "beforeWave": 8,
+          "id": 10,
+          "paid": 128,
+          "pose": {
+            "x": 10.7201,
+            "y": 33.3539,
+            "z": -26.3584,
+            "f": {
+              "x": -0.9758,
+              "y": 0.0224,
+              "z": 0.2177
+            },
+            "metres": [
+              0,
+              0,
+              22.9681
+            ]
+          }
+        },
+        {
+          "beforeWave": 8,
+          "id": 11,
+          "paid": 140,
+          "pose": {
+            "x": -20.8972,
+            "y": 35.775,
+            "z": -14.6077,
+            "f": {
+              "x": 0.3559,
+              "y": -0.2643,
+              "z": 0.8964
+            },
+            "metres": [
+              17.4928,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 9,
+          "id": 12,
+          "paid": 152,
+          "pose": {
+            "x": -17.8602,
+            "y": 34.0099,
+            "z": -19.9826,
+            "f": {
+              "x": 0.9758,
+              "y": -0.0224,
+              "z": -0.2177
+            },
+            "metres": [
+              0,
+              0,
+              22.9681
+            ]
+          }
+        }
+      ],
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "seconds": 18.05,
+          "peakAlive": 5,
+          "olderDroneDamage": 0,
+          "totalContactMetresByRoute": [
+            36.9849,
+            0,
+            0
+          ]
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 9,
+          "scrap": 104,
+          "drones": 3,
+          "seconds": 21.6,
+          "peakAlive": 8,
+          "olderDroneDamage": 346.6667,
+          "totalContactMetresByRoute": [
+            54.9775,
+            0,
+            0
+          ]
+        },
+        {
+          "wave": 3,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 11,
+          "scrap": 136,
+          "drones": 4,
+          "seconds": 18.8167,
+          "peakAlive": 10,
+          "olderDroneDamage": 140,
+          "totalContactMetresByRoute": [
+            54.9775,
+            19.9387,
+            0
+          ]
+        },
+        {
+          "wave": 4,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 13,
+          "scrap": 214,
+          "drones": 5,
+          "seconds": 20.9833,
+          "peakAlive": 11,
+          "olderDroneDamage": 243,
+          "totalContactMetresByRoute": [
+            63.9738,
+            32.4004,
+            4.9931
+          ]
+        },
+        {
+          "wave": 5,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 14,
+          "scrap": 200,
+          "drones": 7,
+          "seconds": 21.5,
+          "peakAlive": 12,
+          "olderDroneDamage": 418.6667,
+          "totalContactMetresByRoute": [
+            63.9738,
+            70.2839,
+            4.9931
+          ]
+        },
+        {
+          "wave": 6,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 14,
+          "scrap": 228,
+          "drones": 8,
+          "seconds": 19.65,
+          "peakAlive": 11,
+          "olderDroneDamage": 285.3333,
+          "totalContactMetresByRoute": [
+            63.9738,
+            76.2655,
+            28.4604
+          ]
+        },
+        {
+          "wave": 7,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 17,
+          "scrap": 294,
+          "drones": 9,
+          "seconds": 19.1333,
+          "peakAlive": 15,
+          "olderDroneDamage": 522.6667,
+          "totalContactMetresByRoute": [
+            63.9738,
+            85.7364,
+            49.9306
+          ]
+        },
+        {
+          "wave": 8,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 15,
+          "scrap": 206,
+          "drones": 11,
+          "seconds": 19.9,
+          "peakAlive": 13,
+          "olderDroneDamage": 341,
+          "totalContactMetresByRoute": [
+            81.4667,
+            85.7364,
+            72.8986
+          ]
+        },
+        {
+          "wave": 9,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 18,
+          "scrap": 284,
+          "drones": 12,
+          "seconds": 22.9,
+          "peakAlive": 8,
+          "olderDroneDamage": 834.6667,
+          "totalContactMetresByRoute": [
+            81.4667,
+            85.7364,
+            95.8667
+          ]
+        }
+      ],
+      "openings": [
+        {
+          "wave": 3,
+          "gate": "B",
+          "priorFleetMetres": 0,
+          "afterPurchaseMetres": 19.9387,
+          "priorFleetSize": 3,
+          "newFleetSize": 4
+        },
+        {
+          "wave": 6,
+          "gate": "C",
+          "priorFleetMetres": 4.9931,
+          "afterPurchaseMetres": 28.4604,
+          "priorFleetSize": 7,
+          "newFleetSize": 8
+        }
+      ]
+    },
+    {
+      "policy": "freeze-after-wave2",
+      "phase": "lose",
+      "core": 0,
+      "kills": 32,
+      "spent": 96,
+      "purchases": [
+        {
+          "beforeWave": 1,
+          "id": 1,
+          "paid": 20,
+          "pose": {
+            "x": -22.4803,
+            "y": 17.8274,
+            "z": -15.3103,
+            "f": {
+              "x": 0.4709,
+              "y": -0.2643,
+              "z": 0.8417
+            },
+            "metres": [
+              18.9922,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 1,
+          "id": 2,
+          "paid": 32,
+          "pose": {
+            "x": -4.9795,
+            "y": 6.2149,
+            "z": -1.079,
+            "f": {
+              "x": -0.7551,
+              "y": 0.4463,
+              "z": -0.4803
+            },
+            "metres": [
+              17.9926,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "beforeWave": 2,
+          "id": 3,
+          "paid": 44,
+          "pose": {
+            "x": -13.366,
+            "y": 9.4586,
+            "z": 2.4013,
+            "f": {
+              "x": -0.3107,
+              "y": 0.4643,
+              "z": -0.8294
+            },
+            "metres": [
+              17.9926,
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "waves": [
+        {
+          "wave": 1,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 6,
+          "scrap": 56,
+          "drones": 2,
+          "seconds": 18.05,
+          "peakAlive": 5,
+          "olderDroneDamage": 0,
+          "totalContactMetresByRoute": [
+            36.9849,
+            0,
+            0
+          ]
+        },
+        {
+          "wave": 2,
+          "core": 100,
+          "coreLost": 0,
+          "kills": 9,
+          "scrap": 104,
+          "drones": 3,
+          "seconds": 21.6,
+          "peakAlive": 8,
+          "olderDroneDamage": 346.6667,
+          "totalContactMetresByRoute": [
+            54.9775,
+            0,
+            0
+          ]
+        },
+        {
+          "wave": 3,
+          "core": 58,
+          "coreLost": 42,
+          "kills": 5,
+          "scrap": 144,
+          "drones": 3,
+          "seconds": 19.0333,
+          "peakAlive": 11,
+          "olderDroneDamage": 140,
+          "totalContactMetresByRoute": [
+            54.9775,
+            0,
+            0
+          ]
+        },
+        {
+          "wave": 4,
+          "core": 9,
+          "coreLost": 49,
+          "kills": 6,
+          "scrap": 234,
+          "drones": 3,
+          "seconds": 22.0333,
+          "peakAlive": 13,
+          "olderDroneDamage": 408,
+          "totalContactMetresByRoute": [
+            54.9775,
+            0,
+            0
+          ]
+        },
+        {
+          "wave": 5,
+          "core": 0,
+          "coreLost": 9,
+          "kills": 6,
+          "scrap": 282,
+          "drones": 3,
+          "seconds": 18.3833,
+          "peakAlive": 13,
+          "olderDroneDamage": 168,
+          "totalContactMetresByRoute": [
+            54.9775,
+            0,
+            0
+          ]
+        }
+      ],
+      "openings": [
+        {
+          "wave": 3,
+          "gate": "B",
+          "priorFleetMetres": 0,
+          "afterPurchaseMetres": 0,
+          "priorFleetSize": 3,
+          "newFleetSize": 3
+        }
+      ]
+    }
+  ]
+}

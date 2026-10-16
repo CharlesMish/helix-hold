@@ -47,7 +47,7 @@ test('Each paid role raises only its own quote, including a ninth support unit',
 
 test('Existing arenas retain shared prices and cannot inherit Crown discounts', () => {
   for (const [index, level] of LEVELS.entries()) {
-    if (index === SPLIT_CROWN_INDEX) continue;
+    if (index === SPLIT_CROWN_INDEX || level.prototype) continue;
     assert.notEqual(level.dronePricing, 'per-type');
     const run = createRun(index); run.scrap = 100;
     anchor(run, 'pierce'); anchor(run, 'sweep');

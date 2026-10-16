@@ -31,7 +31,7 @@ export function GatePlan({ level, waves = level.waves, wave }: { level: LevelDef
     </button>
     {extras.length > 0 && <p className="gate-plan-option">Optional waves {waves.length + 1}–{allWaves.length} follow your recorded {level.waves.length}-wave victory.</p>}
     {open && <div className="gate-plan-body">
-      <p>Gates open in stages. E carries the carrier in {carrierWaves.length === 1 ? 'wave' : 'waves'} {carrierWaves.join(' and ')}. Setup stays open until you launch in Plan & launch.</p>
+      <p>{level.prototype === 'route-expansion' ? 'Three coils open in stages: A on wave 1, B on wave 3, C on wave 6. Each has a separate breach port.' : level.prototype === 'relay' ? 'Four short trials compare the direct line, a redirected line, and traffic that can block the receiver.' : <>Gates open in stages. E carries the carrier in {carrierWaves.length === 1 ? 'wave' : 'waves'} {carrierWaves.join(' and ')}.</>} Setup stays open until you launch in Plan & launch.</p>
       <WaveRows waves={waves} wave={wave}/>
       {extras.length > 0 && <div className="gate-plan-extra">
         <button className="gate-plan-toggle" aria-expanded={extraOpen} onClick={() => setExtraOpen(!extraOpen)}>
@@ -40,7 +40,7 @@ export function GatePlan({ level, waves = level.waves, wave }: { level: LevelDef
         <p>Continue with your fleet, remaining core and scrap. The last carrier is stronger; continuing leaves your campaign record intact.</p>
         {extraOpen && <WaveRows waves={extras} offset={waves.length} wave={wave}/>}
       </div>}
-      <p>Gate times are seconds after launch, not a countdown during setup. A/B west · C/D east · E crown transfer.</p>
+      <p>Gate times are seconds after launch, not a countdown during setup.{level.presentation === 'split-crown' && ' A/B west · C/D east · E crown transfer.'}{level.prototype && ' Prototype results stay separate from campaign records.'}</p>
     </div>}
   </div>;
 }

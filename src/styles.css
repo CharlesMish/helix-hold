@@ -149,3 +149,49 @@
  .game-root[data-arena='split-crown'] .placement{max-height:calc(100dvh - 330px)}
  .game-root[data-arena='split-crown'][data-touch='1'] .placement{max-height:calc(100dvh - 500px)}
 }
+
+/* Separate spatial experiments keep the campaign selection compact. */
+.experiment-list{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.experiment-list>.eyebrow{font-size:8px;color:#b9c8df;margin-bottom:7px}
+.experiment-list .lab-option{margin:5px 0;padding:10px 12px;justify-content:space-between;border-color:#a7b7dc30;background:#26344e25;min-height:48px}
+.experiment-list .lab-option>span{max-width:none;flex:1;letter-spacing:0;color:#c6d8e9}
+.experiment-list .lab-option b{font:11px var(--font-sans);color:#d9e6f1}
+.experiment-list .lab-option small{display:block;margin-top:4px;font:8px/1.4 var(--font-mono);color:#99b0c8}
+.experiment-list .lab-option.selected{border-color:#a2d9d589;background:#2b5a5940}
+.mode-buttons[data-count='6']{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mode-buttons button[data-mode='lumen'].selected{color:#c8ebff;border-color:#7dc5f2a6;background:#467fa324}
+.mode-buttons button[data-mode='relay'].selected{color:#eed3ff;border-color:#c8a0f0a6;background:#8d5fa324}
+.beam-icon.lumen{color:#88cfff}.beam-icon.lumen:before{top:5px;height:3px;box-shadow:0 0 5px currentColor}
+.beam-icon.relay{color:#d6aaff}.beam-icon.relay:before{top:2px;left:2px;width:9px;height:9px;background:none;border:1px solid currentColor;box-shadow:none;transform:rotate(45deg)}
+.beam-icon.relay:after{content:'';position:absolute;top:7px;left:6px;width:8px;height:1px;background:currentColor}
+.relay-preview,.relay-network,.survey-card .relay-network{padding:8px 9px;border:1px solid #b3b8ed4c;border-radius:6px;background:#55558a18;color:#d1ccea;font:8px/1.65 var(--font-mono);margin:7px 0}
+.route-ghost-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:33px;padding:7px 9px;margin:8px 0;border:1px solid #b8d5e144;border-radius:6px;color:#adc9d9;background:#3252631c;font:9px var(--font-mono)}
+.route-ghost-toggle[aria-pressed=true]{color:#def4f0;border-color:#a0ded384;background:#326b6033}
+.route-ghost-toggle>span{font-size:7px;color:#9fb5c8}
+.game-root[data-prototype='route-expansion'] .lane-intel .mobile-gate-letter,.game-root[data-prototype='relay'] .lane-intel .mobile-gate-letter{display:none}
+.game-root[data-prototype='route-expansion'] .lane-intel,.game-root[data-prototype='relay'] .lane-intel{left:30px;right:auto;top:165px;width:235px}
+.game-root[data-prototype='route-expansion'][data-survey='1'] .lane-intel,.game-root[data-prototype='relay'][data-survey='1'] .lane-intel{left:auto;right:30px}
+.game-root[data-prototype='route-expansion'] .lane[data-status=dormant],.game-root[data-prototype='relay'] .lane[data-status=dormant]{opacity:.6}
+.game-root[data-prototype='route-expansion'] .lane[data-status=upcoming],.game-root[data-prototype='relay'] .lane[data-status=upcoming]{border-color:#e4c28b60}
+@media(max-width:760px){
+ .experiment-list .lab-option{min-height:45px;padding:8px 10px}
+ .game-root[data-prototype='route-expansion'] .lane-intel,.game-root[data-prototype='relay'] .lane-intel,.game-root[data-prototype='route-expansion'][data-survey='1'] .lane-intel,.game-root[data-prototype='relay'][data-survey='1'] .lane-intel{left:16px;right:16px;top:150px;width:auto}
+ .game-root[data-prototype='route-expansion'] .lane-intel .mobile-gate-letter,.game-root[data-prototype='relay'] .lane-intel .mobile-gate-letter{display:inline}
+ .game-root[data-prototype='route-expansion'] .lane-intel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .mode-buttons[data-count='6'] .mode-name{font-size:10px;gap:4px}
+ .relay-preview,.relay-network,.survey-card .relay-network{font-size:7px;padding:7px}
+ .game-root[data-prototype='relay'] .placement,.game-root[data-prototype='route-expansion'] .placement{max-height:calc(100dvh - 290px)}
+ .game-root[data-prototype='relay'][data-touch='1'] .placement,.game-root[data-prototype='route-expansion'][data-touch='1'] .placement{max-height:calc(100dvh - 460px)}
+}
+@media(max-height:520px) and (orientation:landscape){
+ .game-root[data-prototype='route-expansion'] .lane-intel,.game-root[data-prototype='relay'] .lane-intel,.game-root[data-prototype='route-expansion'][data-survey='1'] .lane-intel,.game-root[data-prototype='relay'][data-survey='1'] .lane-intel{left:240px;right:16px;top:70px;width:auto;display:flex}
+ .game-root[data-prototype='relay'] .placement,.game-root[data-prototype='route-expansion'] .placement{max-height:calc(100dvh - 150px)}
+ .game-root[data-prototype='relay'][data-touch='1'] .placement,.game-root[data-prototype='route-expansion'][data-touch='1'] .placement{max-height:calc(100dvh - 273px)}
+ .route-ghost-toggle{font-size:8px;padding:6px;min-height:28px}.route-ghost-toggle>span{display:none}
+}
+@media(max-width:760px) and (orientation:portrait){
+ .game-root[data-prototype='route-expansion'] .flight-note,.game-root[data-prototype='relay'] .flight-note{top:215px;bottom:auto}
+ .game-root[data-prototype='route-expansion'] .placement,.game-root[data-prototype='relay'] .placement{max-height:calc(100dvh - 350px)}
+ .game-root[data-prototype='route-expansion'][data-touch='1'] .placement,.game-root[data-prototype='relay'][data-touch='1'] .placement{max-height:calc(100dvh - 520px)}
+ .game-root[data-prototype][data-survey='1']>.lane-intel{left:auto;right:auto;top:auto;width:auto}
+}

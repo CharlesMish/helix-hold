@@ -16,7 +16,7 @@ function dispose(root) {
 {
   for (const ghost of [false, true]) {
     const drone = buildDrone(ghost), sizes = {};
-    for (const mode of ['pierce', 'sweep', 'stasis', 'halo', 'pin', 'stasis', 'pierce']) {
+    for (const mode of ['pierce', 'sweep', 'stasis', 'halo', 'pin', 'lumen', 'relay', 'stasis', 'pierce']) {
       setDroneVisualMode(drone, mode);
       const roles = drone.children.filter(object => object.visible);
       assert.equal(roles.length, 1, 'slot reuse must never leave a previous role visible');
@@ -38,7 +38,7 @@ function dispose(root) {
     assert.ok(sizes.halo.y > sizes.stasis.y, 'Halo spines extend beyond the compact Stasis cage');
     dispose(drone);
   }
-  console.log('✓ Anchored drones and ghosts retain five distinct role geometries with only two visible meshes');
+  console.log('✓ Anchored drones and ghosts retain seven role geometries with only two visible meshes');
 }
 {
   assert.equal(showFieldVisual('halo', null), true);

@@ -402,7 +402,7 @@ test("Existing campaign weapons stay unchanged; Stasis is enabled per arena and 
   assert.deepEqual(LEVELS.slice(0,3).map(l => l.waves.length), [5,5,5]);
   for (let index = 0; index < LEVELS.length; index++) {
     const run = createRun(index); run.ship.x += 5; run.droneMode = "stasis";
-    assert.equal(placementStatus(run) === null, index === CARRIER_TEST_INDEX || run.level.id === "split-crown");
+    assert.equal(placementStatus(run) === null, index === CARRIER_TEST_INDEX || run.level.id === "split-crown" || !!run.level.prototype);
     run.droneMode = "sweep"; assert.equal(tryAnchor(run), null);
     assert.equal(droneBeam(run.drones[0]).dps, index === CARRIER_TEST_INDEX ? 22 : 18);
     assert.equal(droneBeam(run.drones[0]).pierces, false);

@@ -1,7 +1,7 @@
 {
   "name": "helix-hold",
   "private": true,
-  "version": "0.8.1",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "qa": "node qa/check.mjs",
-    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs && node qa/crown-growth.mjs && node qa/render-pools.mjs && node qa/drone-roles.mjs && node qa/drone-economy.mjs && node qa/drone-visuals.mjs",
+    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs && node qa/crown-growth.mjs && node qa/render-pools.mjs && node qa/drone-roles.mjs && node qa/drone-economy.mjs && node qa/drone-visuals.mjs && node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs",
     "test:geometry": "node qa/geometry.mjs",
     "trial:carrier": "node qa/carrier-trial.mjs",
     "study:sweep": "node qa/sweep-study.mjs",
@@ -24,7 +24,10 @@
     "study:drone-roles": "node qa/drone-role-study.mjs",
     "trial:crown-roles": "node qa/crown-growth-trial.mjs --roles",
     "diagram:drones": "node qa/drone-roster.mjs",
-    "study:crown-late": "node qa/crown-late-trial.mjs"
+    "study:crown-late": "node qa/crown-late-trial.mjs",
+    "trial:frontier": "node qa/frontier-trial.mjs",
+    "test:prototypes": "node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs",
+    "diagram:frontier": "node qa/frontier-geometry.mjs --write"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

@@ -1,3 +1,26 @@
+# Helix Hold 0.9.0 — spatial prototypes
+
+Started from authenticated Sites `1c85f390b01b7d3e27278ada85ab9e0f3af76e12` and GitHub `a24e5b2ac3acd4a3734ddc6c9dd38d75348a979c`. Preserve the existing owner-private Site and public repository.
+
+**Latest request:** Charlie explicitly approved building the route-expansion prototype and Relay Lab, prioritizing interesting coils and spatial development over detailed wave balance. This is not a new v0.8.1 playtest. His question about 64 enemies concerned our application pool, not a Three.js engine limit.
+
+- **Helix Frontier:** optional nine-wave spatial test. Three coils open on waves 1/3/6 around a holographic protected box, with separate actual breach ports. West and east have opposing winding; North Vault winds around a horizontal axis. Old routes remain active. Newly opening routes have a toggleable ribbon (G/Survey). Current-wave versus later coverage, independent prices, no fleet cap and unlimited setup remain.
+- **Relay Lab:** optional four-wave A/B test with one Lumen emitter (48 scrap, 8 DPS, 40% timed slow) and cheap Relays (16 + 8 per owned). One fixed redirection shares the source's 76m range budget. Enemies block output; a second receiver stops it. Shared trace/contact geometry drives preview, combat and live link visuals. Stasis/Pin remain for comparison; Halo is absent here. Lumen/Relay reposition and refund-based re-aiming are setup-only; new paid anchors remain possible during combat.
+- Both experiments sit in a separate Lab menu and never write campaign scores. The original five arenas' authored schedules/settings, including Crown's eight-wave checkpoint and optional 9–12, stay unchanged. This is not endless mode and no broad balance retune accompanies it.
+- Enemy storage and corresponding Three instance buffers now grow together beyond the old initial 64. Synthetic 80-enemy spawn and 200-slot allocation checks pass without delayed schedules or random-stream changes. This is not a practical frame-rate benchmark.
+
+The coarse Frontier probe uses one seed, finite legal idealized Pierce poses, earned purchases and an idle pilot. New B contact changes from 0 to 19.94m with one added drone; new C from 4.99 to 28.46m. Earlier drones still deal damage. The growing fleet wins at 100 core with 12 units; a control frozen after wave 2 loses during wave 5. This supports new placement opportunities, not human difficulty or optimal balance. No wave/hull search was performed.
+
+Validation: **100 deterministic checks**, separate solid/field geometry, source-derived route chart inspection, TypeScript and production build. Shared relay geometry, blockers, range conservation, slow expiry, setup refit, prototype score isolation, original arena settings and growing render buffers are covered. Approved browser control remains unavailable; no preview server or alternate browser was used. In-game contrast, link readability, HUD fit, frame rate and human flight comfort remain unverified.
+
+Read `docs/PROTOTYPES_090.md`, `docs/FRONTIER_GEOMETRY.json`, `docs/FRONTIER_TRIAL.json` and `public/frontier-routes.svg`. Reproduce with `npm run test:prototypes`, `npm run diagram:frontier` and `npm run trial:frontier`. Older study outputs remain historical.
+
+Next playtest: does opening B and C create a useful new-line decision while keeping earlier defenses valuable? Separately, can the player read and enjoy the Relay's planned/powered/blocked states and free setup re-aiming? Answer those before extending survival waves or adding multi-hop relays.
+
+---
+
+## Previous v0.8.1 checkpoint
+
 # Helix Hold 0.8.1 — modest late-Crown pressure
 
 Started from authenticated Sites `e5c14b44a47af099d0686d81526a47a7a84d90b3` and GitHub `57e8ef4e81d0f36fc51645720944bd393119187f`. Preserve the existing owner-private Site and public repository.
