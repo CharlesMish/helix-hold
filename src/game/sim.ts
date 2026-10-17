@@ -1,5 +1,23 @@
 import { clamp, forwardOf, hypot3, type Vec3 } from "./math";
-import { beamContact, DRONE_SPECS, insideSphere, insideStasis, STASIS_RADIUS, STASIS_SPEED_SCALE, PIN_DAMAGE, PIN_INTERVAL, PIN_SLOW_DURATION, PIN_SPEED_SCALE, PIN_FLASH_DURATION, LUMEN_SLOW_DURATION, LUMEN_SPEED_SCALE, RELAY_RADIUS, selectBeamTargets, type Beam, type DroneMode } from "./combat";
+import {
+  beamContact,
+  DRONE_SPECS,
+  insideSphere,
+  insideStasis,
+  STASIS_RADIUS,
+  STASIS_SPEED_SCALE,
+  PIN_DAMAGE,
+  PIN_INTERVAL,
+  PIN_SLOW_DURATION,
+  PIN_SPEED_SCALE,
+  PIN_FLASH_DURATION,
+  LUMEN_SLOW_DURATION,
+  LUMEN_SPEED_SCALE,
+  RELAY_RADIUS,
+  selectBeamTargets,
+  type Beam,
+  type DroneMode,
+} from "./combat";
 import { traceRelay, type RelayTrace as Trace } from "./relay";
 export type { RelaySegment } from "./relay";
 export type RelayTrace = Trace<Enemy>;
@@ -227,16 +245,17 @@ export function isModeAvailable(level: LevelDef, mode: DroneMode): boolean {
 
 /** First authored opening, in the same 1-based numbering shown to the player. */
 export function getLaneFirstWave(run: Run, index: number): number {
-  return run.waves.findIndex(w => w.groups.some(g => g.path === index && g.count > 0)) + 1;
+  return run.waves.findIndex((w) => w.groups.some((g) => g.path === index && g.count > 0)) + 1;
 }
 
 export type LaneStatus = "dormant" | "upcoming" | "active" | "cleared";
 /** Gate forecast and live occupancy share one source for the HUD and scene. */
 export function getLaneStatus(run: Run, index: number): LaneStatus {
-  if (run.enemies.some(e => e.alive && e.pathIndex === index)) return "active";
+  if (run.enemies.some((e) => e.alive && e.pathIndex === index)) return "active";
   const pending = run.rest > 0 || run.waveIndex < 0;
   const wave = run.waves[run.waveIndex + (pending ? 1 : 0)];
-  if (wave?.groups.some(g => g.path === index && g.spawned < g.count)) return pending ? "upcoming" : "active";
+  if (wave?.groups.some((g) => g.path === index && g.spawned < g.count))
+    return pending ? "upcoming" : "active";
   const first = getLaneFirstWave(run, index);
   return first > 0 && first > run.waveIndex + (pending ? 2 : 1) ? "dormant" : "cleared";
 }
@@ -282,7 +301,8 @@ function emptyEnemy(): Enemy {
 function setPhase(run: Run, phase: Phase) {
   if (run.phase === phase) return;
   run.phase = phase;
-  if (phase === "win" && !run.level.experiment && !run.continued) run.save = recordWin(run.level.id, run.core);
+  if (phase === "win" && !run.level.experiment && !run.continued)
+    run.save = recordWin(run.level.id, run.core);
   run.onPhase?.(phase, run);
 }
 
@@ -371,7 +391,10 @@ function leakEnemy(run: Run, e: Enemy) {
   const breach = path.pointAt(path.length);
   run.fx.push({ type: "leak", x: breach.x, y: breach.y, z: breach.z });
   run.lastBreach = { pathIndex: e.pathIndex, at: run.time };
-  const laneName = run.level.presentation === "split-crown" || run.level.prototype ? `Gate ${String.fromCharCode(65 + e.pathIndex)}` : `Lane ${e.pathIndex + 1}`;
+  const laneName =
+    run.level.presentation === "split-crown" || run.level.prototype
+      ? `Gate ${String.fromCharCode(65 + e.pathIndex)}`
+      : `Lane ${e.pathIndex + 1}`;
   run.hint = `${laneName} breached. Catch enemies before they reach ${run.level.protectedVolume ? "its port" : "the core"}.`;
   if (run.core <= 0) {
     run.core = 0;
@@ -423,15 +446,21 @@ export function droneBeam(d: Drone): Beam {
     x: d.x + d.ax * 0.7,
     y: d.y + d.ay * 0.7,
     z: d.z + d.az * 0.7,
-    dx: d.ax, dy: d.ay, dz: d.az,
-    dps: d.dps ?? spec.dps, radius: spec.radius, range: spec.range, pierces: spec.pierces,
+    dx: d.ax,
+    dy: d.ay,
+    dz: d.az,
+    dps: d.dps ?? spec.dps,
+    radius: spec.radius,
+    range: spec.range,
+    pierces: spec.pierces,
   };
 }
 
 export type CoverageSegment = { pathIndex: number; points: Vec3[]; metres: number };
 export type BeamCoverage = { segments: CoverageSegment[]; metres: number; sampleRadius: number };
 export type CoverageTiming = { nowMetres: number; laterMetres: number; idleMetres: number };
-export type PlacementPreview = BeamCoverage & CoverageTiming & { drone: Drone; beam: Beam; status: string | null; relayTraces?: RelayTrace[] };
+export type PlacementPreview = BeamCoverage &
+  CoverageTiming & { drone: Drone; beam: Beam; status: string | null; relayTraces?: RelayTrace[] };
 
 /** Keep all highlighted geometry, but distinguish useful traffic from future plans.
  * Now follows the gate HUD: the next setup wave, or pending/live combat traffic.
@@ -441,7 +470,9 @@ export type PlacementPreview = BeamCoverage & CoverageTiming & { drone: Drone; b
 export function getCoverageTiming(run: Run, coverage: BeamCoverage): CoverageTiming {
   const upcoming = run.rest > 0 || run.waveIndex < 0;
   const waveIndex = run.waveIndex + (upcoming ? 1 : 0);
-  const laterLanes = new Set(run.waves.slice(waveIndex + 1).flatMap(w => w.groups.filter(g => g.count > 0).map(g => g.path)));
+  const laterLanes = new Set(
+    run.waves.slice(waveIndex + 1).flatMap((w) => w.groups.filter((g) => g.count > 0).map((g) => g.path)),
+  );
   const timing: CoverageTiming = { nowMetres: 0, laterMetres: 0, idleMetres: 0 };
   const status = run.paths.map((_, index) => getLaneStatus(run, index));
   for (const segment of coverage.segments) {
@@ -484,16 +515,26 @@ export function getBeamCoverage(run: Pick<Run, "paths">, beam: Beam): BeamCovera
 }
 
 /** Sample nominal route centers; Wisps are tested at their actual drifting centers in combat. */
-export function getFieldCoverage(run: Pick<Run, "paths">, center: Vec3, radius = STASIS_RADIUS): BeamCoverage {
+export function getFieldCoverage(
+  run: Pick<Run, "paths">,
+  center: Vec3,
+  radius = STASIS_RADIUS,
+): BeamCoverage {
   const segments: CoverageSegment[] = [];
   let metres = 0;
   run.paths.forEach((path, pathIndex) => {
-    const count = Math.ceil(path.length / 0.5), ds = path.length / count;
+    const count = Math.ceil(path.length / 0.5),
+      ds = path.length / count;
     let segment: CoverageSegment | undefined;
     for (let i = 0; i < count; i++) {
       if (insideSphere(center, path.pointAt((i + 0.5) * ds), radius)) {
-        if (!segment) { segment = { pathIndex, points: [path.pointAt(i * ds)], metres: 0 }; segments.push(segment); }
-        segment.points.push(path.pointAt((i + 1) * ds)); segment.metres += ds; metres += ds;
+        if (!segment) {
+          segment = { pathIndex, points: [path.pointAt(i * ds)], metres: 0 };
+          segments.push(segment);
+        }
+        segment.points.push(path.pointAt((i + 1) * ds));
+        segment.metres += ds;
+        metres += ds;
       } else segment = undefined;
     }
   });
@@ -504,11 +545,14 @@ type RelayRun = Pick<Run, "drones" | "enemies" | "expand" | "shift" | "fieldChec
 /** Project clones, so preview and live connections share Fan/Slide without mutations. */
 function traceFleet(run: RelayRun, fleet: readonly Drone[], includeEnemies: boolean): RelayTrace[] {
   if (run.fieldCheck) return [];
-  const projected = fleet.map(drone => projectDrone({ ...drone }, run.expand, run.shift));
-  const receivers = projected.filter(drone => drone.mode === "relay").map(drone => ({ ...drone, radius: RELAY_RADIUS }));
-  const enemies = includeEnemies ? run.enemies.filter(enemy => enemy.alive) : [];
-  return projected.filter(drone => drone.mode === "lumen")
-    .map(source => traceRelay(source.id, droneBeam(source), receivers, enemies));
+  const projected = fleet.map((drone) => projectDrone({ ...drone }, run.expand, run.shift));
+  const receivers = projected
+    .filter((drone) => drone.mode === "relay")
+    .map((drone) => ({ ...drone, radius: RELAY_RADIUS }));
+  const enemies = includeEnemies ? run.enemies.filter((enemy) => enemy.alive) : [];
+  return projected
+    .filter((drone) => drone.mode === "lumen")
+    .map((source) => traceRelay(source.id, droneBeam(source), receivers, enemies));
 }
 
 /** Planned connections omit enemies; live connections expose actual blockers. */
@@ -518,18 +562,24 @@ export function getRelayTraces(run: RelayRun, includeEnemies = false): RelayTrac
 
 /** Union sampling counts a route metre only once even where two segments overlap. */
 function getRelayCoverage(run: Pick<Run, "paths">, traces: readonly RelayTrace[]): BeamCoverage {
-  const beams = traces.flatMap(trace => trace.segments.map(segment => segment.beam));
+  const beams = traces.flatMap((trace) => trace.segments.map((segment) => segment.beam));
   const segments: CoverageSegment[] = [];
   const sampleRadius = KINDS.shard.radius;
   let metres = 0;
   run.paths.forEach((path, pathIndex) => {
-    const count = Math.max(1, Math.ceil(path.length / 0.5)), ds = path.length / count;
+    const count = Math.max(1, Math.ceil(path.length / 0.5)),
+      ds = path.length / count;
     let segment: CoverageSegment | undefined;
     for (let i = 0; i < count; i++) {
       const target = { ...path.pointAt((i + 0.5) * ds), radius: sampleRadius };
-      if (beams.some(beam => beamContact(beam, target) !== null)) {
-        if (!segment) { segment = { pathIndex, points: [path.pointAt(i * ds)], metres: 0 }; segments.push(segment); }
-        segment.points.push(path.pointAt((i + 1) * ds)); segment.metres += ds; metres += ds;
+      if (beams.some((beam) => beamContact(beam, target) !== null)) {
+        if (!segment) {
+          segment = { pathIndex, points: [path.pointAt(i * ds)], metres: 0 };
+          segments.push(segment);
+        }
+        segment.points.push(path.pointAt((i + 1) * ds));
+        segment.metres += ds;
+        metres += ds;
       } else segment = undefined;
     }
   });
@@ -537,15 +587,23 @@ function getRelayCoverage(run: Pick<Run, "paths">, traces: readonly RelayTrace[]
 }
 
 function tracesForDrone(traces: RelayTrace[], drone: Drone): RelayTrace[] {
-  return traces.filter(trace => drone.mode === "lumen" ? trace.sourceId === drone.id : trace.relayId === drone.id);
+  return traces.filter((trace) =>
+    drone.mode === "lumen" ? trace.sourceId === drone.id : trace.relayId === drone.id,
+  );
 }
 
 export function getDroneCoverage(run: Pick<Run, "paths"> & Partial<RelayRun>, drone: Drone): BeamCoverage {
   if (drone.mode === "lumen" || drone.mode === "relay") {
     if (!run.drones || !run.enemies) return { segments: [], metres: 0, sampleRadius: KINDS.shard.radius };
     // Replace the candidate by identity instead of adding a second moving unit.
-    const fleet = [...run.drones.filter(d => d.id !== drone.id), drone];
-    const relayRun: RelayRun = { drones: fleet, enemies: run.enemies, expand: run.expand ?? 0, shift: run.shift ?? 0, fieldCheck: run.fieldCheck ?? null };
+    const fleet = [...run.drones.filter((d) => d.id !== drone.id), drone];
+    const relayRun: RelayRun = {
+      drones: fleet,
+      enemies: run.enemies,
+      expand: run.expand ?? 0,
+      shift: run.shift ?? 0,
+      fieldCheck: run.fieldCheck ?? null,
+    };
     return getRelayCoverage(run, tracesForDrone(traceFleet(relayRun, fleet, false), drone));
   }
   return drone.mode === "stasis" || drone.mode === "halo"
@@ -554,13 +612,19 @@ export function getDroneCoverage(run: Pick<Run, "paths"> & Partial<RelayRun>, dr
 }
 
 function insideAnyStasis(run: Pick<Run, "drones">, point: Vec3): boolean {
-  return run.drones.some(d => d.mode === "stasis" && insideStasis(d, point));
+  return run.drones.some((d) => d.mode === "stasis" && insideStasis(d, point));
 }
 
-export function enemySpeedScale(run: Pick<Run, "drones">, point: Vec3 & { pinSlowRemaining?: number; lumenSlowRemaining?: number }): number {
+export function enemySpeedScale(
+  run: Pick<Run, "drones">,
+  point: Vec3 & { pinSlowRemaining?: number; lumenSlowRemaining?: number },
+): number {
   const fieldScale = insideAnyStasis(run, point) ? STASIS_SPEED_SCALE : 1;
-  return Math.min(fieldScale, (point.pinSlowRemaining ?? 0) > 0 ? PIN_SPEED_SCALE : 1,
-    (point.lumenSlowRemaining ?? 0) > 0 ? LUMEN_SPEED_SCALE : 1);
+  return Math.min(
+    fieldScale,
+    (point.pinSlowRemaining ?? 0) > 0 ? PIN_SPEED_SCALE : 1,
+    (point.lumenSlowRemaining ?? 0) > 0 ? LUMEN_SPEED_SCALE : 1,
+  );
 }
 
 function noteStasisContact(run: Run, enemy: Enemy): void {
@@ -574,21 +638,27 @@ function noteStasisContact(run: Run, enemy: Enemy): void {
 export function startFieldCheck(run: Run): string | null {
   if (!hasStasis(run.level)) return "Field check is available in Carrier Test Flight and Split Crown";
   if (run.fieldCheck) return "Field check is already running";
-  if ((run.phase !== "play" && run.phase !== "pause") || run.rest <= 0 || run.enemies.some(e => e.alive)) return "Field check is available during setup";
+  if ((run.phase !== "play" && run.phase !== "pause") || run.rest <= 0 || run.enemies.some((e) => e.alive))
+    return "Field check is available during setup";
   if (run.repositionId !== null) return "Finish or cancel repositioning before checking fields";
-  if (!run.drones.some(d => d.mode === "stasis")) return "Anchor a Stasis drone before checking fields";
+  if (!run.drones.some((d) => d.mode === "stasis")) return "Anchor a Stasis drone before checking fields";
   run.fieldCheck = {
-    enemies: run.enemies.map(e => ({ ...e })), stasisTouched: run.stasisTouched,
-    stasisExposure: run.stasisExposure, randomState: run.randomState,
-    hint: run.hint, banner: run.banner,
+    enemies: run.enemies.map((e) => ({ ...e })),
+    stasisTouched: run.stasisTouched,
+    stasisExposure: run.stasisExposure,
+    randomState: run.randomState,
+    hint: run.hint,
+    banner: run.banner,
   };
-  run.stasisTouched = 0; run.stasisExposure = 0;
+  run.stasisTouched = 0;
+  run.stasisExposure = 0;
   for (const enemy of run.enemies) enemy.alive = false;
   for (let pathIndex = 0; pathIndex < run.paths.length; pathIndex++) spawnEnemy(run, "barge", pathIndex);
   run.shipHitting = false;
   for (const drone of run.drones) drone.hit = false;
   run.banner = "Field check · harmless targets";
-  run.hint = "One harmless target follows each route. Amber brackets mean slowed; end the check to resume setup.";
+  run.hint =
+    "One harmless target follows each route. Amber brackets mean slowed; end the check to resume setup.";
   return null;
 }
 
@@ -596,53 +666,110 @@ export function endFieldCheck(run: Run): void {
   const saved = run.fieldCheck;
   if (!saved) return;
   run.enemies.forEach((enemy, index) => Object.assign(enemy, saved.enemies[index] ?? emptyEnemy()));
-  run.stasisTouched = saved.stasisTouched; run.stasisExposure = saved.stasisExposure;
-  run.randomState = saved.randomState; run.hint = saved.hint; run.banner = saved.banner;
+  run.stasisTouched = saved.stasisTouched;
+  run.stasisExposure = saved.stasisExposure;
+  run.randomState = saved.randomState;
+  run.hint = saved.hint;
+  run.banner = saved.banner;
   run.fieldCheck = null;
 }
 
 /** Capture the actual state rather than inferring contact from screen overlap. */
 export function getStasisReport(run: Run, build: string) {
   const center = (p: Vec3) => ({ x: p.x, y: p.y, z: p.z });
-  const fields = run.drones.filter(d => d.mode === "stasis");
-  const alive = run.enemies.filter(e => e.alive);
+  const fields = run.drones.filter((d) => d.mode === "stasis");
+  const alive = run.enemies.filter((e) => e.alive);
   return {
-    build, level: run.levelId, phase: run.phase, wave: run.waveIndex + 1,
-    mode: run.droneMode, waveMode: run.waveMode, rest: run.rest,
-    fieldCheck: !!run.fieldCheck, time: run.time, waveTime: run.waveTime,
-    ship: center(run.ship), lattice: { fan: run.expand, slide: run.shift },
-    drones: run.drones.map(d => ({ id: d.id, mode: d.mode, paid: d.paid,
-      center: center(d), restCenter: { x: d.bx, y: d.by, z: d.bz },
-      coveredMetresByLane: d.mode === "stasis" ? run.paths.map((path, i) => ({ lane: i + 1, route: path.id,
-        metres: getFieldCoverage(run, d).segments.filter(s => s.pathIndex === i).reduce((n, s) => n + s.metres, 0) })) : [],
+    build,
+    level: run.levelId,
+    phase: run.phase,
+    wave: run.waveIndex + 1,
+    mode: run.droneMode,
+    waveMode: run.waveMode,
+    rest: run.rest,
+    fieldCheck: !!run.fieldCheck,
+    time: run.time,
+    waveTime: run.waveTime,
+    ship: center(run.ship),
+    lattice: { fan: run.expand, slide: run.shift },
+    drones: run.drones.map((d) => ({
+      id: d.id,
+      mode: d.mode,
+      paid: d.paid,
+      center: center(d),
+      restCenter: { x: d.bx, y: d.by, z: d.bz },
+      coveredMetresByLane:
+        d.mode === "stasis"
+          ? run.paths.map((path, i) => ({
+              lane: i + 1,
+              route: path.id,
+              metres: getFieldCoverage(run, d)
+                .segments.filter((s) => s.pathIndex === i)
+                .reduce((n, s) => n + s.metres, 0),
+            }))
+          : [],
     })),
-    enemies: alive.map(e => ({ kind: e.kind, lane: e.pathIndex + 1, center: center(e), distanceAlongRoute: e.dist,
-      baseSpeed: e.speed, actualScale: e.speedScale, expectedScale: enemySpeedScale(run, e), effectiveSpeed: e.speed * e.speedScale,
+    enemies: alive.map((e) => ({
+      kind: e.kind,
+      lane: e.pathIndex + 1,
+      center: center(e),
+      distanceAlongRoute: e.dist,
+      baseSpeed: e.speed,
+      actualScale: e.speedScale,
+      expectedScale: enemySpeedScale(run, e),
+      effectiveSpeed: e.speed * e.speedScale,
       pinSlowRemaining: e.pinSlowRemaining,
       lumenSlowRemaining: e.lumenSlowRemaining,
-      nearestFieldDistance: fields.length ? Math.min(...fields.map(d => Math.hypot(d.x - e.x, d.y - e.y, d.z - e.z))) : null,
-      insideFieldIds: fields.filter(d => insideStasis(d, e)).map(d => d.id), stasisSeen: e.stasisSeen,
+      nearestFieldDistance: fields.length
+        ? Math.min(...fields.map((d) => Math.hypot(d.x - e.x, d.y - e.y, d.z - e.z)))
+        : null,
+      insideFieldIds: fields.filter((d) => insideStasis(d, e)).map((d) => d.id),
+      stasisSeen: e.stasisSeen,
     })),
-    contact: { alive: alive.length, slowedNow: alive.filter(e => insideAnyStasis(run, e)).length,
-      geometricallyInsideNow: alive.filter(e => fields.some(d => insideStasis(d, e))).length,
-      touched: run.stasisTouched, enemySeconds: run.stasisExposure },
+    contact: {
+      alive: alive.length,
+      slowedNow: alive.filter((e) => insideAnyStasis(run, e)).length,
+      geometricallyInsideNow: alive.filter((e) => fields.some((d) => insideStasis(d, e))).length,
+      touched: run.stasisTouched,
+      enemySeconds: run.stasisExposure,
+    },
   };
 }
 
 function proposedDrone(run: Run): Drone {
-  const moving = run.drones.find(d => d.id === run.repositionId);
-  return projectDrone({
-    id: run.nextDroneId,
-    mode: run.droneMode,
-    dps: run.droneMode === "sweep" ? run.level.sweepDps ?? DRONE_SPECS.sweep.dps : DRONE_SPECS[run.droneMode].dps,
-    paid: getAnchorCost(run),
-    kills: 0, damage: 0, hit: false, shotCooldown: 0, shotFlash: 0, shotTarget: null,
-    ...moving,
-    bx: run.ship.x, by: run.ship.y, bz: run.ship.z,
-    fx: run.aimx, fy: run.aimy, fz: run.aimz,
-    x: run.ship.x, y: run.ship.y, z: run.ship.z,
-    ax: run.aimx, ay: run.aimy, az: run.aimz,
-  }, run.expand, run.shift);
+  const moving = run.drones.find((d) => d.id === run.repositionId);
+  return projectDrone(
+    {
+      id: run.nextDroneId,
+      mode: run.droneMode,
+      dps:
+        run.droneMode === "sweep"
+          ? (run.level.sweepDps ?? DRONE_SPECS.sweep.dps)
+          : DRONE_SPECS[run.droneMode].dps,
+      paid: getAnchorCost(run),
+      kills: 0,
+      damage: 0,
+      hit: false,
+      shotCooldown: 0,
+      shotFlash: 0,
+      shotTarget: null,
+      ...moving,
+      bx: run.ship.x,
+      by: run.ship.y,
+      bz: run.ship.z,
+      fx: run.aimx,
+      fy: run.aimy,
+      fz: run.aimz,
+      x: run.ship.x,
+      y: run.ship.y,
+      z: run.ship.z,
+      ax: run.aimx,
+      ay: run.aimy,
+      az: run.aimz,
+    },
+    run.expand,
+    run.shift,
+  );
 }
 
 export function getPlacementPreview(run: Run): PlacementPreview {
@@ -660,9 +787,18 @@ export function getPlacementPreview(run: Run): PlacementPreview {
     const segments = coverage.segments.filter((segment) => announced.has(segment.pathIndex));
     coverage = { ...coverage, segments, metres: segments.reduce((sum, segment) => sum + segment.metres, 0) };
   }
-  const relayTraces = drone.mode === "lumen" || drone.mode === "relay"
-    ? tracesForDrone(traceFleet(run, [...run.drones.filter(d => d.id !== drone.id), drone], false), drone) : undefined;
-  return { ...coverage, ...getCoverageTiming(run, coverage), drone, beam, status: placementStatus(run), relayTraces };
+  const relayTraces =
+    drone.mode === "lumen" || drone.mode === "relay"
+      ? tracesForDrone(traceFleet(run, [...run.drones.filter((d) => d.id !== drone.id), drone], false), drone)
+      : undefined;
+  return {
+    ...coverage,
+    ...getCoverageTiming(run, coverage),
+    drone,
+    beam,
+    status: placementStatus(run),
+    relayTraces,
+  };
 }
 
 /** All damage sources credit only remaining hull and award a kill exactly once. */
@@ -691,13 +827,21 @@ function weapons(run: Run, dt: number) {
   run.shipHitting = false;
   if (run.phase !== "play") return;
   const shipBeam: Beam = {
-      x: run.ship.x + run.aimx * 1.15,
-      y: run.ship.y + run.aimy * 1.15,
-      z: run.ship.z + run.aimz * 1.15,
-      dx: run.aimx, dy: run.aimy, dz: run.aimz,
-      dps: SHIP_DPS, radius: SHIP_RADIUS, range: BEAM_RANGE, pierces: true,
+    x: run.ship.x + run.aimx * 1.15,
+    y: run.ship.y + run.aimy * 1.15,
+    z: run.ship.z + run.aimz * 1.15,
+    dx: run.aimx,
+    dy: run.aimy,
+    dz: run.aimz,
+    dps: SHIP_DPS,
+    radius: SHIP_RADIUS,
+    range: BEAM_RANGE,
+    pierces: true,
   };
-  for (const enemy of selectBeamTargets(shipBeam, run.enemies.filter(e => e.alive))) {
+  for (const enemy of selectBeamTargets(
+    shipBeam,
+    run.enemies.filter((e) => e.alive),
+  )) {
     damageEnemy(run, enemy, shipBeam.dps * dt);
   }
   for (const drone of run.drones) {
@@ -705,9 +849,12 @@ function weapons(run: Run, dt: number) {
     if (drone.mode === "lumen") {
       // Resolve after previous damage sources, so a killed obstruction cannot
       // absorb this source's energy. Only this emitter receives contribution.
-      const trace = traceRelay(drone.id, droneBeam(drone),
-        run.drones.filter(d => d.mode === "relay").map(d => ({ ...d, radius: RELAY_RADIUS })),
-        run.enemies.filter(e => e.alive));
+      const trace = traceRelay(
+        drone.id,
+        droneBeam(drone),
+        run.drones.filter((d) => d.mode === "relay").map((d) => ({ ...d, radius: RELAY_RADIUS })),
+        run.enemies.filter((e) => e.alive),
+      );
       if (trace.target) {
         damageEnemy(run, trace.target, DRONE_SPECS.lumen.dps * dt, drone);
         if (trace.target.alive) {
@@ -731,7 +878,10 @@ function weapons(run: Run, dt: number) {
       drone.shotFlash = Math.max(0, (drone.shotFlash ?? 0) - dt);
       if (drone.shotFlash === 0) drone.shotTarget = null;
       if (drone.shotCooldown > 1e-9) continue;
-      const target = selectBeamTargets(beam, run.enemies.filter(e => e.alive))[0];
+      const target = selectBeamTargets(
+        beam,
+        run.enemies.filter((e) => e.alive),
+      )[0];
       if (!target) continue;
       // A ready weapon fires once. Time spent without a target never banks a burst.
       drone.shotCooldown = PIN_INTERVAL;
@@ -744,7 +894,10 @@ function weapons(run: Run, dt: number) {
       }
       continue;
     }
-    for (const enemy of selectBeamTargets(beam, run.enemies.filter(e => e.alive))) {
+    for (const enemy of selectBeamTargets(
+      beam,
+      run.enemies.filter((e) => e.alive),
+    )) {
       damageEnemy(run, enemy, beam.dps * dt, drone);
     }
   }
@@ -755,7 +908,10 @@ function updateWaves(run: Run, dt: number) {
   if (run.phase !== "play") return;
   if (run.fieldCheck) return;
   if (run.rest > 0) {
-    if (run.repositionId !== null) { run.banner = "Repositioning · setup held"; return; }
+    if (run.repositionId !== null) {
+      run.banner = "Repositioning · setup held";
+      return;
+    }
     // Preparation is live flight. Manual mode waits for an intentional launch;
     // the positive rest value remains a waiting sentinel rather than ticking.
     if (run.waveMode === "manual") {
@@ -787,11 +943,15 @@ function updateWaves(run: Run, dt: number) {
       run.rest = 8;
       run.banner = run.waveMode === "manual" ? "Lane clear · launch when ready" : "Lane clear  8";
       const cost = getAnchorCost(run);
-      const placement = run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
-        ? `Next drone costs ${cost} scrap. ` : "Adjust your defense. ";
-      run.hint = placement + (run.waveMode === "manual"
-        ? "Take your time, then launch the next wave."
-        : "The next wave launches in 8 seconds.");
+      const placement =
+        run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
+          ? `Next drone costs ${cost} scrap. `
+          : "Adjust your defense. ";
+      run.hint =
+        placement +
+        (run.waveMode === "manual"
+          ? "Take your time, then launch the next wave."
+          : "The next wave launches in 8 seconds.");
     }
   }
 }
@@ -809,12 +969,18 @@ function moveEnemies(run: Run, dt: number) {
     const lumenTime = Math.min(dt, e.lumenSlowRemaining ?? 0);
     // Preserve the original movement arithmetic when no new effect is present.
     // With both timers, integrate each expiry boundary using the strongest slow.
-    if (lumenTime === 0) e.dist += e.speed * (pinTime * Math.min(fieldScale, PIN_SPEED_SCALE) + (dt - pinTime) * fieldScale);
+    if (lumenTime === 0)
+      e.dist += e.speed * (pinTime * Math.min(fieldScale, PIN_SPEED_SCALE) + (dt - pinTime) * fieldScale);
     else {
       const boundaries = [...new Set([0, pinTime, lumenTime, dt])].sort((a, b) => a - b);
       for (let i = 1; i < boundaries.length; i++) {
-        const start = boundaries[i - 1]!, end = boundaries[i]!;
-        const scale = Math.min(fieldScale, start < pinTime ? PIN_SPEED_SCALE : 1, start < lumenTime ? LUMEN_SPEED_SCALE : 1);
+        const start = boundaries[i - 1]!,
+          end = boundaries[i]!;
+        const scale = Math.min(
+          fieldScale,
+          start < pinTime ? PIN_SPEED_SCALE : 1,
+          start < lumenTime ? LUMEN_SPEED_SCALE : 1,
+        );
         e.dist += e.speed * (end - start) * scale;
       }
     }
@@ -842,14 +1008,17 @@ function moveEnemies(run: Run, dt: number) {
 export function placementStatus(run: Run): string | null {
   if (run.fieldCheck) return "End the field check before anchoring";
   if (run.phase !== "play") return "Resume flight to anchor";
-  if (!isModeAvailable(run.level, run.droneMode)) return run.droneMode === "stasis"
-    ? "Stasis is available in Carrier Test Flight and Split Crown"
-    : run.droneMode === "lumen" || run.droneMode === "relay" ? "Lumen and Relay are available in Relay Lab"
-    : "Halo and Pin are available in Split Crown";
-  const moving = run.drones.find(d => d.id === run.repositionId);
+  if (!isModeAvailable(run.level, run.droneMode))
+    return run.droneMode === "stasis"
+      ? "Stasis is available in Carrier Test Flight and Split Crown"
+      : run.droneMode === "lumen" || run.droneMode === "relay"
+        ? "Lumen and Relay are available in Relay Lab"
+        : "Halo and Pin are available in Split Crown";
+  const moving = run.drones.find((d) => d.id === run.repositionId);
   if (run.repositionId !== null && (!moving || run.rest <= 0)) return "Reposition only during setup";
   if (!moving) {
-    if (run.droneMode === "lumen" && run.drones.some(d => d.mode === "lumen")) return "Relay Lab supports one Lumen emitter";
+    if (run.droneMode === "lumen" && run.drones.some((d) => d.mode === "lumen"))
+      return "Relay Lab supports one Lumen emitter";
     if (run.drones.length >= getDroneLimit(run.level)) return "Lattice is full";
     const cost = getAnchorCost(run);
     if (run.scrap < cost) return `Need ${cost} scrap to anchor`;
@@ -873,7 +1042,7 @@ export function tryAnchor(run: Run): string | null {
   const status = placementStatus(run);
   if (status) return status;
   const drone = proposedDrone(run);
-  const moving = run.drones.find(d => d.id === run.repositionId);
+  const moving = run.drones.find((d) => d.id === run.repositionId);
   if (moving) Object.assign(moving, drone);
   else {
     run.drones.push(drone);
@@ -905,7 +1074,9 @@ export function tryAnchor(run: Run): string | null {
   run.aimx = f.x;
   run.aimy = f.y;
   run.aimz = f.z;
-  run.hint = moving ? `Drone ${drone.id} repositioned at no cost. Back at the hangar.` : `${DRONE_SPECS[drone.mode].label} anchored. Survey during setup to select and reposition any drone.`;
+  run.hint = moving
+    ? `Drone ${drone.id} repositioned at no cost. Back at the hangar.`
+    : `${DRONE_SPECS[drone.mode].label} anchored. Survey during setup to select and reposition any drone.`;
   return null;
 }
 
@@ -915,7 +1086,8 @@ export function recallLast(run: Run): string | null {
   if (run.phase !== "play") return "Resume flight to recall";
   if (run.repositionId !== null) return "Finish or cancel repositioning first";
   const last = run.drones[run.drones.length - 1];
-  if (run.rest <= 0 && (last?.mode === "lumen" || last?.mode === "relay")) return "Recall Lumen/Relay during setup";
+  if (run.rest <= 0 && (last?.mode === "lumen" || last?.mode === "relay"))
+    return "Recall Lumen/Relay during setup";
   const drone = run.drones.pop();
   if (!drone) return "No drone to recall";
   run.scrap += drone.paid;
@@ -932,15 +1104,32 @@ export function recallLast(run: Run): string | null {
 export function beginReposition(run: Run, id: number): string | null {
   if (run.fieldCheck) return "End the field check before repositioning";
   if ((run.phase !== "play" && run.phase !== "pause") || run.rest <= 0) return "Reposition only during setup";
-  const drone = run.drones.find(d => d.id === id);
+  const drone = run.drones.find((d) => d.id === id);
   if (!drone) return "Select a drone first";
   run.selectedDroneId = id;
   run.repositionId = id;
   run.droneMode = drone.mode;
-  run.expand = 0; run.shift = 0; updateLattice(run);
-  Object.assign(run.ship, { x: drone.bx, y: drone.by, z: drone.bz, yaw: Math.atan2(-drone.fx, -drone.fz), pitch: Math.asin(clamp(drone.fy, -1, 1)), vx: 0, vy: 0, vz: 0, yawRate: 0, pitchRate: 0, roll: 0 });
-  run.aimx = drone.fx; run.aimy = drone.fy; run.aimz = drone.fz;
-  run.speed = 0; run.thrustVisual = 0;
+  run.expand = 0;
+  run.shift = 0;
+  updateLattice(run);
+  Object.assign(run.ship, {
+    x: drone.bx,
+    y: drone.by,
+    z: drone.bz,
+    yaw: Math.atan2(-drone.fx, -drone.fz),
+    pitch: Math.asin(clamp(drone.fy, -1, 1)),
+    vx: 0,
+    vy: 0,
+    vz: 0,
+    yawRate: 0,
+    pitchRate: 0,
+    roll: 0,
+  });
+  run.aimx = drone.fx;
+  run.aimy = drone.fy;
+  run.aimz = drone.fz;
+  run.speed = 0;
+  run.thrustVisual = 0;
   run.rest = 8;
   run.hint = `Moving drone ${id}. Fly and aim, then anchor at no cost; cancel keeps its old position.`;
   return null;
@@ -955,14 +1144,18 @@ export function cancelReposition(run: Run): void {
 
 export function recallSelected(run: Run, id: number): string | null {
   if (run.fieldCheck) return "End the field check before recalling drones";
-  if ((run.phase !== "play" && run.phase !== "pause") || run.rest <= 0) return "Selected recall is available during setup";
-  const index = run.drones.findIndex(d => d.id === id);
+  if ((run.phase !== "play" && run.phase !== "pause") || run.rest <= 0)
+    return "Selected recall is available during setup";
+  const index = run.drones.findIndex((d) => d.id === id);
   if (index < 0) return "Select a drone first";
   if (run.repositionId === id) cancelReposition(run);
   const [drone] = run.drones.splice(index, 1);
   run.scrap += drone!.paid;
   if (run.selectedDroneId === id) run.selectedDroneId = null;
-  if (!run.drones.length) { run.expand = 0; run.shift = 0; }
+  if (!run.drones.length) {
+    run.expand = 0;
+    run.shift = 0;
+  }
   run.hint = `Drone ${id} recalled · ${drone!.paid} scrap returned.`;
   return null;
 }
@@ -970,8 +1163,9 @@ export function recallSelected(run: Run, id: number): string | null {
 /** The ordinary campaign result is already recorded; continuation cannot overwrite it. */
 export function beginContinuation(run: Run): boolean {
   const extra = run.level.continuation;
-  if (run.phase !== "win" || run.continued || !extra?.length || run.waveIndex !== run.level.waves.length - 1) return false;
-  run.waves.push(...extra.map(w => ({ ...w, groups: w.groups.map(g => ({ ...g, spawned: 0 })) })));
+  if (run.phase !== "win" || run.continued || !extra?.length || run.waveIndex !== run.level.waves.length - 1)
+    return false;
+  run.waves.push(...extra.map((w) => ({ ...w, groups: w.groups.map((g) => ({ ...g, spawned: 0 })) })));
   run.continued = true;
   run.carrierOutcome = "pending";
   run.waveMode = "manual";
@@ -983,15 +1177,24 @@ export function beginContinuation(run: Run): boolean {
 }
 
 export function nextWaveNow(run: Run): void {
-  if (run.fieldCheck) { run.hint = "End the field check before launching"; return; }
+  if (run.fieldCheck) {
+    run.hint = "End the field check before launching";
+    return;
+  }
   if (run.phase !== "play" || run.rest <= 0) return;
-  if (run.repositionId !== null) { run.hint = "Finish or cancel repositioning before launching"; return; }
+  if (run.repositionId !== null) {
+    run.hint = "Finish or cancel repositioning before launching";
+    return;
+  }
   beginWave(run, run.waveIndex + 1);
 }
 
 /** Enabling automatic progress always grants a fresh setup window. */
 export function setWaveMode(run: Run, mode: WaveMode): void {
-  if (run.fieldCheck) { run.hint = "End the field check before changing wave pacing"; return; }
+  if (run.fieldCheck) {
+    run.hint = "End the field check before changing wave pacing";
+    return;
+  }
   if (run.waveMode === mode) return;
   run.waveMode = mode;
   if (run.rest <= 0) return;
@@ -1177,11 +1380,15 @@ export function createRun(levelIndex: number, seed = 0x48454c49): Run {
 }
 
 export function beginWave(run: Run, index: number) {
-  if (run.fieldCheck) { run.hint = "End the field check before launching"; return; }
+  if (run.fieldCheck) {
+    run.hint = "End the field check before launching";
+    return;
+  }
   run.waveIndex = index;
   run.waveTime = 0;
   run.rest = 0;
-  if (run.waves[index]?.groups.some(g => g.kind === "carrier" && g.count > 0)) run.carrierOutcome = "pending";
+  if (run.waves[index]?.groups.some((g) => g.kind === "carrier" && g.count > 0))
+    run.carrierOutcome = "pending";
   run.banner = `Wave ${index + 1} / ${run.waves.length}`;
   run.hint = run.waves[index]?.lesson ?? "Wave launched. Your drones hold their lines while you fly.";
 }

@@ -15,12 +15,24 @@ export const RELAY_RADIUS = 1;
 
 export const DRONE_SPECS = {
   lumen: {
-    label: "Lumen", dps: 8, radius: 1.1, range: 76, color: 0xa4ecff,
-    description: "One emitter. Fixed light slows the nearest enemy 40% for 2.4s and deals 8 DPS. One Relay can turn its remaining range.", pierces: false,
+    label: "Lumen",
+    dps: 8,
+    radius: 1.1,
+    range: 76,
+    color: 0xa4ecff,
+    description:
+      "One emitter. Fixed light slows the nearest enemy 40% for 2.4s and deals 8 DPS. One Relay can turn its remaining range.",
+    pierces: false,
   },
   relay: {
-    label: "Relay", dps: 0, radius: RELAY_RADIUS, range: 0, color: 0xf1bdff,
-    description: "No weapon. Receives Lumen light and redirects it along your aim. One turn; shared range. Re-aim free during setup.", pierces: false,
+    label: "Relay",
+    dps: 0,
+    radius: RELAY_RADIUS,
+    range: 0,
+    color: 0xf1bdff,
+    description:
+      "No weapon. Receives Lumen light and redirects it along your aim. One turn; shared range. Re-aim free during setup.",
+    pierces: false,
   },
   pierce: {
     label: "Pierce",
@@ -32,16 +44,31 @@ export const DRONE_SPECS = {
     pierces: true,
   },
   stasis: {
-    label: "Stasis", dps: 0, radius: STASIS_RADIUS, range: 0, color: 0xffbb79,
-    description: "6m sphere. Slows enemies by 50%; no damage. Fields do not stack.", pierces: false,
+    label: "Stasis",
+    dps: 0,
+    radius: STASIS_RADIUS,
+    range: 0,
+    color: 0xffbb79,
+    description: "6m sphere. Slows enemies by 50%; no damage. Fields do not stack.",
+    pierces: false,
   },
   halo: {
-    label: "Halo", dps: 18, radius: HALO_RADIUS, range: 0, color: 0xff789d,
-    description: "Passive 5m sphere. Deals 18 damage per second to every enemy inside; no aiming needed.", pierces: true,
+    label: "Halo",
+    dps: 18,
+    radius: HALO_RADIUS,
+    range: 0,
+    color: 0xff789d,
+    description: "Passive 5m sphere. Deals 18 damage per second to every enemy inside; no aiming needed.",
+    pierces: true,
   },
   pin: {
-    label: "Pin", dps: PIN_DAMAGE / PIN_INTERVAL, radius: 1.1, range: 60, color: 0x9fdc87,
-    description: "Fixed line. Every 1.6s, hits the nearest target for 24 damage and slows it 35% for 2.4s.", pierces: false,
+    label: "Pin",
+    dps: PIN_DAMAGE / PIN_INTERVAL,
+    radius: 1.1,
+    range: 60,
+    color: 0x9fdc87,
+    description: "Fixed line. Every 1.6s, hits the nearest target for 24 damage and slows it 35% for 2.4s.",
+    pierces: false,
   },
   sweep: {
     label: "Sweep",
@@ -108,10 +135,17 @@ export function selectBeamTargets<T extends BeamTarget>(beam: Beam, targets: rea
 }
 
 /** Field membership follows the enemy center in world space, not hull radius or screen position. */
-export function insideSphere(center: { x: number; y: number; z: number }, point: { x: number; y: number; z: number }, radius: number): boolean {
+export function insideSphere(
+  center: { x: number; y: number; z: number },
+  point: { x: number; y: number; z: number },
+  radius: number,
+): boolean {
   return (center.x - point.x) ** 2 + (center.y - point.y) ** 2 + (center.z - point.z) ** 2 <= radius ** 2;
 }
 
-export function insideStasis(center: { x: number; y: number; z: number }, point: { x: number; y: number; z: number }): boolean {
+export function insideStasis(
+  center: { x: number; y: number; z: number },
+  point: { x: number; y: number; z: number },
+): boolean {
   return insideSphere(center, point, STASIS_RADIUS);
 }

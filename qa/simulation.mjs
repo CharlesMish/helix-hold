@@ -5,16 +5,39 @@ import { build } from "esbuild";
 
 const bundle = await build({
   stdin: {
-    contents: 'export * from "./src/game/sim"; export * from "./src/game/combat"; export * from "./src/game/paths";',
+    contents:
+      'export * from "./src/game/sim"; export * from "./src/game/combat"; export * from "./src/game/paths";',
     resolveDir: new URL("../", import.meta.url).pathname,
   },
-  bundle: true, platform: "node", format: "esm", write: false,
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
 });
-const api = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString("base64")}`);
+const api = await import(
+  `data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString("base64")}`
+);
 const {
-  createRun, step, tryAnchor, placementStatus, getPlacementPreview, recallLast,
-  nextWaveNow, setWaveMode, getBeamCoverage, droneBeam, beamContact, selectBeamTargets,
-  DRONE_SPECS, anchorCost, buildPath, LEVELS, CARRIER_TEST_INDEX, insideStasis, enemySpeedScale, getFieldCoverage,
+  createRun,
+  step,
+  tryAnchor,
+  placementStatus,
+  getPlacementPreview,
+  recallLast,
+  nextWaveNow,
+  setWaveMode,
+  getBeamCoverage,
+  droneBeam,
+  beamContact,
+  selectBeamTargets,
+  DRONE_SPECS,
+  anchorCost,
+  buildPath,
+  LEVELS,
+  CARRIER_TEST_INDEX,
+  insideStasis,
+  enemySpeedScale,
+  getFieldCoverage,
 } = api;
 globalThis.localStorage = { getItem: () => null, setItem() {} };
 const input = () => ({ thrust: 0, steer: 0, pitch: 0, boost: false, anchor: false, expand: false, shift: 0 });
@@ -29,7 +52,9 @@ const beam = (mode) => ({ x: 0, y: 8, z: 0, dx: 0, dy: 0, dz: -1, ...DRONE_SPECS
 const target = (z, x = 0) => ({ x, y: 8, z, radius: 0.72 });
 
 test("Pierce hits every collinear foe; Sweep selects nearest regardless of array order", () => {
-  const far = target(-20), close = target(-8), offLine = target(-12, 4);
+  const far = target(-20),
+    close = target(-8),
+    offLine = target(-12, 4);
   assert.deepEqual(selectBeamTargets(beam("pierce"), [far, offLine, close]), [far, close]);
   assert.deepEqual(selectBeamTargets(beam("sweep"), [far, offLine, close]), [close]);
 });
@@ -52,20 +77,47 @@ function combatRun(mode) {
   run.rest = 0;
   Object.assign(run.ship, { x: 40, y: 30, z: 30, yaw: 0, pitch: 0 });
   const d = {
-    id: 1, mode, paid: 20, kills: 0, damage: 0, hit: false,
-    bx: 0, by: 8, bz: 0, fx: 0, fy: 0, fz: -1,
-    x: 0, y: 8, z: 0, ax: 0, ay: 0, az: -1,
+    id: 1,
+    mode,
+    paid: 20,
+    kills: 0,
+    damage: 0,
+    hit: false,
+    bx: 0,
+    by: 8,
+    bz: 0,
+    fx: 0,
+    fy: 0,
+    fz: -1,
+    x: 0,
+    y: 8,
+    z: 0,
+    ax: 0,
+    ay: 0,
+    az: -1,
   };
   run.drones.push(d);
-  [20, 8].forEach((dist, i) => Object.assign(run.enemies[i], {
-    ...target(-dist), alive: true, dist, speed: 0, amp: 0, hp: 100, maxHp: 100,
-    pathIndex: 0, kind: "shard", reward: 8, leak: 7,
-  }));
+  [20, 8].forEach((dist, i) =>
+    Object.assign(run.enemies[i], {
+      ...target(-dist),
+      alive: true,
+      dist,
+      speed: 0,
+      amp: 0,
+      hp: 100,
+      maxHp: 100,
+      pathIndex: 0,
+      kind: "shard",
+      reward: 8,
+      leak: 7,
+    }),
+  );
   return run;
 }
 
 test("Actual simulation applies Pierce damage to both targets and Sweep only to the nearer", () => {
-  const pierce = combatRun("pierce"), sweep = combatRun("sweep");
+  const pierce = combatRun("pierce"),
+    sweep = combatRun("sweep");
   step(pierce, input(), 0.25);
   step(sweep, input(), 0.25);
   near(pierce.enemies[0].hp, 95);
@@ -96,7 +148,8 @@ test("Coverage brackets exactly the same shard-center samples that the combat he
     const result = getBeamCoverage({ paths: [path] }, beam(mode));
     near(result.sampleRadius, 0.72);
     let expected = 0;
-    const count = Math.ceil(path.length / 0.5), ds = path.length / count;
+    const count = Math.ceil(path.length / 0.5),
+      ds = path.length / count;
     for (let i = 0; i < count; i++) {
       const sample = path.pointAt((i + 0.5) * ds);
       if (beamContact(beam(mode), { ...sample, radius: result.sampleRadius }) !== null) expected += ds;
@@ -106,7 +159,8 @@ test("Coverage brackets exactly the same shard-center samples that the combat he
     for (const segment of result.segments) {
       assert.equal(segment.pathIndex, 0);
       for (let i = 1; i < segment.points.length; i++) {
-        const a = segment.points[i - 1], b = segment.points[i];
+        const a = segment.points[i - 1],
+          b = segment.points[i];
         const midpoint = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2, radius: 0.72 };
         assert.notEqual(beamContact(beam(mode), midpoint), null);
       }
@@ -148,7 +202,11 @@ test("Tutorial preview introduces lower-coil coverage with wave 3; open arenas r
     const full = getBeamCoverage(openArena, preview.beam);
     assert.ok(full.segments.some((segment) => segment.pathIndex === 1));
     near(preview.metres, full.metres);
-    assert.deepEqual(preview.segments, full.segments, "open arenas show future routes from their first setup");
+    assert.deepEqual(
+      preview.segments,
+      full.segments,
+      "open arenas show future routes from their first setup",
+    );
   }
 });
 
@@ -220,14 +278,17 @@ test("Manual preparation waits indefinitely while flying and anchoring remain li
   assert.equal(run.waveIndex, -1);
   assert.equal(run.rest, 12);
   assert.equal(run.waveTime, 0);
-  assert.equal(run.enemies.some((e) => e.alive), false);
-  assert.ok(run.waves.every(w => w.groups.every(g => g.spawned === 0)));
+  assert.equal(
+    run.enemies.some((e) => e.alive),
+    false,
+  );
+  assert.ok(run.waves.every((w) => w.groups.every((g) => g.spawned === 0)));
   nextWaveNow(run);
   nextWaveNow(run);
   assert.equal(run.waveIndex, 0, "repeated launch presses cannot skip a wave");
   assert.equal(run.rest, 0);
   step(run, input(), 0.8);
-  assert.ok(run.waves[0].groups.some(g => g.spawned > 0));
+  assert.ok(run.waves[0].groups.some((g) => g.spawned > 0));
 });
 
 function betweenWaves() {
@@ -236,7 +297,9 @@ function betweenWaves() {
     { groups: [{ kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 1 }] },
     { groups: [{ kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 0 }] },
   ];
-  run.enemies.forEach(e => { e.alive = false; });
+  run.enemies.forEach((e) => {
+    e.alive = false;
+  });
   step(run, input(), 1 / 60);
   return run;
 }
@@ -308,13 +371,17 @@ test("Paused simulation freezes manual and automatic progression and rejects lau
 
 test("Group speed multipliers affect only their own spawned enemies", () => {
   const run = createRun(0);
-  run.waves = [{ groups: [
-    { kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 0 },
-    { kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 0, speedMul: 0.55 },
-  ] }];
+  run.waves = [
+    {
+      groups: [
+        { kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 0 },
+        { kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 0, speedMul: 0.55 },
+      ],
+    },
+  ];
   nextWaveNow(run);
   step(run, input(), 1 / 60);
-  const spawned = run.enemies.filter(e => e.alive);
+  const spawned = run.enemies.filter((e) => e.alive);
   assert.equal(spawned.length, 2);
   near(spawned[0].speed, 10.4 * run.level.speedMul);
   near(spawned[1].speed, 10.4 * run.level.speedMul * 0.55);
@@ -324,7 +391,9 @@ test("Group speed multipliers affect only their own spawned enemies", () => {
 test("Last wave resolves to win; leaks resolve to lose with lane attribution", () => {
   const win = combatRun("pierce");
   win.waves = [{ groups: [{ kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 1 }] }];
-  win.enemies.forEach((e) => { e.alive = false; });
+  win.enemies.forEach((e) => {
+    e.alive = false;
+  });
   step(win, input(), 0.1);
   assert.equal(win.phase, "win");
   const lose = combatRun("pierce");
@@ -382,28 +451,47 @@ test("Stasis slows actual motion, deals zero damage, and restores speed outside 
 });
 
 test("Field preview matches membership and follows the same fan/slide pose as placement", () => {
-  const path = buildPath("field-line", t => ({ x: -10 + 20*t, y: 8, z: 0 }));
+  const path = buildPath("field-line", (t) => ({ x: -10 + 20 * t, y: 8, z: 0 }));
   const result = getFieldCoverage({ paths: [path] }, { x: 0, y: 8, z: 0 });
   near(result.metres, 12);
   assert.equal(result.sampleRadius, 0);
   const run = createRun(CARRIER_TEST_INDEX);
-  run.ship.x += 5; run.droneMode = "stasis"; run.expand = 0.7; run.shift = -0.6;
+  run.ship.x += 5;
+  run.droneMode = "stasis";
+  run.expand = 0.7;
+  run.shift = -0.6;
   const preview = getPlacementPreview(run);
   assert.equal(tryAnchor(run), null);
   assert.deepEqual(run.drones[0], preview.drone);
-  assert.deepEqual(getFieldCoverage(run, run.drones[0]), { segments: preview.segments, metres: preview.metres, sampleRadius: preview.sampleRadius });
+  assert.deepEqual(getFieldCoverage(run, run.drones[0]), {
+    segments: preview.segments,
+    metres: preview.metres,
+    sampleRadius: preview.sampleRadius,
+  });
   assert.equal(run.scrap, 40);
   assert.equal(recallLast(run), null);
   assert.equal(run.scrap, 60);
 });
 
 test("Existing campaign weapons stay unchanged; Stasis is enabled per arena and lab alone tries 22-DPS Sweep", () => {
-  assert.deepEqual(LEVELS.slice(0,3).map(l => l.id), ["tutorial", "shear", "orbital"]);
-  assert.deepEqual(LEVELS.slice(0,3).map(l => l.waves.length), [5,5,5]);
+  assert.deepEqual(
+    LEVELS.slice(0, 3).map((l) => l.id),
+    ["tutorial", "shear", "orbital"],
+  );
+  assert.deepEqual(
+    LEVELS.slice(0, 3).map((l) => l.waves.length),
+    [5, 5, 5],
+  );
   for (let index = 0; index < LEVELS.length; index++) {
-    const run = createRun(index); run.ship.x += 5; run.droneMode = "stasis";
-    assert.equal(placementStatus(run) === null, index === CARRIER_TEST_INDEX || run.level.id === "split-crown" || !!run.level.prototype);
-    run.droneMode = "sweep"; assert.equal(tryAnchor(run), null);
+    const run = createRun(index);
+    run.ship.x += 5;
+    run.droneMode = "stasis";
+    assert.equal(
+      placementStatus(run) === null,
+      index === CARRIER_TEST_INDEX || run.level.id === "split-crown" || !!run.level.prototype,
+    );
+    run.droneMode = "sweep";
+    assert.equal(tryAnchor(run), null);
     assert.equal(droneBeam(run.drones[0]).dps, index === CARRIER_TEST_INDEX ? 22 : 18);
     assert.equal(droneBeam(run.drones[0]).pierces, false);
   }
@@ -417,18 +505,23 @@ test("Carrier damage is cumulative, breaches cost 40, and experiment outcomes ne
   run.level = LEVELS[CARRIER_TEST_INDEX];
   run.enemies[0].alive = false;
   Object.assign(run.enemies[1], { kind: "carrier", hp: 3, maxHp: 486, leak: 40 });
-  step(run, input(), 0.1); near(run.enemies[1].hp, 1);
+  step(run, input(), 0.1);
+  near(run.enemies[1].hp, 1);
   step(run, input(), 0.1);
   assert.equal(run.carrierOutcome, "destroyed");
   // Supply a completed schedule so the ordinary completion path runs.
-  run.waves = [{ groups: [{ kind:"carrier", path:0, count:1, spawned:1, delay:0, interval:1 }] }];
+  run.waves = [{ groups: [{ kind: "carrier", path: 0, count: 1, spawned: 1, delay: 0, interval: 1 }] }];
   step(run, input(), 0.1);
-  assert.equal(run.phase, "win"); assert.equal(run.save, undefined); assert.equal(writes.length, 0);
-  const breached = combatRun("pierce"); breached.level = LEVELS[CARRIER_TEST_INDEX];
+  assert.equal(run.phase, "win");
+  assert.equal(run.save, undefined);
+  assert.equal(writes.length, 0);
+  const breached = combatRun("pierce");
+  breached.level = LEVELS[CARRIER_TEST_INDEX];
   breached.enemies[0].alive = false;
   Object.assign(breached.enemies[1], { kind: "carrier", dist: 50, leak: 40 });
   step(breached, input(), 0.1);
-  assert.equal(breached.core, 60); assert.equal(breached.carrierOutcome, "breached");
+  assert.equal(breached.core, 60);
+  assert.equal(breached.carrierOutcome, "breached");
   globalThis.localStorage = { getItem: () => null, setItem() {} };
 });
 
@@ -458,7 +551,13 @@ test("The first two tutorial waves are achievable through ordinary controls, wit
       step(run, input(), 1 / 60);
       run.fx.length = 0;
     }
-    return { phase: run.phase, core: run.core, kills: run.kills, seconds: Number(run.time.toFixed(1)), clearedWaves: run.rest > 0 ? run.waveIndex + 1 : 0 };
+    return {
+      phase: run.phase,
+      core: run.core,
+      kills: run.kills,
+      seconds: Number(run.time.toFixed(1)),
+      clearedWaves: run.rest > 0 ? run.waveIndex + 1 : 0,
+    };
   };
   const idle = createRun(0);
   const crossing = createRun(0);
@@ -473,17 +572,26 @@ test("The first two tutorial waves are achievable through ordinary controls, wit
   ];
   assert.equal(along.scrap, 8);
   assert.equal(along.waveIndex, -1, "both drones are placed before the player chooses to launch");
-  const idleResult = finish(idle), crossingResult = finish(crossing), alongResult = finish(along);
+  const idleResult = finish(idle),
+    crossingResult = finish(crossing),
+    alongResult = finish(along);
   assert.equal(idleResult.kills, 0, "the unassisted hangar should not clear either wave's enemies");
   assert.equal(crossingResult.clearedWaves, 2, "imperfect early placements leave room for a beginner");
   assert.equal(alongResult.clearedWaves, 2);
-  assert.ok(alongResult.core >= 90, "two accessible placements plus the idle pilot can hold the introductory waves");
+  assert.ok(
+    alongResult.core >= 90,
+    "two accessible placements plus the idle pilot can hold the introductory waves",
+  );
   assert.ok(crossingResult.core > idleResult.core);
   assert.ok(alongResult.core > crossingResult.core, "longer coverage should have a visible payoff");
   assert.ok(alongCoverage[0] > crossingCoverage[0]);
   console.log(`  Idle: ${JSON.stringify(idleResult)}`);
-  console.log(`  Across ribbon (${crossingCoverage.map(n => n.toFixed(1)).join(" / ")}m): ${JSON.stringify(crossingResult)}`);
-  console.log(`  Along ribbon (${alongCoverage.map(n => n.toFixed(1)).join(" / ")}m): ${JSON.stringify(alongResult)}`);
+  console.log(
+    `  Across ribbon (${crossingCoverage.map((n) => n.toFixed(1)).join(" / ")}m): ${JSON.stringify(crossingResult)}`,
+  );
+  console.log(
+    `  Along ribbon (${alongCoverage.map((n) => n.toFixed(1)).join(" / ")}m): ${JSON.stringify(alongResult)}`,
+  );
 });
 
 console.log(`\n${checks} simulation checks passed.`);

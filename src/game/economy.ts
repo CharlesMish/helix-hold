@@ -26,6 +26,6 @@ export function anchorCost(droneCount: number): number {
 export function getAnchorCost(run: PricingFleet, mode: DroneMode = run.droneMode): number {
   if (run.level.dronePricing !== "per-type") return anchorCost(run.drones.length);
   const price = DRONE_PRICES[mode];
-  const owned = run.drones.filter(drone => drone.mode === mode).length;
+  const owned = run.drones.filter((drone) => drone.mode === mode).length;
   return price.base + price.increment * owned;
 }

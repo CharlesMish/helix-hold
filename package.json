@@ -27,7 +27,9 @@
     "study:crown-late": "node qa/crown-late-trial.mjs",
     "trial:frontier": "node qa/frontier-trial.mjs",
     "test:prototypes": "node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs",
-    "diagram:frontier": "node qa/frontier-geometry.mjs --write"
+    "diagram:frontier": "node qa/frontier-geometry.mjs --write",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"qa/*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"qa/*.mjs\""
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
@@ -46,6 +48,7 @@
     "@vitejs/plugin-react": "^5.0.0",
     "playwright": "^1.56.1",
     "pngjs": "^7.0.0",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.7.0",
     "vite": "^7.0.0"

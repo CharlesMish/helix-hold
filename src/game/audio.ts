@@ -62,8 +62,15 @@ export function createAudio(): AudioBus {
 
   return {
     resume,
-    setMuted(on) { muted = on; if (master && ctx) master.gain.setTargetAtTime(on ? 0 : 0.2, ctx.currentTime, 0.04); },
-    dispose() { if (ctx) void ctx.close(); ctx = null; master = null; },
+    setMuted(on) {
+      muted = on;
+      if (master && ctx) master.gain.setTargetAtTime(on ? 0 : 0.2, ctx.currentTime, 0.04);
+    },
+    dispose() {
+      if (ctx) void ctx.close();
+      ctx = null;
+      master = null;
+    },
     setEngine(amount, active) {
       if (!ctx || !engineGain || !osc || !filter) return;
       const now = ctx.currentTime;
