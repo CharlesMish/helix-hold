@@ -1264,7 +1264,16 @@ export function createWorld(canvas: HTMLCanvasElement): World {
   dockRing.rotation.x = Math.PI / 2;
   const dockPad = new THREE.Mesh(
     new THREE.CylinderGeometry(2.3, 1.6, 0.45, 6),
-    new THREE.MeshStandardMaterial({ color: 0x384965, metalness: 0.55, roughness: 0.38 }),
+    // Low metalness: with no environment map, a metallic pad renders as a black hexagon
+    // that hides the first route behind the cradle from the opening camera.
+    new THREE.MeshStandardMaterial({
+      color: 0x41557a,
+      metalness: 0.18,
+      roughness: 0.62,
+      emissive: 0x111c30,
+      transparent: true,
+      opacity: 0.82,
+    }),
   );
   dockPad.position.y = -0.35;
   const dockInner = new THREE.Mesh(

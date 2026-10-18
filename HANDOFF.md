@@ -1,3 +1,25 @@
+# Helix Hold 0.10.0: Tripwire, Drift Frontier and a green browser suite
+
+Started from GitHub `77632a8` (v0.9.0) on branch `claude/weekend-pass`. Work by Claude (Anthropic), with source, simulation and browser checks run in a cloud container.
+
+**Latest request:** Charlie said the core loop felt great from the start, but the challenge was easy. It was "hard" mainly because of the eight-drone cap, which he hit less than halfway through, with no good way to scale after that. The labs exist to explore weapon variety and harder levels. He asked for ideas (weapons, maps, modes), formatting, a fixed test suite, and help building out Frontier/Crown or more drone types.
+
+- **Formatting:** Prettier across `src/` and `qa/` (`npm run format`). The built bundle differs only in JSX whitespace text nodes.
+- **Browser suite fixed and executed:** stale `.lab-option` selector, and a thrust check that assumed a fast renderer. It now runs green in headless Chromium/SwiftShader against `vite preview` and adds Tripwire, Drift and touch-portrait checks. Run with `CHROMIUM_PATH=... npm run qa` while a preview server is up.
+- **Tripwire (Frontier prototypes only, key 6):** a paid first post plus a free second post up to 32 m away. Every enemy entering the strand takes 26 damage once per crossing, with a wider release volume to re-arm. It rewards cutting *across* routes, the opposite geometry from Pierce. Recall-last undoes the free second post; selected recall removes and refunds the whole strand.
+- **Drift Frontier (new lab entry, index 7):** Helix Frontier's coils, but from wave 4 an announced route swings around the prism between waves, with its approach re-formed to the same port. Drones stay put. The HUD and Survey report contact lost, the swung route gets the ribbon, and the gate plan forecasts swings. Twelve waves; waves 8–12 carry 2× escalation.
+- Small fixes: phone-portrait Crown lesson text no longer overlaps the gate cards; the launch cradle no longer renders as a black hexagon over route A; roster messages corrected; QA-only `__helixDebug.clear()`.
+
+Evidence: **111 deterministic checks** (prior 100 plus 7 Tripwire and 4 Drift; roster and visual assertions updated), geometry checks, the production build, and the browser suite. Drift trial (`npm run trial:drift`): an idle-pilot greedy fleet that re-flies broken lines finishes at 73/100/82 core across three seeds; the same purchases never repositioned fall in wave 8; the plain Frontier control finishes at 100. Hull alone is a cliff (2.5× late makes re-fly lose during wave 11). These are feasibility results, not human difficulty. Software rendering ran at about 4 fps, so frame rate on real GPUs is still unmeasured.
+
+Read `docs/TRIPWIRE_DRIFT_0100.md` (rules, evidence, playtest questions) and `docs/DESIGN_DIRECTIONS.md` (ranked proposals for weapons, difficulty, maps and modes).
+
+Next playtest: in Drift Frontier, is re-flying after a swing a fresh puzzle or a chore, and is 45° too large? Every swing currently wipes 70–100% of that coil's contact. Does Tripwire find strands that cut across coils, and is it worth its price? Do waves 8–12 feel achievable but challenging with real pilot fire?
+
+---
+
+## Previous v0.9.0 checkpoint
+
 # Helix Hold 0.9.0 — spatial prototypes
 
 Started from authenticated Sites `1c85f390b01b7d3e27278ada85ab9e0f3af76e12` and GitHub `a24e5b2ac3acd4a3734ddc6c9dd38d75348a979c`. Preserve the existing owner-private Site and public repository.

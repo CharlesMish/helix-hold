@@ -2301,8 +2301,9 @@ svg {
   .mobile-gate-letter {
     display: inline;
   }
+  /* Clear both rows of gate cards, including E's wrapped CARRIER tag. */
   .game-root[data-arena="split-crown"][data-touch="1"] .flight-note {
-    top: 257px;
+    top: 288px;
   }
   .game-root[data-arena="split-crown"] .survey-card {
     max-height: calc(100dvh - 260px);

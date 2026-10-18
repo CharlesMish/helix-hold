@@ -680,6 +680,14 @@ try {
       "touch roster fits five priced roles in a 3 + 2 grid",
     );
     check(roleLayout.gatesClear, "touch placement panel stays below the five gate cards");
+    const noteClear = await touchPage.evaluate(() => {
+      const note = document.querySelector(".flight-note").getBoundingClientRect();
+      const lanes = [...document.querySelectorAll(".lane-intel .lane")].map((l) => l.getBoundingClientRect());
+      return lanes.every(
+        (l) => l.bottom <= note.top || l.top >= note.bottom || l.right <= note.left || l.left >= note.right,
+      );
+    });
+    check(noteClear, "touch lesson text does not overlap the gate cards");
     await touchPage.screenshot({ path: `${OUT}split-crown-touch-roles.png` });
     await touchPage.getByRole("button", { name: "Survey arena", exact: true }).tap();
     await touchPage.getByRole("button", { name: /Show 8-wave gate plan/ }).tap();
@@ -689,6 +697,65 @@ try {
   } finally {
     await touchContext.close();
   }
+
+  console.log("Frontier prototypes: Tripwire and Drift");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(`${BASE}/?qa`, { waitUntil: "load" });
+  await page.waitForFunction(() => !!window.__helixDebug);
+  await page.getByRole("button", { name: /^Helix Frontier/ }).click();
+  await page.getByRole("button", { name: "Enter prototype", exact: true }).click();
+  await waitState({ phase: "play", waveIndex: -1 });
+  await page.keyboard.press("Digit6");
+  await waitState({ mode: "tripwire", nextCost: 36 });
+  check(
+    (await page.locator(".mode-buttons button").count()) === 6,
+    "Frontier offers six roles including Tripwire",
+  );
+  await page.evaluate(() => window.__helixDebug.place(-16, 36, -3, 0, 0));
+  await page.keyboard.press("KeyF");
+  await waitState({ drones: 1, scrap: 24, nextCost: 0 });
+  await page.waitForFunction(() => document.querySelector(".anchor span")?.textContent === "Complete strand");
+  check(
+    (await page.locator(".anchor strong").textContent()) === "Free",
+    "an open first post makes the second post free",
+  );
+  await page.evaluate(() => window.__helixDebug.place(-16, 13.5, -3, 0, 0));
+  await page.waitForFunction(() => document.querySelector(".coverage-read b")?.textContent === "2×");
+  check(
+    (await page.locator(".coverage-read span").first().textContent()).includes("22.5m strand"),
+    "strand preview reports its span and crossings",
+  );
+  await page.keyboard.press("KeyF");
+  await waitState({ drones: 2, scrap: 24, nextCost: 54 });
+  check((await snap()).owned.tripwire === 1, "two posts count as one strand");
+  await page.keyboard.press("KeyR");
+  await waitState({ drones: 1, nextCost: 0 });
+  check((await snap()).scrap === 24, "recalling the second post refunds nothing and reopens the first");
+  await page.screenshot({ path: `${OUT}frontier-tripwire.png` });
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Back to the observatory", exact: true }).click();
+  await page.getByRole("button", { name: /^Drift Frontier/ }).click();
+  await page.getByRole("button", { name: /Show 12-wave gate plan/ }).click();
+  check(
+    (await page.locator(".gate-plan li").nth(3).innerText()).includes("Gate A swings 45°"),
+    "gate plan forecasts the first swing",
+  );
+  await page.getByRole("button", { name: "Enter prototype", exact: true }).click();
+  await waitState({ phase: "play", waveIndex: -1 });
+  await page.evaluate(() => window.__helixDebug.place(-12.74, 12.64, 0.66, 0.665, 0.276));
+  await page.keyboard.press("KeyF");
+  await waitState({ drones: 1 });
+  for (let wave = 0; wave < 3; wave++) {
+    await page.evaluate(() => window.__helixDebug.clear());
+    await waitState({ waveIndex: wave, phase: "play" });
+    await page.waitForFunction(() => window.__helixDebug.snap().rest > 0);
+  }
+  await page.locator(".drift-note").first().waitFor({ state: "visible" });
+  check(
+    (await page.locator(".drift-note").first().innerText()).includes("Gate A swung 45°"),
+    "wave-4 setup announces the swing with the fleet's lost contact",
+  );
+  await page.screenshot({ path: `${OUT}drift-swing.png` });
 
   check(errors.length === 0, `no page errors${errors.length ? `: ${errors.join(" | ")}` : ""}`);
 } finally {

@@ -18,6 +18,8 @@ Version 0.8.1 follows Charlie’s actual v0.8 playtest: roughly 32 drones, minor
 
 Version 0.9.0 adds two isolated, opt-in prototypes: nine-wave Helix Frontier with three staged coils and distinct protected-box ports, and four-wave Relay Lab with one slowing-light emitter and fixed-direction receivers. One redirection conserves source range/DPS. Stasis remains for comparison. They use independent prices and uncapped growth, do not save campaign scores, and do not alter the five existing arenas. The user requested spatial exploration before detailed balance. Enemy storage and matching render buffers now grow beyond the former initial 64; practical frame rate is unmeasured.
 
+Version 0.10.0 adds **Tripwire** (a two-post strand that bursts once per crossing, Frontier prototypes only) and **Drift Frontier** (coils swing around the prism between waves; twelve waves with heavy 8–12). It formats the source with Prettier and fixes the browser suite, which now runs green in headless Chromium. Campaign arenas are unchanged. Read [TRIPWIRE_DRIFT_0100.md](TRIPWIRE_DRIFT_0100.md) and [DESIGN_DIRECTIONS.md](DESIGN_DIRECTIONS.md) first.
+
 ## Run and inspect
 
 Use a current supported Node.js installation and npm. The commands below are for an ordinary local checkout; the development server stays running until stopped.
