@@ -158,6 +158,15 @@ type Group = {
   spawned: number;
 };
 
+export type DriftReport = {
+  path: number;
+  degrees: number;
+  swing: number;
+  /** Summed drone contact on that route (metres) just before and after the swing. */
+  before: number;
+  after: number;
+};
+
 type FieldCheckState = {
   enemies: Enemy[];
   stasisTouched: number;
@@ -198,11 +207,21 @@ export type Run = {
   continued: boolean;
   /** Optional setup route ribbons for spatial prototypes; never changes combat. */
   routeGhost: boolean;
+  /** Drift prototypes: cumulative swing per route (degrees) and a revision for scene rebuilds. */
+  pathSwing: number[];
+  pathRevision: number;
+  /** The swings applied for the current setup, with this fleet's contact before and after. */
+  lastDrift: DriftReport[] | null;
   fieldCheck: FieldCheckState | null;
   stasisTouched: number;
   stasisExposure: number;
   enemies: Enemy[];
-  waves: { groups: Group[]; chapter?: string; lesson?: string }[];
+  waves: {
+    groups: Group[];
+    chapter?: string;
+    lesson?: string;
+    drift?: { path: number; degrees: number }[];
+  }[];
   waveIndex: number;
   waveTime: number;
   waveMode: WaveMode;
@@ -1101,8 +1120,53 @@ function updateWaves(run: Run, dt: number) {
         (run.waveMode === "manual"
           ? "Take your time, then launch the next wave."
           : "The next wave launches in 8 seconds.");
+      applyDrift(run, run.waves[run.waveIndex + 1]);
     }
   }
+}
+
+/** Summed drone contact per route; the same measure the Frontier trials report. */
+export function fleetRouteContact(
+  run: Pick<Run, "paths" | "drones" | "enemies" | "expand" | "shift" | "fieldCheck">,
+): number[] {
+  const totals = run.paths.map(() => 0);
+  for (const drone of run.drones)
+    for (const segment of getDroneCoverage(run, drone).segments) totals[segment.pathIndex]! += segment.metres;
+  return totals;
+}
+
+/**
+ * Drift happens only between waves, when no enemy is alive: listed routes swing around
+ * the prism and rebuild from the level's factory. Drones never move; the player decides
+ * which lines to re-fly with free setup repositioning.
+ */
+function applyDrift(run: Run, wave: Run["waves"][number] | undefined): void {
+  run.lastDrift = null;
+  if (!wave?.drift?.length || !run.level.driftPath) return;
+  const before = fleetRouteContact(run);
+  const paths = [...run.paths];
+  for (const { path, degrees } of wave.drift) {
+    run.pathSwing[path] = (run.pathSwing[path] ?? 0) + degrees;
+    paths[path] = run.level.driftPath(path, run.pathSwing[path]!);
+  }
+  run.paths = paths;
+  run.pathRevision += 1;
+  const after = fleetRouteContact(run);
+  const report = wave.drift.map(({ path, degrees }) => ({
+    path,
+    degrees,
+    swing: run.pathSwing[path]!,
+    before: before[path]!,
+    after: after[path]!,
+  }));
+  run.lastDrift = report;
+  run.hint =
+    report
+      .map(
+        (d) =>
+          `Gate ${String.fromCharCode(65 + d.path)} swung ${Math.abs(d.degrees)}° · your contact ${d.before.toFixed(0)} → ${d.after.toFixed(0)}m.`,
+      )
+      .join(" ") + " Re-fly the lines that lost it; repositioning is free.";
 }
 
 function moveEnemies(run: Run, dt: number) {
@@ -1540,6 +1604,9 @@ export function createRun(levelIndex: number, seed = 0x48454c49): Run {
     repositionId: null,
     continued: false,
     routeGhost: !!level.prototype,
+    pathSwing: level.paths.map(() => 0),
+    pathRevision: 0,
+    lastDrift: null,
     fieldCheck: null,
     stasisTouched: 0,
     stasisExposure: 0,

@@ -31,6 +31,14 @@ function WaveRows({ waves, offset = 0, wave }: { waves: WaveSpec[]; offset?: num
                   )
                   .join(" · ")}
               </small>
+              {w.drift?.length ? (
+                <em className="gate-plan-drift">
+                  {w.drift
+                    .map((d) => `Gate ${String.fromCharCode(65 + d.path)} swings ${Math.abs(d.degrees)}°`)
+                    .join(" · ")}{" "}
+                  before launch
+                </em>
+              ) : null}
             </div>
           </li>
         );
@@ -73,7 +81,9 @@ export function GatePlan({
       {open && (
         <div className="gate-plan-body">
           <p>
-            {level.prototype === "route-expansion" ? (
+            {level.driftPath ? (
+              "Three coils open on waves 1, 3 and 6. From wave 4, an announced coil swings around the prism before launch; your drones stay put."
+            ) : level.prototype === "route-expansion" ? (
               "Three coils open in stages: A on wave 1, B on wave 3, C on wave 6. Each has a separate breach port."
             ) : level.prototype === "relay" ? (
               "Four short trials compare the direct line, a redirected line, and traffic that can block the receiver."

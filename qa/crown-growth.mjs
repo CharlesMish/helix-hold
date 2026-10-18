@@ -222,7 +222,10 @@ test("Authored reinforcement hull applies only to its group and the second carri
   advance(regular, 1.6);
   assert.ok(Math.abs(regular.enemies.find((e) => e.alive && e.kind === "carrier").maxHp - 486) < 1e-9);
   assert.ok(
-    LEVELS.every((l) => l.waves.every((w) => w.groups.every((g) => g.hpMul === undefined))),
+    // Prototype arenas (e.g. Drift Frontier) author their own escalation; campaigns and the lab may not.
+    LEVELS.filter((l) => !l.prototype).every((l) =>
+      l.waves.every((w) => w.groups.every((g) => g.hpMul === undefined)),
+    ),
     "normal campaigns and lab retain their authored hull",
   );
 });

@@ -66,6 +66,8 @@ export type LevelDef = {
   waves: WaveSpec[];
   /** Authored extra waves, offered only after the ordinary arena clear is recorded. */
   continuation?: WaveSpec[];
+  /** Drift prototypes rebuild a route after it swings by a cumulative angle (degrees). */
+  driftPath?: (pathIndex: number, swingDegrees: number) => PathCurve;
 };
 
 export type Kind = "shard" | "barge" | "wisp" | "carrier";
@@ -73,6 +75,8 @@ export type Kind = "shard" | "barge" | "wisp" | "carrier";
 export type WaveSpec = {
   chapter?: string;
   lesson?: string;
+  /** Applied when this wave's setup begins: each listed route swings around the prism. */
+  drift?: { path: number; degrees: number }[];
   groups: {
     kind: Kind;
     path: number;
@@ -796,30 +800,48 @@ LEVELS.push({
  * The transfer starts along the coil tangent. Its last control point stays outside
  * the port face, so the route reaches the protected volume only at its endpoint.
  */
-function frontierCoil(o: {
-  center: Vec3;
-  rx: number;
-  rz: number;
-  drop: number;
-  turns: number;
-  endAngle: number;
-  port: Vec3;
-  approach: Vec3;
-}): (t: number) => Vec3 {
+/** Rotate about the protected prism's vertical axis. Zero swing returns the input object. */
+function swingAboutPrism(p: Vec3, swing: number): Vec3 {
+  if (swing === 0) return p;
+  const c = Math.cos(swing),
+    s = Math.sin(swing);
+  return { x: p.x * c + p.z * s, y: p.y, z: -p.x * s + p.z * c };
+}
+
+function frontierCoil(
+  o: {
+    center: Vec3;
+    rx: number;
+    rz: number;
+    drop: number;
+    turns: number;
+    endAngle: number;
+    port: Vec3;
+    approach: Vec3;
+  },
+  /** Drift: the coil body swings around the prism; its approach re-forms to the fixed port. */
+  swing = 0,
+): (t: number) => Vec3 {
   const coil = (u: number): Vec3 => {
     const angle = o.endAngle + (u - 1) * o.turns * Math.PI * 2;
-    return {
-      x: o.center.x + o.rx * Math.cos(angle),
-      y: o.center.y - o.drop * u,
-      z: o.center.z + o.rz * Math.sin(angle),
-    };
+    return swingAboutPrism(
+      {
+        x: o.center.x + o.rx * Math.cos(angle),
+        y: o.center.y - o.drop * u,
+        z: o.center.z + o.rz * Math.sin(angle),
+      },
+      swing,
+    );
   };
   const end = coil(1);
-  const tangent = {
-    x: -o.rx * Math.sin(o.endAngle) * o.turns * Math.PI * 2,
-    y: -o.drop,
-    z: o.rz * Math.cos(o.endAngle) * o.turns * Math.PI * 2,
-  };
+  const tangent = swingAboutPrism(
+    {
+      x: -o.rx * Math.sin(o.endAngle) * o.turns * Math.PI * 2,
+      y: -o.drop,
+      z: o.rz * Math.cos(o.endAngle) * o.turns * Math.PI * 2,
+    },
+    swing,
+  );
   const length = Math.hypot(tangent.x, tangent.y, tangent.z);
   const transfer = arcSample([
     [
@@ -840,56 +862,72 @@ function frontierCoil(o: {
  * existing coverage, while its northern entrance and roofward exit need new lines.
  */
 function frontierCrossCoil(t: number): Vec3 {
+  return frontierCrossCoilSwung(0)(t);
+}
+
+function frontierCrossCoilSwung(swing: number): (t: number) => Vec3 {
   const coil = (u: number): Vec3 => {
     const angle = (u - 1) * 1.15 * Math.PI * 2;
-    return { x: -4 + 14 * Math.cos(angle), y: 29 + 7 * Math.sin(angle), z: -30 + 20 * u };
+    return swingAboutPrism(
+      { x: -4 + 14 * Math.cos(angle), y: 29 + 7 * Math.sin(angle), z: -30 + 20 * u },
+      swing,
+    );
   };
   const end = coil(1);
   const length = Math.hypot(7 * 1.15 * Math.PI * 2, 20);
+  const lead = swingAboutPrism(
+    { x: 0, y: ((7 * 1.15 * Math.PI * 2) / length) * 5, z: (20 / length) * 5 },
+    swing,
+  );
   const transfer = arcSample([
     [
       end,
-      { x: end.x, y: end.y + ((7 * 1.15 * Math.PI * 2) / length) * 5, z: end.z + (20 / length) * 5 },
+      swing === 0
+        ? { x: end.x, y: end.y + ((7 * 1.15 * Math.PI * 2) / length) * 5, z: end.z + (20 / length) * 5 }
+        : { x: end.x + lead.x, y: end.y + lead.y, z: end.z + lead.z },
       { x: 0, y: 18, z: -11 },
       { x: 0, y: 16, z: -6 },
     ],
   ]);
-  return t <= 0.75 ? coil(t / 0.75) : transfer((t - 0.75) / 0.25);
+  return (t) => (t <= 0.75 ? coil(t / 0.75) : transfer((t - 0.75) / 0.25));
 }
 
 const frontierVolume = { center: { x: 0, y: 10, z: 0 }, size: { x: 16, y: 16, z: 12 } };
 const frontierHangar = lookingAt({ x: -13, y: 31, z: -24 }, { x: -24, y: 32, z: -11 });
+const westSpindle = {
+  center: { x: -27, y: 36, z: -3 },
+  rx: 11,
+  rz: 11,
+  drop: 22,
+  turns: 1.2,
+  endAngle: 0,
+  port: { x: -8, y: 8, z: -3 },
+  approach: { x: -13, y: 8, z: -3 },
+};
+const eastReturn = {
+  center: { x: 27, y: 39, z: 4 },
+  rx: 10,
+  rz: 10,
+  drop: 22,
+  turns: -1.25,
+  endAngle: Math.PI,
+  port: { x: 8, y: 12, z: 2 },
+  approach: { x: 13, y: 12, z: 2 },
+};
 const frontierPaths = [
-  buildPath(
-    "west-spindle",
-    frontierCoil({
-      center: { x: -27, y: 36, z: -3 },
-      rx: 11,
-      rz: 11,
-      drop: 22,
-      turns: 1.2,
-      endAngle: 0,
-      port: { x: -8, y: 8, z: -3 },
-      approach: { x: -13, y: 8, z: -3 },
-    }),
-    480,
-  ),
-  buildPath(
-    "east-return",
-    frontierCoil({
-      center: { x: 27, y: 39, z: 4 },
-      rx: 10,
-      rz: 10,
-      drop: 22,
-      turns: -1.25,
-      endAngle: Math.PI,
-      port: { x: 8, y: 12, z: 2 },
-      approach: { x: 13, y: 12, z: 2 },
-    }),
-    480,
-  ),
+  buildPath("west-spindle", frontierCoil(westSpindle), 480),
+  buildPath("east-return", frontierCoil(eastReturn), 480),
   buildPath("north-vault", frontierCrossCoil, 480),
 ];
+/** The same three routes after a cumulative swing around the prism (degrees). */
+export function frontierDriftPath(pathIndex: number, swingDegrees: number): PathCurve {
+  if (swingDegrees === 0) return frontierPaths[pathIndex]!;
+  const swing = (swingDegrees * Math.PI) / 180;
+  const id = frontierPaths[pathIndex]!.id;
+  if (pathIndex === 0) return buildPath(id, frontierCoil(westSpindle, swing), 480);
+  if (pathIndex === 1) return buildPath(id, frontierCoil(eastReturn, swing), 480);
+  return buildPath(id, frontierCrossCoilSwung(swing), 480);
+}
 
 /** A finite first study of route expansion, not a claim of endless balance. */
 export const FRONTIER_INDEX = LEVELS.length;
@@ -1030,6 +1068,144 @@ LEVELS.push({
       lesson:
         "Choose which convoy needs the redirected slow. Other weapons still supply the damage; Stasis remains a passive comparison.",
       groups: [g("barge", 0, 3, 2.8, 1), g("barge", 1, 3, 2.8, 4), g("shard", 0, 4, 1.8, 7)],
+    },
+  ],
+});
+
+/**
+ * Drift Frontier: the same three coils, but between waves an authored route swings
+ * around the prism. Lines on a moved coil lose contact; free setup repositioning is the
+ * answer. Difficulty comes from a changing placement problem, not only from hull.
+ * Swings stay inside each route's measured legal range (no early prism entry, in bounds).
+ */
+export const DRIFT_INDEX = LEVELS.length;
+LEVELS.push({
+  id: "drift-frontier",
+  name: "Drift Frontier",
+  experiment: true,
+  prototype: "route-expansion",
+  subtitle: "Coils that move · 12-wave late-game prototype",
+  blurb:
+    "Helix Frontier's three coils, but they swing around the prism between waves. Re-fly the lines a swing breaks while the waves grow heavier.",
+  briefing:
+    "A opens first, B on wave 3, C on wave 6. From wave 4 an announced coil swings around the prism before each wave; your drones stay put, so lines on that coil lose contact. Survey shows each swing and your lost contact; reposition is free during setup. Twelve escalating waves end with all three convoys. Tripwire (6) is available. No campaign score is recorded.",
+  hangar: frontierHangar,
+  accent: 0xe6b86a,
+  stasisAvailable: true,
+  fleetGrowth: "scrap",
+  droneRoster: "expanded",
+  dronePricing: "per-type",
+  presentation: "protected-prism",
+  protectedVolume: frontierVolume,
+  startingScrap: 60,
+  // Tuned with qa/drift-trial.mjs: waves 8–12 carry twice their listed escalation.
+  hpMul: 1.15,
+  speedMul: 0.9,
+  paths: frontierPaths,
+  driftPath: frontierDriftPath,
+  waves: [
+    {
+      chapter: "01 · West spindle",
+      lesson: "Only A is open. Build a first line; from wave 4 coils will start to swing between waves.",
+      groups: [g("shard", 0, 7, 1.6, 1)],
+    },
+    {
+      chapter: "02 · Hold the west",
+      lesson: "Barges join A. B opens next wave on the far side of the prism.",
+      groups: [g("shard", 0, 8, 1.4, 1), g("barge", 0, 2, 3, 4)],
+    },
+    {
+      chapter: "03 · East return",
+      lesson: "B opens. Extend east; the west keeps its traffic.",
+      groups: [g("shard", 1, 7, 1.5, 1), g("shard", 0, 6, 1.5, 4), g("wisp", 0, 2, 1.8, 8)],
+    },
+    {
+      chapter: "04 · First swing",
+      lesson:
+        "A swung 45° south around the prism. Check which west lines still touch it and re-fly the rest.",
+      drift: [{ path: 0, degrees: 45 }],
+      groups: [g("barge", 0, 3, 2.6, 1), g("shard", 1, 8, 1.4, 3), g("wisp", 0, 3, 1.8, 7)],
+    },
+    {
+      chapter: "05 · East swings north",
+      lesson: "B swung 45° north. A stays where it moved. Two coils out of their first places.",
+      drift: [{ path: 1, degrees: 45 }],
+      groups: [g("barge", 1, 3, 2.5, 1), g("shard", 0, 8, 1.3, 3), g("wisp", 1, 4, 1.7, 7)],
+    },
+    {
+      chapter: "06 · North vault",
+      lesson: "C opens above the north face. No swing this wave: build its first line.",
+      groups: [g("shard", 2, 8, 1.5, 1), g("barge", 0, 3, 2.6, 3), g("shard", 1, 6, 1.4, 6)],
+    },
+    {
+      chapter: "07 · The vault slides east",
+      lesson: "C swung 45° east toward B. Some eastern lines may now reach it.",
+      drift: [{ path: 2, degrees: -45 }],
+      groups: [
+        g("barge", 2, 3, 2.4, 1),
+        g("shard", 0, 7, 1.3, 3, 1, 1.2),
+        g("wisp", 1, 5, 1.6, 5),
+        g("shard", 2, 5, 1.3, 9),
+      ],
+    },
+    {
+      chapter: "08 · West swings north",
+      lesson: "A swung 90° the other way, past home and into the north. Heavier west convoy.",
+      drift: [{ path: 0, degrees: -90 }],
+      groups: [
+        g("barge", 0, 5, 2.2, 1, 1, 2.6),
+        g("shard", 1, 8, 1.3, 3, 1, 2.4),
+        g("wisp", 2, 5, 1.5, 6, 1, 2),
+      ],
+    },
+    {
+      chapter: "09 · East swings farther",
+      lesson: "B swung another 30° north. Barges on B and C.",
+      drift: [{ path: 1, degrees: 30 }],
+      groups: [
+        g("barge", 1, 4, 2.2, 1, 1, 2.8),
+        g("barge", 2, 3, 2.4, 4, 1, 2.6),
+        g("shard", 0, 9, 1.2, 6, 1, 2.4),
+        g("wisp", 1, 4, 1.5, 10, 1, 2),
+      ],
+    },
+    {
+      chapter: "10 · Vault swings west",
+      lesson: "C swung 90° west. Fast Wisps on A: a Tripwire across them pays per crossing.",
+      drift: [{ path: 2, degrees: 90 }],
+      groups: [
+        g("barge", 2, 5, 2.1, 1, 1, 3),
+        g("wisp", 0, 7, 1.3, 3, 1, 2.4),
+        g("shard", 1, 10, 1.1, 6, 1, 2.6),
+      ],
+    },
+    {
+      chapter: "11 · Twin return",
+      lesson:
+        "A and B both swing back to their first places. Old lines may work again; heavy convoys on both.",
+      drift: [
+        { path: 0, degrees: 45 },
+        { path: 1, degrees: -75 },
+      ],
+      groups: [
+        g("barge", 0, 5, 2, 1, 1, 3.2),
+        g("barge", 1, 5, 2, 3, 1, 3.2),
+        g("shard", 2, 10, 1.1, 5, 1, 2.6),
+        g("wisp", 0, 6, 1.3, 9, 1, 2.4),
+      ],
+    },
+    {
+      chapter: "12 · Every frontier",
+      lesson: "C swings home. All three convoys at once, then late bursts. Hold every port.",
+      drift: [{ path: 2, degrees: -45 }],
+      groups: [
+        g("barge", 0, 6, 2, 1, 1, 3.6),
+        g("barge", 1, 6, 2, 2, 1, 3.6),
+        g("barge", 2, 6, 2, 3, 1, 3.6),
+        g("shard", 0, 8, 1, 12, 1, 2.8),
+        g("shard", 1, 8, 1, 14, 1, 2.8),
+        g("wisp", 2, 8, 1.2, 16, 1, 2.6),
+      ],
     },
   ],
 });

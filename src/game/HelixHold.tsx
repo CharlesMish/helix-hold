@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { ArrowUpRight, Crosshair, Pause, Play, RotateCcw, Scan, Volume2, VolumeX, X } from "lucide-react";
 import { createAudio, type AudioBus } from "./audio";
-import { LEVELS, CARRIER_TEST_INDEX, FRONTIER_INDEX, RELAY_LAB_INDEX } from "./paths";
+import { LEVELS, CARRIER_TEST_INDEX, DRIFT_INDEX, FRONTIER_INDEX, RELAY_LAB_INDEX } from "./paths";
 import { GatePlan } from "./GatePlan";
 import { freshSave, loadSave, type SaveData } from "./save";
 import { createWorld, type World } from "./scene";
@@ -49,7 +49,7 @@ import {
 import { clamp, forwardOf } from "./math";
 
 type Stick = { x: number; y: number; pointer: number | null };
-const BUILD_LABEL = "0.9.0";
+const BUILD_LABEL = "0.10.0";
 const MODE_KEYS: Record<DroneMode, number> = {
   pierce: 1,
   sweep: 2,
@@ -176,6 +176,8 @@ type Hud = {
   /** Tripwire: span of the strand this anchor would complete, or null for an open first post. */
   wireSpan: number | null;
   wireAnchorId: number | null;
+  /** Drift swings applied for this setup, with the fleet's contact on that route before/after. */
+  drift: { path: number; degrees: number; before: number; after: number }[];
 };
 const emptyHud: Hud = {
   core: 100,
@@ -226,6 +228,7 @@ const emptyHud: Hud = {
   laterCrossings: 0,
   wireSpan: null,
   wireAnchorId: null,
+  drift: [],
 };
 const kindLabel = { shard: "Shards", barge: "Barges", wisp: "Wisps", carrier: "Carrier" };
 
@@ -247,6 +250,8 @@ declare global {
       mode: (mode: DroneMode) => void;
       recall: () => void;
       next: () => void;
+      /** QA only: launch the waiting wave and resolve it immediately, as if every enemy were stopped. */
+      clear: () => void;
     };
   }
 }
@@ -812,6 +817,7 @@ export function HelixHold() {
         laterCrossings: ghost.laterCrossings,
         wireSpan: ghost.wire?.span ?? null,
         wireAnchorId: ghost.wire?.anchorId ?? null,
+        drift: r.rest > 0 ? (r.lastDrift ?? []) : [],
         recallSetupOnly:
           !!lastDrone && (lastDrone.mode === "relay" || lastDrone.mode === "lumen") && r.rest <= 0,
         checking: !!r.fieldCheck,
@@ -1085,6 +1091,15 @@ export function HelixHold() {
         next: () => {
           if (runRef.current) nextWaveNow(runRef.current);
         },
+        clear: () => {
+          const r = runRef.current;
+          if (!r || r.phase !== "play") return;
+          if (r.rest > 0) nextWaveNow(r);
+          const wave = r.waves[r.waveIndex];
+          if (!wave) return;
+          for (const g of wave.groups) g.spawned = g.count;
+          for (const e of r.enemies) e.alive = false;
+        },
       };
     }
     raf = requestAnimationFrame(frame);
@@ -1151,6 +1166,7 @@ export function HelixHold() {
   const crown = level.presentation === "split-crown",
     prototype = !!level.prototype,
     frontier = level.prototype === "route-expansion",
+    drifting = !!level.driftPath,
     relayLab = level.prototype === "relay",
     staged = crown || !!level.prototype,
     stasisAvailable = hasStasis(level),
@@ -1190,9 +1206,11 @@ export function HelixHold() {
         ? `${carrierName} breached for 40 core.`
         : `${carrierName} not reached.`;
   const debriefCopy = prototype
-    ? (frontier
-        ? "Three coils, three breach ports. Did each opening ask for a new line while keeping your older drones useful?"
-        : "Did redirecting one Lumen beam create a useful line? Try changing the receiver’s aim or compare it with Stasis.") +
+    ? (drifting
+        ? "Coils that move. Did re-flying broken lines after each swing feel like a fresh puzzle, or like chores? Did Tripwire earn a place?"
+        : frontier
+          ? "Three coils, three breach ports. Did each opening ask for a new line while keeping your older drones useful?"
+          : "Did redirecting one Lumen beam create a useful line? Try changing the receiver’s aim or compare it with Stasis.") +
       " This prototype does not record a campaign score."
     : debrief?.continued
       ? `${baseWaveCount}-wave campaign result already recorded. This extended defense is a separate challenge.${crown ? ` ${carrierSummary}` : ""}`
@@ -1208,7 +1226,16 @@ export function HelixHold() {
   const laneLabel = (i: number) => (staged ? String.fromCharCode(65 + i) : String(i + 1));
   const coverageNow = staged ? hud.nowCoverage : hud.coverage;
   const wavePlan = runRef.current?.waves[hud.rest > 0 ? hud.wave + 1 : hud.wave];
-  const newRouteSetup = frontier && hud.rest > 0 && hud.lanes.some((l) => l.opensAt === hud.wave + 2);
+  const driftNote = hud.drift.length
+    ? hud.drift
+        .map(
+          (d) =>
+            `Gate ${laneLabel(d.path)} swung ${Math.abs(d.degrees)}° · your contact ${d.before.toFixed(0)} → ${d.after.toFixed(0)} m`,
+        )
+        .join(" · ")
+    : "";
+  const newRouteSetup =
+    frontier && hud.rest > 0 && (hud.lanes.some((l) => l.opensAt === hud.wave + 2) || hud.drift.length > 0);
   const nextCampaign = LEVELS.findIndex(
     (candidate, i) => i > selected && !candidate.archived && !candidate.experiment && !candidate.prototype,
   );
@@ -1471,13 +1498,19 @@ export function HelixHold() {
                   prices unchanged. Reposition any existing drone for free during setup.
                 </p>
               )}
+              {driftNote && (
+                <p className="drift-note">
+                  <b>Drift</b>
+                  {driftNote}. Select a drone that lost its line and reposition it for free.
+                </p>
+              )}
               {newRouteSetup && (
                 <button
                   className="route-ghost-toggle"
                   aria-pressed={hud.routeGhost}
                   onClick={toggleRouteGhost}
                 >
-                  New-route ribbon · {hud.routeGhost ? "on" : "off"}
+                  {drifting ? "Moved/new route ribbon" : "New-route ribbon"} · {hud.routeGhost ? "on" : "off"}
                   {!touch && <kbd>G</kbd>}
                 </button>
               )}
@@ -1667,6 +1700,12 @@ export function HelixHold() {
                                 : "Two drones to begin"}
                       </span>
                     </div>
+                    {driftNote && hud.moving === null && (
+                      <p className="drift-note">
+                        <b>Drift</b>
+                        {driftNote}
+                      </p>
+                    )}
                     {modeButtons}
                     <p className="pilot-weapon-note">
                       {hud.moving !== null ? "Moving existing drone" : "Next drone type"} · your pilot gun
@@ -1680,8 +1719,9 @@ export function HelixHold() {
                         aria-pressed={hud.routeGhost}
                         onClick={toggleRouteGhost}
                       >
-                        New-route ribbon · {hud.routeGhost ? "on" : "off"}
-                        <span>Opening routes only</span>
+                        {drifting ? "Moved/new route ribbon" : "New-route ribbon"} ·{" "}
+                        {hud.routeGhost ? "on" : "off"}
+                        <span>{drifting ? "Swung or opening routes" : "Opening routes only"}</span>
                         {!touch && <kbd>G</kbd>}
                       </button>
                     )}
@@ -1971,6 +2011,11 @@ export function HelixHold() {
                   label: "Helix Frontier",
                   note: "Three coils · 9-wave spatial prototype",
                 },
+                {
+                  index: DRIFT_INDEX,
+                  label: "Drift Frontier",
+                  note: "Coils swing between waves · 12-wave late game",
+                },
                 { index: RELAY_LAB_INDEX, label: "Relay Lab", note: "Slowing light · one fixed redirection" },
                 { index: CARRIER_TEST_INDEX, label: "Stasis + carrier", note: "Short field comparison" },
               ].map((lab) => (
@@ -2235,7 +2280,15 @@ export function HelixHold() {
                 </div>
               </div>
             )}
-            {frontier && (
+            {drifting && (
+              <p className="lab-guide">
+                Drift Frontier uses the same coils, but from wave 4 an announced coil swings around the prism
+                before each wave. Your drones never move by themselves: lines on a swung coil lose contact.
+                The placement panel and Survey show each swing with your contact before and after; the moved
+                route gets a ribbon (G). Reposition is free during setup. Waves 8–12 are deliberately heavy.
+              </p>
+            )}
+            {frontier && !drifting && (
               <p className="lab-guide">
                 Helix Frontier opens A on wave 1, B on wave 3 and C on wave 6. Each coil ends at its own
                 breach port on the protected prism. The new-route ribbon highlights only the route opening in

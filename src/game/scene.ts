@@ -1005,6 +1005,11 @@ export function buildProtectedPrismVisual(volume: {
   return { group, edgeMaterial };
 }
 
+/** Routes rebuild when the arena changes or a Drift swing replaces a path. */
+function sceneKey(run: Pick<Run, "levelId" | "pathRevision">) {
+  return `${run.levelId}:${run.pathRevision}`;
+}
+
 export function createWorld(canvas: HTMLCanvasElement): World {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const renderer = new THREE.WebGLRenderer({
@@ -1544,7 +1549,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
     const size = bounds.getSize(new THREE.Vector3());
     const span = Math.max(size.x, size.y, size.z, 25);
     surveyPosition.copy(surveyCenter).add(new THREE.Vector3(span * 1.15, span * 0.82, span * 1.32));
-    builtId = run.levelId;
+    builtId = sceneKey(run);
     coverageClock = 1;
   }
   function placeBeam(mesh: THREE.Mesh, beam: Beam, color: number, hit: boolean, run: Run, index?: number) {
@@ -1844,7 +1849,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       };
     },
     sync(run, dt, elapsed) {
-      if (builtId !== run.levelId) rebuild(run);
+      if (builtId !== sceneKey(run)) rebuild(run);
       ensureDroneVisuals(run.drones.length);
       updateCamera(run, dt, elapsed);
       const preview = getPlacementPreview(run);
@@ -2092,8 +2097,12 @@ export function createWorld(canvas: HTMLCanvasElement): World {
             !!materials.dormant && run.waveIndex + (pending ? 2 : 1) < getLaneFirstWave(run, index);
           if (materials.ghost) {
             const newlyOpening = pending && run.waveIndex + 2 === getLaneFirstWave(run, index);
+            // A route that just swung is as new to the player as one that just opened.
+            const justSwung = pending && !!run.lastDrift?.some((d) => d.path === index);
             materials.ghost.opacity =
-              run.routeGhost && newlyOpening && run.phase !== "title" && !run.fieldCheck ? 0.17 : 0;
+              run.routeGhost && (newlyOpening || justSwung) && run.phase !== "title" && !run.fieldCheck
+                ? 0.17
+                : 0;
           }
           if (materials.dormant) materials.dormant.opacity = pendingPrimary ? (overview ? 0.24 : 0.16) : 0;
           materials.tube.opacity = pendingPrimary ? 0 : waiting ? 0.02 : overview ? 0.15 : 0.075;

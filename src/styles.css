@@ -2920,3 +2920,29 @@ svg {
 .placement[data-mode="tripwire"] .coverage-read b {
   color: #fff1c8;
 }
+
+/* Drift: announces which route swung and how much of the fleet's contact it took. */
+.drift-note {
+  margin: 0 0 9px;
+  padding: 8px 9px;
+  border: 1px solid #e6b86a59;
+  border-radius: 9px;
+  background: #e6b86a14;
+  color: #f4dfb5;
+  font: 10px/1.45 var(--font-mono);
+}
+.drift-note b {
+  display: block;
+  margin-bottom: 2px;
+  color: #ffd27f;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 9px;
+}
+.gate-plan-drift {
+  display: block;
+  margin-top: 2px;
+  color: #ffd27f;
+  font-style: normal;
+  font-size: 10px;
+}

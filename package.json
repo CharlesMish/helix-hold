@@ -1,7 +1,7 @@
 {
   "name": "helix-hold",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.10.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "qa": "node qa/check.mjs",
-    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs && node qa/crown-growth.mjs && node qa/render-pools.mjs && node qa/drone-roles.mjs && node qa/drone-economy.mjs && node qa/drone-visuals.mjs && node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs && node qa/tripwire.mjs",
+    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs && node qa/crown-growth.mjs && node qa/render-pools.mjs && node qa/drone-roles.mjs && node qa/drone-economy.mjs && node qa/drone-visuals.mjs && node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs && node qa/tripwire.mjs && node qa/drift.mjs",
     "test:geometry": "node qa/geometry.mjs",
     "trial:carrier": "node qa/carrier-trial.mjs",
     "study:sweep": "node qa/sweep-study.mjs",
@@ -29,7 +29,8 @@
     "test:prototypes": "node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs",
     "diagram:frontier": "node qa/frontier-geometry.mjs --write",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"qa/*.mjs\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"qa/*.mjs\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"qa/*.mjs\"",
+    "trial:drift": "node qa/drift-trial.mjs --write"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
