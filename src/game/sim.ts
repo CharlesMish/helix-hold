@@ -14,6 +14,10 @@ import {
   LUMEN_SLOW_DURATION,
   LUMEN_SPEED_SCALE,
   RELAY_RADIUS,
+  TRIPWIRE_DAMAGE,
+  TRIPWIRE_MAX_SPAN,
+  TRIPWIRE_MIN_SPAN,
+  TRIPWIRE_RELEASE,
   selectBeamTargets,
   type Beam,
   type DroneMode,
@@ -93,6 +97,8 @@ export type Enemy = {
   /** Timed Pin slow persists after leaving its firing line; refreshed, never stacked. */
   pinSlowRemaining: number;
   lumenSlowRemaining: number;
+  /** Tripwire strands (by owner post id) this enemy is currently crossing. */
+  wireContacts: number[];
   radius: number;
   reward: number;
   leak: number;
@@ -112,6 +118,8 @@ export type Drone = {
   mode: DroneMode;
   /** Only the optional encounter overrides Sweep; campaign specs remain stable. */
   dps?: number;
+  /** Tripwire posts pair into one strand. Null marks an open first post awaiting its partner. */
+  partnerId?: number | null;
   paid: number;
   kills: number;
   damage: number;
@@ -236,6 +244,7 @@ export function availableDroneModes(level: LevelDef): DroneMode[] {
   const modes: DroneMode[] = ["pierce", "sweep"];
   if (hasStasis(level)) modes.push("stasis");
   if (level.droneRoster === "expanded") modes.push("halo", "pin");
+  if (level.prototype === "route-expansion") modes.push("tripwire");
   return modes;
 }
 
@@ -283,6 +292,7 @@ function emptyEnemy(): Enemy {
     stasisSeen: false,
     pinSlowRemaining: 0,
     lumenSlowRemaining: 0,
+    wireContacts: [],
     radius: 1,
     reward: 0,
     leak: 0,
@@ -366,6 +376,7 @@ function spawnEnemy(run: Run, kind: Kind, pathIndex: number, speedMul = 1, hpMul
   slot.stasisSeen = false;
   slot.pinSlowRemaining = 0;
   slot.lumenSlowRemaining = 0;
+  slot.wireContacts = [];
   slot.radius = spec.radius;
   slot.reward = spec.reward;
   slot.leak = spec.leak;
@@ -459,8 +470,18 @@ export function droneBeam(d: Drone): Beam {
 export type CoverageSegment = { pathIndex: number; points: Vec3[]; metres: number };
 export type BeamCoverage = { segments: CoverageSegment[]; metres: number; sampleRadius: number };
 export type CoverageTiming = { nowMetres: number; laterMetres: number; idleMetres: number };
+export type CrossingTiming = { nowCrossings: number; laterCrossings: number };
+export type WirePreview = { from: Vec3; to: Vec3; span: number; anchorId: number };
 export type PlacementPreview = BeamCoverage &
-  CoverageTiming & { drone: Drone; beam: Beam; status: string | null; relayTraces?: RelayTrace[] };
+  CoverageTiming &
+  CrossingTiming & {
+    drone: Drone;
+    beam: Beam;
+    status: string | null;
+    relayTraces?: RelayTrace[];
+    /** Tripwire only: the strand this anchor would create, or null for an open first post. */
+    wire?: WirePreview | null;
+  };
 
 /** Keep all highlighted geometry, but distinguish useful traffic from future plans.
  * Now follows the gate HUD: the next setup wave, or pending/live combat traffic.
@@ -482,6 +503,77 @@ export function getCoverageTiming(run: Run, coverage: BeamCoverage): CoverageTim
     else timing.idleMetres += segment.metres;
   }
   return timing;
+}
+
+/** Tripwire value is the number of separate route crossings, split by the same lane timing. */
+export function getCrossingTiming(run: Run, coverage: BeamCoverage): CrossingTiming {
+  const upcoming = run.rest > 0 || run.waveIndex < 0;
+  const waveIndex = run.waveIndex + (upcoming ? 1 : 0);
+  const laterLanes = new Set(
+    run.waves.slice(waveIndex + 1).flatMap((w) => w.groups.filter((g) => g.count > 0).map((g) => g.path)),
+  );
+  const status = run.paths.map((_, index) => getLaneStatus(run, index));
+  const timing: CrossingTiming = { nowCrossings: 0, laterCrossings: 0 };
+  for (const segment of coverage.segments) {
+    const lane = status[segment.pathIndex];
+    if (lane === "active" || lane === "upcoming") timing.nowCrossings += 1;
+    else if (laterLanes.has(segment.pathIndex)) timing.laterCrossings += 1;
+  }
+  return timing;
+}
+
+/**
+ * A strand is the shared finite cylinder between two post centers. It starts 0.4m
+ * behind the first post so beamContact's muzzle gap lands exactly on that post.
+ */
+export function wireBeam(a: Vec3, b: Vec3): Beam | null {
+  const dx = b.x - a.x,
+    dy = b.y - a.y,
+    dz = b.z - a.z;
+  const span = Math.hypot(dx, dy, dz);
+  if (span < 1e-6) return null;
+  const ux = dx / span,
+    uy = dy / span,
+    uz = dz / span;
+  return {
+    x: a.x - ux * 0.4,
+    y: a.y - uy * 0.4,
+    z: a.z - uz * 0.4,
+    dx: ux,
+    dy: uy,
+    dz: uz,
+    range: span + 0.4,
+    radius: DRONE_SPECS.tripwire.radius,
+    dps: 0,
+    pierces: true,
+  };
+}
+
+/** Wider, longer copy used only to decide when an enemy has fully left a strand. */
+function wireReleaseBeam(beam: Beam): Beam {
+  return {
+    ...beam,
+    x: beam.x - beam.dx * TRIPWIRE_RELEASE,
+    y: beam.y - beam.dy * TRIPWIRE_RELEASE,
+    z: beam.z - beam.dz * TRIPWIRE_RELEASE,
+    range: beam.range + TRIPWIRE_RELEASE * 2,
+    radius: beam.radius + TRIPWIRE_RELEASE,
+  };
+}
+
+export type Strand = { ownerId: number; owner: Drone; partner: Drone; beam: Beam };
+
+/** Completed strands, using each post's current (Fan/Slide-projected) center.
+ * The lower id owns the strand: it was paid for and receives damage and kills. */
+export function getStrands(fleet: readonly Drone[]): Strand[] {
+  const strands: Strand[] = [];
+  for (const owner of fleet) {
+    if (owner.mode !== "tripwire" || owner.partnerId == null || owner.partnerId < owner.id) continue;
+    const partner = fleet.find((d) => d.id === owner.partnerId && d.mode === "tripwire");
+    const beam = partner && wireBeam(owner, partner);
+    if (partner && beam) strands.push({ ownerId: owner.id, owner, partner, beam });
+  }
+  return strands;
 }
 
 /**
@@ -605,6 +697,12 @@ export function getDroneCoverage(run: Pick<Run, "paths"> & Partial<RelayRun>, dr
       fieldCheck: run.fieldCheck ?? null,
     };
     return getRelayCoverage(run, tracesForDrone(traceFleet(relayRun, fleet, false), drone));
+  }
+  if (drone.mode === "tripwire") {
+    const strand = run.drones && getStrands(run.drones).find((s) => s.ownerId === drone.id);
+    return strand
+      ? getBeamCoverage(run, strand.beam)
+      : { segments: [], metres: 0, sampleRadius: KINDS.shard.radius };
   }
   return drone.mode === "stasis" || drone.mode === "halo"
     ? getFieldCoverage(run, drone, DRONE_SPECS[drone.mode].radius)
@@ -772,10 +870,40 @@ function proposedDrone(run: Run): Drone {
   );
 }
 
+/** The post a Tripwire anchor would connect to: a moved post's partner, or the open first post. */
+export function wireAnchorPost(run: Pick<Run, "drones" | "repositionId" | "droneMode">): Drone | undefined {
+  const moving = run.drones.find((d) => d.id === run.repositionId);
+  if (moving) {
+    return moving.mode === "tripwire" && moving.partnerId != null
+      ? run.drones.find((d) => d.id === moving.partnerId)
+      : undefined;
+  }
+  if (run.droneMode !== "tripwire") return undefined;
+  return run.drones.find((d) => d.mode === "tripwire" && (d.partnerId ?? null) === null);
+}
+
 export function getPlacementPreview(run: Run): PlacementPreview {
   const drone = proposedDrone(run);
-  const beam = droneBeam(drone);
-  let coverage = getDroneCoverage(run, drone);
+  let beam = droneBeam(drone);
+  let wire: WirePreview | null | undefined;
+  let coverage: BeamCoverage;
+  if (drone.mode === "tripwire") {
+    const post = wireAnchorPost(run);
+    const strand = post && wireBeam(post, drone);
+    wire =
+      post && strand
+        ? {
+            from: { x: post.x, y: post.y, z: post.z },
+            to: { x: drone.x, y: drone.y, z: drone.z },
+            span: strand.range - 0.4,
+            anchorId: post.id,
+          }
+        : null;
+    if (strand) beam = strand;
+    coverage = strand
+      ? getBeamCoverage(run, strand)
+      : { segments: [], metres: 0, sampleRadius: KINDS.shard.radius };
+  } else coverage = getDroneCoverage(run, drone);
   if (run.level.id === "tutorial") {
     // Match the scene's route announcements: introduce the next route during
     // setup, then retain it. A dormant lesson must not look like useful coverage.
@@ -794,8 +922,10 @@ export function getPlacementPreview(run: Run): PlacementPreview {
   return {
     ...coverage,
     ...getCoverageTiming(run, coverage),
+    ...getCrossingTiming(run, coverage),
     drone,
     beam,
+    wire,
     status: placementStatus(run),
     relayTraces,
   };
@@ -844,8 +974,27 @@ function weapons(run: Run, dt: number) {
   )) {
     damageEnemy(run, enemy, shipBeam.dps * dt);
   }
+  // Strands resolve as discrete crossings: entering contact deals one burst, and only a
+  // clear exit (wider release volume) re-arms that strand for the same enemy.
   for (const drone of run.drones) {
-    if (drone.mode === "stasis" || drone.mode === "relay") continue;
+    if (drone.mode === "tripwire") drone.shotFlash = Math.max(0, (drone.shotFlash ?? 0) - dt);
+  }
+  for (const strand of getStrands(run.drones)) {
+    const release = wireReleaseBeam(strand.beam);
+    for (const enemy of run.enemies) {
+      if (!enemy.alive) continue;
+      const touching = enemy.wireContacts.includes(strand.ownerId);
+      if (!touching && beamContact(strand.beam, enemy) !== null) {
+        enemy.wireContacts.push(strand.ownerId);
+        strand.owner.shotFlash = PIN_FLASH_DURATION;
+        damageEnemy(run, enemy, TRIPWIRE_DAMAGE, strand.owner);
+      } else if (touching && beamContact(release, enemy) === null) {
+        enemy.wireContacts = enemy.wireContacts.filter((id) => id !== strand.ownerId);
+      }
+    }
+  }
+  for (const drone of run.drones) {
+    if (drone.mode === "stasis" || drone.mode === "relay" || drone.mode === "tripwire") continue;
     if (drone.mode === "lumen") {
       // Resolve after previous damage sources, so a killed obstruction cannot
       // absorb this source's energy. Only this emitter receives contribution.
@@ -1010,10 +1159,12 @@ export function placementStatus(run: Run): string | null {
   if (run.phase !== "play") return "Resume flight to anchor";
   if (!isModeAvailable(run.level, run.droneMode))
     return run.droneMode === "stasis"
-      ? "Stasis is available in Carrier Test Flight and Split Crown"
+      ? "Stasis is offered in Split Crown and the optional labs"
       : run.droneMode === "lumen" || run.droneMode === "relay"
         ? "Lumen and Relay are available in Relay Lab"
-        : "Halo and Pin are available in Split Crown";
+        : run.droneMode === "tripwire"
+          ? "Tripwire is offered in the Helix Frontier prototypes"
+          : "Halo and Pin are available in Split Crown";
   const moving = run.drones.find((d) => d.id === run.repositionId);
   if (run.repositionId !== null && (!moving || run.rest <= 0)) return "Reposition only during setup";
   if (!moving) {
@@ -1035,6 +1186,15 @@ export function placementStatus(run: Run): string | null {
     const ddz = d.bz - run.ship.z;
     if (ddx * ddx + ddy * ddy + ddz * ddz < 4.8) return "Too close to another drone";
   }
+  const post = run.droneMode === "tripwire" || moving?.mode === "tripwire" ? wireAnchorPost(run) : undefined;
+  if (post) {
+    // Rest positions on both ends: Fan/Slide never decides whether a strand is legal.
+    const span = Math.hypot(post.bx - run.ship.x, post.by - run.ship.y, post.bz - run.ship.z);
+    if (span > TRIPWIRE_MAX_SPAN)
+      return `Strand too long · ${span.toFixed(1)}m of ${TRIPWIRE_MAX_SPAN}m from post #${post.id}`;
+    if (span < TRIPWIRE_MIN_SPAN)
+      return `Strand too short · fly at least ${TRIPWIRE_MIN_SPAN}m from post #${post.id}`;
+  }
   return null;
 }
 
@@ -1045,6 +1205,12 @@ export function tryAnchor(run: Run): string | null {
   const moving = run.drones.find((d) => d.id === run.repositionId);
   if (moving) Object.assign(moving, drone);
   else {
+    if (drone.mode === "tripwire") {
+      // The open post pairs with this anchor; otherwise this is a new, paid first post.
+      const open = wireAnchorPost(run);
+      drone.partnerId = open ? open.id : null;
+      if (open) open.partnerId = drone.id;
+    }
     run.drones.push(drone);
     run.nextDroneId += 1;
     run.scrap -= drone.paid;
@@ -1090,14 +1256,36 @@ export function recallLast(run: Run): string | null {
     return "Recall Lumen/Relay during setup";
   const drone = run.drones.pop();
   if (!drone) return "No drone to recall";
-  run.scrap += drone.paid;
+  // Undoing a strand's free second post reopens its first post; a paid post takes its partner along.
+  const refund = drone.paid + releaseStrand(run, drone, drone.paid === 0);
+  run.scrap += refund;
   if (run.selectedDroneId === drone.id) run.selectedDroneId = null;
   if (!run.drones.length) {
     run.expand = 0;
     run.shift = 0;
   }
-  run.hint = `${DRONE_SPECS[drone.mode].label} recalled · ${drone.paid} scrap returned. Try a new line.`;
+  run.hint =
+    drone.mode === "tripwire" && drone.paid === 0
+      ? `Second post recalled · post #${drone.partnerId} is open again. Fly a new strand.`
+      : `${DRONE_SPECS[drone.mode].label} recalled · ${refund} scrap returned. Try a new line.`;
   return null;
+}
+
+/** Detach a removed Tripwire post from its partner. Either reopen the partner, or remove it
+ * too and return its paid value, so a strand can never be rebuilt for less than its price. */
+function releaseStrand(run: Run, drone: Drone, reopenPartner: boolean): number {
+  if (drone.mode !== "tripwire" || drone.partnerId == null) return 0;
+  const index = run.drones.findIndex((d) => d.id === drone.partnerId);
+  if (index < 0) return 0;
+  const partner = run.drones[index]!;
+  if (reopenPartner) {
+    partner.partnerId = null;
+    return 0;
+  }
+  run.drones.splice(index, 1);
+  if (run.selectedDroneId === partner.id) run.selectedDroneId = null;
+  if (run.repositionId === partner.id) run.repositionId = null;
+  return partner.paid;
 }
 
 /** Setup revision reuses the exact paid unit; the old placement survives cancellation. */
@@ -1150,13 +1338,18 @@ export function recallSelected(run: Run, id: number): string | null {
   if (index < 0) return "Select a drone first";
   if (run.repositionId === id) cancelReposition(run);
   const [drone] = run.drones.splice(index, 1);
-  run.scrap += drone!.paid;
+  // Selected recall removes a whole strand and refunds its single purchase.
+  const strandRefund = releaseStrand(run, drone!, false);
+  run.scrap += drone!.paid + strandRefund;
   if (run.selectedDroneId === id) run.selectedDroneId = null;
   if (!run.drones.length) {
     run.expand = 0;
     run.shift = 0;
   }
-  run.hint = `Drone ${id} recalled · ${drone!.paid} scrap returned.`;
+  run.hint =
+    drone!.mode === "tripwire" && drone!.partnerId != null
+      ? `Strand #${Math.min(id, drone!.partnerId)} recalled · both posts removed · ${drone!.paid + strandRefund} scrap returned.`
+      : `Drone ${id} recalled · ${drone!.paid} scrap returned.`;
   return null;
 }
 

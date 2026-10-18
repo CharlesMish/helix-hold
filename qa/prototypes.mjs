@@ -113,7 +113,14 @@ test("The five existing arenas retain their authored schedules, continuation and
 test("Prototype entry uses independent run state, explicit rosters and scrap-funded fleet growth", () => {
   assert.equal(LEVELS[FRONTIER_INDEX].id, "helix-frontier");
   assert.equal(LEVELS[RELAY_LAB_INDEX].id, "relay-lab");
-  assert.deepEqual(availableDroneModes(LEVELS[FRONTIER_INDEX]), ["pierce", "sweep", "stasis", "halo", "pin"]);
+  assert.deepEqual(availableDroneModes(LEVELS[FRONTIER_INDEX]), [
+    "pierce",
+    "sweep",
+    "stasis",
+    "halo",
+    "pin",
+    "tripwire",
+  ]);
   assert.deepEqual(availableDroneModes(LEVELS[RELAY_LAB_INDEX]), [
     "pierce",
     "sweep",

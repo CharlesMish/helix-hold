@@ -1,5 +1,5 @@
 /** Weapon geometry lives here so combat and placement previews use the same hit test. */
-export type DroneMode = "pierce" | "sweep" | "stasis" | "halo" | "pin" | "lumen" | "relay";
+export type DroneMode = "pierce" | "sweep" | "stasis" | "halo" | "pin" | "lumen" | "relay" | "tripwire";
 
 export const STASIS_RADIUS = 6;
 export const STASIS_SPEED_SCALE = 0.5;
@@ -12,6 +12,13 @@ export const PIN_FLASH_DURATION = 0.18;
 export const LUMEN_SLOW_DURATION = 2.4;
 export const LUMEN_SPEED_SCALE = 0.6;
 export const RELAY_RADIUS = 1;
+/** Tripwire: a strand between two flown posts. Each fresh crossing deals one burst. */
+export const TRIPWIRE_DAMAGE = 26;
+export const TRIPWIRE_RADIUS = 0.6;
+export const TRIPWIRE_MAX_SPAN = 32;
+export const TRIPWIRE_MIN_SPAN = 3;
+/** An enemy must clear the strand by this extra margin before a new crossing can count. */
+export const TRIPWIRE_RELEASE = 0.6;
 
 export const DRONE_SPECS = {
   lumen: {
@@ -33,6 +40,15 @@ export const DRONE_SPECS = {
     description:
       "No weapon. Receives Lumen light and redirects it along your aim. One turn; shared range. Re-aim free during setup.",
     pierces: false,
+  },
+  tripwire: {
+    label: "Tripwire",
+    dps: 0,
+    radius: TRIPWIRE_RADIUS,
+    range: TRIPWIRE_MAX_SPAN,
+    color: 0xffe08a,
+    description: `Two posts, one strand. Every enemy that crosses it takes ${TRIPWIRE_DAMAGE} damage per crossing.`,
+    pierces: true,
   },
   pierce: {
     label: "Pierce",

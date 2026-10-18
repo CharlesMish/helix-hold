@@ -9,11 +9,13 @@ export const DRONE_PRICES = {
   pin: { base: 48, increment: 24 },
   lumen: { base: 48, increment: 24 },
   relay: { base: 16, increment: 8 },
+  /** One price buys a whole strand: the first post is paid, the second completes it free. */
+  tripwire: { base: 36, increment: 18 },
 } as const satisfies Record<DroneMode, { base: number; increment: number }>;
 
 type PricingFleet = {
   level: { dronePricing?: "per-type" };
-  drones: readonly { mode: DroneMode }[];
+  drones: readonly { mode: DroneMode; partnerId?: number | null; paid?: number }[];
   droneMode: DroneMode;
 };
 
@@ -26,6 +28,12 @@ export function anchorCost(droneCount: number): number {
 export function getAnchorCost(run: PricingFleet, mode: DroneMode = run.droneMode): number {
   if (run.level.dronePricing !== "per-type") return anchorCost(run.drones.length);
   const price = DRONE_PRICES[mode];
+  if (mode === "tripwire") {
+    // An open first post means the next Tripwire anchor completes that strand for free.
+    const posts = run.drones.filter((drone) => drone.mode === "tripwire");
+    if (posts.some((drone) => (drone.partnerId ?? null) === null)) return 0;
+    return price.base + price.increment * posts.filter((drone) => (drone.paid ?? 0) > 0).length;
+  }
   const owned = run.drones.filter((drone) => drone.mode === mode).length;
   return price.base + price.increment * owned;
 }

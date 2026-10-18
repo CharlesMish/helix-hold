@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "qa": "node qa/check.mjs",
-    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs && node qa/crown-growth.mjs && node qa/render-pools.mjs && node qa/drone-roles.mjs && node qa/drone-economy.mjs && node qa/drone-visuals.mjs && node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs",
+    "test": "node qa/simulation.mjs && node qa/revision.mjs && node qa/field-check.mjs && node qa/crown.mjs && node qa/coverage.mjs && node qa/crown-growth.mjs && node qa/render-pools.mjs && node qa/drone-roles.mjs && node qa/drone-economy.mjs && node qa/drone-visuals.mjs && node qa/frontier-geometry.mjs && node qa/relay.mjs && node qa/prototypes.mjs && node qa/tripwire.mjs",
     "test:geometry": "node qa/geometry.mjs",
     "trial:carrier": "node qa/carrier-trial.mjs",
     "study:sweep": "node qa/sweep-study.mjs",

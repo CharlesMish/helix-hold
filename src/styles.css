@@ -2887,3 +2887,36 @@ svg {
     width: auto;
   }
 }
+
+/* Tripwire: two posts joined by a strand. */
+.beam-icon.tripwire {
+  color: #ffe08a;
+}
+.beam-icon.tripwire:before {
+  top: 6px;
+  left: 2px;
+  right: 2px;
+  height: 1px;
+}
+.beam-icon.tripwire:after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 0;
+  width: 15px;
+  height: 9px;
+  border-left: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  box-sizing: border-box;
+}
+.mode-buttons button[data-mode="tripwire"].selected {
+  color: #fff1c8;
+  border-color: #e8c66fa6;
+  background: #a3844624;
+}
+.placement[data-mode="tripwire"] .coverage-track i {
+  background: #ffe08a;
+}
+.placement[data-mode="tripwire"] .coverage-read b {
+  color: #fff1c8;
+}

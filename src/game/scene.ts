@@ -22,6 +22,7 @@ import {
   getLaneStatus,
   getPlacementPreview,
   getRelayTraces,
+  getStrands,
   type RelayTrace,
   type Run,
 } from "./sim";
@@ -404,6 +405,20 @@ export function buildDrone(ghost = false) {
       ring(0.73, 0.05),
       bar(0.07, 0.07, 1.35, 0, 0, 0.67),
       new THREE.ConeGeometry(0.18, 0.43, 4).rotateX(Math.PI / 2).translate(0, 0, 1.5),
+    ],
+  );
+  // Tripwire: an upright post with a strand eye. Posts never rotate with aim.
+  role(
+    "tripwire",
+    [
+      bar(0.16, 1.7, 0.16),
+      new THREE.CylinderGeometry(0.42, 0.5, 0.16, 6).translate(0, -0.85, 0),
+      new THREE.OctahedronGeometry(0.2).translate(0, 0.98, 0),
+    ],
+    [
+      ring(0.3, 0.05, "xz").translate(0, 0.62, 0),
+      ring(0.3, 0.05, "xz").translate(0, -0.2, 0),
+      bar(0.05, 1.4, 0.05, 0.13, 0.2, 0),
     ],
   );
   group.userData.mode = "pierce";
@@ -1867,6 +1882,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         selectedDroneRing.position.set(selectedDrone.x, selectedDrone.y, selectedDrone.z);
         selectedDroneRing.quaternion.copy(camera.quaternion);
       }
+      const strands = getStrands(run.drones);
       for (let i = 0; i < drones.length; i++) {
         const drone = run.drones[i],
           mesh = drones[i]!,
@@ -1907,7 +1923,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
             .setHex(connected ? 0xe3f8ff : DRONE_SPECS.relay.color)
             .multiplyScalar(connected ? 1 : 0.45);
         }
-        if (isFieldVisualMode(drone.mode)) mesh.quaternion.identity();
+        if (isFieldVisualMode(drone.mode) || drone.mode === "tripwire") mesh.quaternion.identity();
         else aimAlong(mesh, drone.ax, drone.ay, drone.az);
         if (mesh.userData.relocating !== relocating) {
           mesh.traverse((object) => {
@@ -1932,10 +1948,15 @@ export function createWorld(canvas: HTMLCanvasElement): World {
           });
           mesh.userData.relocating = relocating;
         }
-        if (
+        const strand = drone.mode === "tripwire" ? strands.find((s) => s.ownerId === drone.id) : undefined;
+        if (strand && !run.fieldCheck) {
+          // The owner post draws the whole strand; a crossing burst briefly thickens it.
+          placeBeam(beam, strand.beam, color, drone.shotFlash > 0, run, i);
+        } else if (
           isFieldVisualMode(drone.mode) ||
           drone.mode === "lumen" ||
           drone.mode === "relay" ||
+          drone.mode === "tripwire" ||
           run.fieldCheck
         ) {
           beam.visible = false;
@@ -1952,7 +1973,10 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       const previewColor = DRONE_SPECS[run.droneMode].color;
       ghost.visible = showPreview;
       const relayPreview = run.droneMode === "lumen" || run.droneMode === "relay";
-      previewVolume.visible = showPreview && !isFieldVisualMode(run.droneMode) && !relayPreview;
+      // A Tripwire's first post has no strand yet; its second post previews the strand itself.
+      const wireFirstPost = run.droneMode === "tripwire" && !preview.wire;
+      previewVolume.visible =
+        showPreview && !isFieldVisualMode(run.droneMode) && !relayPreview && !wireFirstPost;
       relayPreviewVisual.sync(showPreview && relayPreview ? (preview.relayTraces ?? []) : []);
       fieldPreview.group.visible = showPreview && isFieldVisualMode(run.droneMode);
       if (isFieldVisualMode(run.droneMode))
@@ -1961,7 +1985,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
       if (showPreview) {
         ghost.position.set(preview.drone.x, preview.drone.y, preview.drone.z);
         setDroneVisualMode(ghost, run.droneMode);
-        if (isFieldVisualMode(run.droneMode)) ghost.quaternion.identity();
+        if (isFieldVisualMode(run.droneMode) || run.droneMode === "tripwire") ghost.quaternion.identity();
         else aimAlong(ghost, preview.drone.ax, preview.drone.ay, preview.drone.az);
         previewVolume.position.set(preview.beam.x, preview.beam.y, preview.beam.z);
         aimAlong(previewVolume, preview.beam.dx, preview.beam.dy, preview.beam.dz);

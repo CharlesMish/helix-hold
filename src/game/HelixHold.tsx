@@ -39,6 +39,8 @@ import {
   PIN_INTERVAL,
   PIN_SLOW_DURATION,
   PIN_SPEED_SCALE,
+  TRIPWIRE_DAMAGE,
+  TRIPWIRE_MAX_SPAN,
   insideStasis,
   STASIS_RADIUS,
   STASIS_SPEED_SCALE,
@@ -56,6 +58,8 @@ const MODE_KEYS: Record<DroneMode, number> = {
   pin: 5,
   lumen: 6,
   relay: 7,
+  // Tripwire shares key 6 with Lumen; the two never appear in the same roster.
+  tripwire: 6,
 };
 const MODE_ROLES: Record<DroneMode, string> = {
   pierce: "Piercing beam",
@@ -65,6 +69,7 @@ const MODE_ROLES: Record<DroneMode, string> = {
   pin: "Aimed slow dart",
   lumen: "Slowing light beam",
   relay: "Fixed beam redirector",
+  tripwire: "Crossing strand",
 };
 const isFieldMode = (mode: DroneMode) => mode === "stasis" || mode === "halo";
 const initialQuotes: Record<DroneMode, number> = {
@@ -75,6 +80,7 @@ const initialQuotes: Record<DroneMode, number> = {
   pin: 48,
   lumen: 48,
   relay: 16,
+  tripwire: 36,
 };
 const emptyOwned: Record<DroneMode, number> = {
   pierce: 0,
@@ -84,10 +90,15 @@ const emptyOwned: Record<DroneMode, number> = {
   pin: 0,
   lumen: 0,
   relay: 0,
+  tripwire: 0,
 };
+// A strand is one purchase across two posts: count paid posts, not both ends.
 const ownedByMode = (r: Run) =>
   Object.fromEntries(
-    Object.keys(emptyOwned).map((mode) => [mode, r.drones.filter((d) => d.mode === mode).length]),
+    Object.keys(emptyOwned).map((mode) => [
+      mode,
+      r.drones.filter((d) => d.mode === mode && (mode !== "tripwire" || d.paid > 0)).length,
+    ]),
   ) as Record<DroneMode, number>;
 const quotesByMode = (r: Run) =>
   Object.fromEntries(
@@ -104,6 +115,7 @@ type FleetItem = {
   slowed: number;
   coverage: number[];
   relayStatus: string;
+  partnerId: number | null;
 };
 const slowPercent = Math.round((1 - STASIS_SPEED_SCALE) * 100);
 type Hud = {
@@ -159,6 +171,11 @@ type Hud = {
   relayPreview: string;
   relayNetwork: string;
   recallSetupOnly: boolean;
+  nowCrossings: number;
+  laterCrossings: number;
+  /** Tripwire: span of the strand this anchor would complete, or null for an open first post. */
+  wireSpan: number | null;
+  wireAnchorId: number | null;
 };
 const emptyHud: Hud = {
   core: 100,
@@ -205,6 +222,10 @@ const emptyHud: Hud = {
   relayPreview: "",
   relayNetwork: "",
   recallSetupOnly: false,
+  nowCrossings: 0,
+  laterCrossings: 0,
+  wireSpan: null,
+  wireAnchorId: null,
 };
 const kindLabel = { shard: "Shards", barge: "Barges", wisp: "Wisps", carrier: "Carrier" };
 
@@ -459,6 +480,10 @@ export function HelixHold() {
       owned: ownedByMode(r),
       status: ghost.status,
       relayPreview: relayPreviewCopy(ghost),
+      nowCrossings: ghost.nowCrossings,
+      laterCrossings: ghost.laterCrossings,
+      wireSpan: ghost.wire?.span ?? null,
+      wireAnchorId: ghost.wire?.anchorId ?? null,
       coverage: ghost.metres,
       nowCoverage: ghost.nowMetres,
       laterCoverage: ghost.laterMetres,
@@ -769,6 +794,7 @@ export function HelixHold() {
             damage: d.damage,
             slowed: d.mode === "stasis" ? r.enemies.filter((e) => e.alive && insideStasis(d, e)).length : 0,
             relayStatus: d.mode === "relay" ? relayState(r, d.id) : "",
+            partnerId: d.partnerId ?? null,
             coverage: isFieldMode(d.mode)
               ? r.paths.map((_, i) =>
                   segments.filter((seg) => seg.pathIndex === i).reduce((n, seg) => n + seg.metres, 0),
@@ -782,6 +808,10 @@ export function HelixHold() {
         routeGhost: r.routeGhost,
         relayPreview: relayPreviewCopy(ghost),
         relayNetwork: relayNetworkCopy(r),
+        nowCrossings: ghost.nowCrossings,
+        laterCrossings: ghost.laterCrossings,
+        wireSpan: ghost.wire?.span ?? null,
+        wireAnchorId: ghost.wire?.anchorId ?? null,
         recallSetupOnly:
           !!lastDrone && (lastDrone.mode === "relay" || lastDrone.mode === "lumen") && r.rest <= 0,
         checking: !!r.fieldCheck,
@@ -829,7 +859,9 @@ export function HelixHold() {
               : "",
         breach: !!r.lastBreach && r.time - r.lastBreach.at < 1.2,
         lastDrone: lastDrone
-          ? `${DRONE_SPECS[lastDrone.mode].label} · ${lastDrone.mode === "stasis" ? "slowing field" : lastDrone.mode === "relay" ? "beam redirector" : `${lastDrone.kills} kills`} · refund ${lastDrone.paid}`
+          ? lastDrone.mode === "tripwire" && lastDrone.paid === 0
+            ? `Tripwire second post · recall reopens post #${lastDrone.partnerId}`
+            : `${DRONE_SPECS[lastDrone.mode].label} · ${lastDrone.mode === "stasis" ? "slowing field" : lastDrone.mode === "relay" ? "beam redirector" : `${lastDrone.kills} kills`} · refund ${lastDrone.paid}`
           : "",
       });
     };
@@ -938,8 +970,8 @@ export function HelixHold() {
       keys.current.add(e.code);
       if (e.code === "KeyF") anchorEdge.current = true;
       if (e.code === "KeyR") recall();
-      const modeKey = Object.entries(MODE_KEYS).find(([, key]) => e.code === `Digit${key}`);
-      if (modeKey) chooseMode(modeKey[0] as DroneMode);
+      const modeKey = availableDroneModes(r.level).find((mode) => e.code === `Digit${MODE_KEYS[mode]}`);
+      if (modeKey) chooseMode(modeKey);
       if (e.code === "KeyC") cancelReposition(r);
 
       if (e.code === "Enter") {
@@ -1126,6 +1158,9 @@ export function HelixHold() {
     expanded = modes.includes("halo"),
     perType = level.dronePricing === "per-type";
   const previewField = isFieldMode(hud.mode);
+  const wireMode = hud.mode === "tripwire",
+    wireOpenPost = hud.fleet.find((d) => d.mode === "tripwire" && d.partnerId === null),
+    wireCompleting = wireMode && hud.moving === null && !!wireOpenPost;
   const modeDescription =
     hud.mode === "stasis"
       ? `Passive sphere · ${STASIS_RADIUS}m radius / ${STASIS_RADIUS * 2}m across · ${slowPercent}% slow · no shots`
@@ -1137,9 +1172,11 @@ export function HelixHold() {
             ? "Slowing light · 76m shared range · 8 DPS · 40% slow for 2.4s · one emitter"
             : hud.mode === "relay"
               ? "Receives Lumen and redirects along your aim · one turn · no weapon of its own"
-              : hud.mode === "pierce"
-                ? "Long, narrow · hits every foe in line"
-                : `Short, wide · nearest foe${selected === CARRIER_TEST_INDEX ? " · 22 DPS trial" : ""}`;
+              : hud.mode === "tripwire"
+                ? `Two posts · strand up to ${TRIPWIRE_MAX_SPAN}m · ${TRIPWIRE_DAMAGE} damage to every enemy, once per crossing · aim doesn’t matter`
+                : hud.mode === "pierce"
+                  ? "Long, narrow · hits every foe in line"
+                  : `Short, wide · nearest foe${selected === CARRIER_TEST_INDEX ? " · 22 DPS trial" : ""}`;
   const droneLimit = getDroneLimit(level),
     scrapGrowth = !Number.isFinite(droneLimit);
   const baseWaveCount = level.waves.length,
@@ -1237,7 +1274,9 @@ export function HelixHold() {
               ? "Move · free"
               : mode === "lumen" && hud.owned.lumen >= 1
                 ? "1 / 1 placed"
-                : `${hud.quotes[mode]} scrap · ${hud.owned[mode]} owned`}
+                : mode === "tripwire" && hud.quotes.tripwire === 0
+                  ? "Second post · free"
+                  : `${hud.quotes[mode]} scrap · ${hud.owned[mode]} ${mode === "tripwire" ? "strands" : "owned"}`}
           </small>
         </button>
       ))}
@@ -1473,7 +1512,11 @@ export function HelixHold() {
                             ? `${d.slowed} slowed now`
                             : d.mode === "relay"
                               ? d.relayStatus
-                              : `${d.kills} kills · ${Math.round(d.damage)} damage`}{" "}
+                              : d.mode === "tripwire" && d.partnerId === null
+                                ? "Open post · place its second end"
+                                : d.mode === "tripwire" && d.paid === 0
+                                  ? `Second post of strand #${d.partnerId}`
+                                  : `${d.kills} kills · ${Math.round(d.damage)} damage`}{" "}
                           · paid {d.paid}
                         </small>
                       </button>
@@ -1488,6 +1531,8 @@ export function HelixHold() {
                         Reposition keeps its type and purchase value.
                         {selectedUnit.mode === "relay" &&
                           " Fly and re-aim the receiver between waves; its output follows your fixed aim."}
+                        {selectedUnit.mode === "tripwire" &&
+                          " Moving one post re-strings the strand from its partner. Recall removes both posts."}
                       </p>
                       {isFieldMode(selectedUnit.mode) && (
                         <div className="anchored-coverage">
@@ -1507,7 +1552,12 @@ export function HelixHold() {
                           Reposition · free
                         </button>
                         <button onClick={sellSelected} disabled={hud.rest <= 0 || hud.checking}>
-                          Recall · +{selectedUnit.paid} scrap
+                          Recall · +
+                          {selectedUnit.mode === "tripwire"
+                            ? selectedUnit.paid +
+                              (hud.fleet.find((d) => d.id === selectedUnit.partnerId)?.paid ?? 0)
+                            : selectedUnit.paid}{" "}
+                          scrap
                         </button>
                       </div>
                     </>
@@ -1599,7 +1649,11 @@ export function HelixHold() {
                           ? `REPOSITION DRONE #${hud.moving}`
                           : previewField
                             ? "FIELD PREVIEW · NOT YET ANCHORED"
-                            : "AIM THE NEXT ANCHOR"}
+                            : wireMode
+                              ? wireCompleting
+                                ? `SECOND POST · STRAND FROM #${wireOpenPost?.id}`
+                                : "FIRST POST · STRAND STARTS HERE"
+                              : "AIM THE NEXT ANCHOR"}
                       </span>
                       <span>
                         {hud.moving !== null
@@ -1631,31 +1685,46 @@ export function HelixHold() {
                         {!touch && <kbd>G</kbd>}
                       </button>
                     )}
-                    <div className="coverage-read" data-good={coverageNow > 1}>
+                    <div
+                      className="coverage-read"
+                      data-good={wireMode ? hud.nowCrossings > 0 : coverageNow > 1}
+                    >
                       <span>
-                        {hud.mode === "relay" || hud.mode === "lumen"
-                          ? hud.rest > 0
-                            ? "Connected beam · this wave"
-                            : "Connected beam · active routes"
-                          : staged
+                        {wireMode
+                          ? hud.wireSpan === null
+                            ? "Strand · place the second post next"
+                            : `Crossings ${hud.rest > 0 ? "this wave" : "still active"} · ${hud.wireSpan.toFixed(1)}m strand`
+                          : hud.mode === "relay" || hud.mode === "lumen"
                             ? hud.rest > 0
-                              ? "Coverage this wave"
-                              : "Coverage still active"
-                            : previewField
-                              ? "Route length in preview"
-                              : "Potential coverage"}
+                              ? "Connected beam · this wave"
+                              : "Connected beam · active routes"
+                            : staged
+                              ? hud.rest > 0
+                                ? "Coverage this wave"
+                                : "Coverage still active"
+                              : previewField
+                                ? "Route length in preview"
+                                : "Potential coverage"}
                       </span>
                       <b>
-                        {staged
-                          ? `${coverageNow.toFixed(1)} m`
-                          : coverageNow < 0.5
-                            ? "No contact"
-                            : `${coverageNow.toFixed(1)} m`}
+                        {wireMode
+                          ? hud.wireSpan === null
+                            ? "—"
+                            : `${hud.nowCrossings}×`
+                          : staged
+                            ? `${coverageNow.toFixed(1)} m`
+                            : coverageNow < 0.5
+                              ? "No contact"
+                              : `${coverageNow.toFixed(1)} m`}
                       </b>
                     </div>
                     {staged && (
                       <div className="coverage-timing">
-                        <span>Later waves · +{hud.laterCoverage.toFixed(1)} m</span>
+                        <span>
+                          {wireMode
+                            ? `Later waves · +${hud.laterCrossings} crossings`
+                            : `Later waves · +${hud.laterCoverage.toFixed(1)} m`}
+                        </span>
                         {hud.idleCoverage > 0.05 && <span>{hud.idleCoverage.toFixed(1)} m cleared</span>}
                       </div>
                     )}
@@ -1679,7 +1748,11 @@ export function HelixHold() {
                       </span>
                     )}
                     <div className="coverage-track">
-                      <i style={{ width: `${Math.min(100, (coverageNow / 30) * 100)}%` }} />
+                      <i
+                        style={{
+                          width: `${Math.min(100, wireMode ? (hud.nowCrossings / 4) * 100 : (coverageNow / 30) * 100)}%`,
+                        }}
+                      />
                     </div>
                     <button
                       className="primary anchor"
@@ -1688,10 +1761,18 @@ export function HelixHold() {
                       disabled={cannotBuy}
                     >
                       <Crosshair size={17} />
-                      <span>{hud.moving !== null ? "Place moved drone" : "Anchor drone"}</span>
+                      <span>
+                        {hud.moving !== null
+                          ? "Place moved drone"
+                          : wireMode
+                            ? wireCompleting
+                              ? "Complete strand"
+                              : "Anchor first post"
+                            : "Anchor drone"}
+                      </span>
                       <strong>
-                        {hud.moving !== null ? "Free" : hud.cost}
-                        {hud.moving === null && <small> scrap</small>}
+                        {hud.moving !== null || hud.cost === 0 ? "Free" : hud.cost}
+                        {hud.moving === null && hud.cost > 0 && <small> scrap</small>}
                       </strong>
                       <kbd>F</kbd>
                     </button>
@@ -1703,17 +1784,23 @@ export function HelixHold() {
                             ? "Passive field centered on the drone. No shot or damage; strongest slow only."
                             : hud.mode === "halo"
                               ? "Passive damage centered on the drone. Aim does not change its sphere."
-                              : hud.mode === "relay"
-                                ? "The receiver must intersect a Lumen line. Reposition in Survey to change its fixed output aim."
-                                : hud.mode === "lumen"
-                                  ? "Enemies or receivers stop the light. One Relay can redirect the remaining range; slow never stacks."
-                                  : hud.mode === "pin"
-                                    ? "Aim a narrow line. Darts stop at the nearest foe; slow continues after contact."
-                                    : coverageNow < 0.5
-                                      ? staged && hud.coverage >= 0.5
-                                        ? "No contact with this wave. Other routes remain highlighted."
-                                        : "Aim across the ribbon before anchoring."
-                                      : "Anchor here; return to the launch cradle.")}
+                              : wireMode
+                                ? hud.wireSpan === null
+                                  ? `Posts ignore aim. Anchor here, then fly up to ${TRIPWIRE_MAX_SPAN}m away for the free second post.`
+                                  : hud.nowCrossings > 0
+                                    ? "Every enemy crossing this strand takes a burst. Cut across routes, not along them."
+                                    : "No crossing with this wave yet. Stretch the strand across a ribbon."
+                                : hud.mode === "relay"
+                                  ? "The receiver must intersect a Lumen line. Reposition in Survey to change its fixed output aim."
+                                  : hud.mode === "lumen"
+                                    ? "Enemies or receivers stop the light. One Relay can redirect the remaining range; slow never stacks."
+                                    : hud.mode === "pin"
+                                      ? "Aim a narrow line. Darts stop at the nearest foe; slow continues after contact."
+                                      : coverageNow < 0.5
+                                        ? staged && hud.coverage >= 0.5
+                                          ? "No contact with this wave. Other routes remain highlighted."
+                                          : "Aim across the ribbon before anchoring."
+                                        : "Anchor here; return to the launch cradle.")}
                     </p>
                     {hud.moving !== null ? (
                       <button className="cancel-move" onClick={cancelMove}>
@@ -2134,6 +2221,20 @@ export function HelixHold() {
                 campaign score.
               </p>
             )}
+            {modes.includes("tripwire") && (
+              <div className="guide-beams guide-extra">
+                <div>
+                  <span className="beam-icon tripwire" />
+                  <b>Tripwire · 6</b>
+                  <p>
+                    Anchor a first post anywhere, then fly up to {TRIPWIRE_MAX_SPAN}m away and anchor the free
+                    second post. Every enemy that crosses the strand between them takes {TRIPWIRE_DAMAGE}{" "}
+                    damage, once per crossing, however fast it moves. Riding along the strand counts once, so
+                    cut across ribbons and coil turns instead of following them. Posts ignore aim.
+                  </p>
+                </div>
+              </div>
+            )}
             {frontier && (
               <p className="lab-guide">
                 Helix Frontier opens A on wave 1, B on wave 3 and C on wave 6. Each coil ends at its own
@@ -2146,7 +2247,11 @@ export function HelixHold() {
               <p className="pricing-guide">
                 Each type prices independently from the number currently owned: Pierce 20 + 12, Sweep 24 + 12,
                 Stasis 32 + 20,{" "}
-                {relayLab ? "Pin 48 + 24, Lumen 48 (one emitter), Relay 16 + 8" : "Halo 44 + 20, Pin 48 + 24"}{" "}
+                {relayLab
+                  ? "Pin 48 + 24, Lumen 48 (one emitter), Relay 16 + 8"
+                  : frontier
+                    ? "Halo 44 + 20, Pin 48 + 24, Tripwire 36 + 18 per strand"
+                    : "Halo 44 + 20, Pin 48 + 24"}{" "}
                 scrap. The first number is its starting price; the second is the increase for each owned unit
                 of that type. Every button shows your actual next price. Reposition is free and preserves the
                 unit’s mode; Recall refunds its actual paid amount.
@@ -2181,7 +2286,17 @@ export function HelixHold() {
                     <kbd>A / D</kbd>Turn <kbd>Space</kbd>Boost <kbd>F</kbd>Anchor
                   </p>
                   <p>
-                    <kbd>{relayLab ? "1–3 / 5–7" : expanded ? "1–5" : stasisAvailable ? "1–3" : "1 / 2"}</kbd>
+                    <kbd>
+                      {relayLab
+                        ? "1–3 / 5–7"
+                        : modes.includes("tripwire")
+                          ? "1–6"
+                          : expanded
+                            ? "1–5"
+                            : stasisAvailable
+                              ? "1–3"
+                              : "1 / 2"}
+                    </kbd>
                     Next drone <kbd>R</kbd>Recall last <kbd>Shift</kbd>Fan
                   </p>
                   <p>
