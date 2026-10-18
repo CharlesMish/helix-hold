@@ -1,4 +1,4 @@
-# Helix Hold · Sightline Lab (0.10.0)
+# Helix Hold · Sightline Lab (0.10.1)
 
 A 3D defense game in which placement is piloting. Fly into a useful line, anchor a weaker drone there, and return to the launch cradle to build the next.
 
@@ -37,11 +37,11 @@ Stasis is available from setup, with the same passive 6m radius, half-speed effe
 
 `npm run trial:crown` retains the historical eight-drone comparisons and an ordinary-input opening. `npm run trial:crown-growth` tests normally funded larger fleets through twelve waves, including an automated pursuing pilot; `npm run study:crown-pilot` isolates the original short carrier encounter. The current [late-wave tune](docs/CROWN_LATE_TUNE_081.md) compares frozen paid fleets of 19, 25 and 33 drones; reproduce it with `npm run study:crown-late`. Earlier roster results are in [the v0.8 role study](docs/DRONE_ROLES_080.md); `npm run trial:crown-roles` includes the Halo/Pin fleet. [The original growth note](docs/CROWN_GROWTH.md) is a v0.7 historical snapshot, whose stored figures use the old shared prices. In the historical trial, shared-line layouts finish with and without Stasis; one dedicated-line layout benefits from a late field and a free carrier-wave reposition. These establish feasibility and a useful tradeoff, not human difficulty or an optimal solution. Browser visuals remain unverified in this environment.
 
-## New in 0.10.0: Tripwire and Drift Frontier
+## Tripwire and gentle Drift Frontier (0.10.1)
 
-**Tripwire** (key 6, Frontier prototypes only) is a line you define by flying twice. Anchor a first post (36 scrap), then fly up to 32 m away and anchor the free second post. Every enemy that crosses the strand between them takes 26 damage, once per crossing, however fast it moves. Riding along the strand counts once, so cut across ribbons and coil turns. Recall last undoes the second post; selected recall removes the whole strand. Posts are fixed pylons: Fan and Slide do not move them, and they can be recalled only during setup.
+**Tripwire** (key 6, Frontier prototypes only) is a line you define by flying twice. Anchor a first post (36 scrap), then fly up to 32 m away and anchor the free second post. Entry deals 26 damage; the enemy must fully exit a wider release volume before another burst. The preview counts that same re-arm rule and labels nominal Shard crossings as estimates. Riding along the strand counts once, so cut across ribbons and coil turns. Recall last undoes the second post; selected recall removes the whole strand. Posts are fixed pylons: Fan and Slide do not move them, and they can be recalled only during setup.
 
-**Drift Frontier** (LAB) uses Helix Frontier's three coils, but from wave 4 an announced coil swings around the prism before each wave. Your drones stay put, so lines on that coil lose contact. The panel and Survey report the swing and your lost contact, the moved route gets a ribbon (G), and reposition is free. Twelve waves; 8–12 are deliberately heavy. Details and evidence: [docs/TRIPWIRE_DRIFT_0100.md](docs/TRIPWIRE_DRIFT_0100.md). Ideas for what to try next: [docs/DESIGN_DIRECTIONS.md](docs/DESIGN_DIRECTIONS.md).
+**Drift Frontier** (LAB) keeps the coils within **±5° of their original positions**, with small announced steps between waves from wave 4. Each coil visits both sides and returns home; the largest step is 10°. Your drones stay put, so broad or central lines can survive while some narrow lines invite revision. The panel and Survey report contact before and after. The moved route gets the ribbon (G), and setup reposition is free. Twelve waves retain the original counts/timings, with the extra doubled hull removed from waves 8–12. This is a gentler first-play spatial experiment. [Current rules and evidence](docs/GENTLE_DRIFT_0101.md); [historical aggressive version](docs/TRIPWIRE_DRIFT_0100.md).
 
 ## Optional spatial prototypes
 
@@ -78,9 +78,15 @@ npm run build
 npm test
 ```
 
-`npm run format` applies Prettier. `npm run trial:drift` reproduces `docs/DRIFT_TRIAL.json`. `npm test` runs 112 deterministic simulation, revision, field-check, Split Crown, coverage, growth and renderer-allocation checks, including manual/automatic pacing, paid per-type growth, discrete shot cadence, actual-3D fields, slow expiry, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
+`npm run format` applies Prettier. `npm run trial:drift` reproduces `docs/DRIFT_GENTLE_TRIAL.json`. `npm test` runs 114 deterministic simulation, revision, field-check, Split Crown, coverage, growth and renderer-allocation checks, including manual/automatic pacing, paid per-type growth, discrete shot cadence, actual-3D fields, slow expiry, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
 
-### Verification for this revision (0.10.0)
+### Verification for this revision (0.10.1)
+
+- 114 deterministic checks pass, including the real-route Tripwire re-arm regression and bounded, two-sided Drift schedule. Separate geometry and production build checks pass.
+- The current funded trial clears with both re-fly and never-move policies at 100 core across three seeds; re-fly moves one drone. Earlier results below are historical, not current difficulty measurements.
+- Browser control is unavailable here. Updated checks are prepared but not executed; Claude's previous browser observations below apply to 0.10.0.
+
+### Previous verification (0.10.0)
 
 - 112 deterministic checks pass, including Tripwire pricing, span, crossing counts, recall and reposition rules, and Drift's legal swings, determinism and drone permanence.
 - Browser suite **executed**: headless Chromium with SwiftShader against `vite preview`, all 83 checks passing, including new Tripwire, Drift and touch-portrait assertions. Software rendering ran at about 4 fps, so real-GPU frame rate and human flight comfort remain unmeasured.

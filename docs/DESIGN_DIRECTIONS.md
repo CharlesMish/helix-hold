@@ -1,5 +1,7 @@
 # Design directions (Claude, after v0.10.0)
 
+Historical design discussion. Drift has since been softened for a first playthrough; see [GENTLE_DRIFT_0101.md](GENTLE_DRIFT_0101.md). Earlier numerical results below describe the aggressive v0.10.0 study.
+
 These are ideas for new weapons, difficulty, maps and modes, ranked by how well each keeps the part Charlie says felt great: **placement is piloting**. Tripwire and Drift Frontier are already built (see [TRIPWIRE_DRIFT_0100.md](TRIPWIRE_DRIFT_0100.md)). Everything else here is a proposal, not an implementation.
 
 ## Why the game gets easy

@@ -1,0 +1,1514 @@
+{
+  "question": "Does gentle drift preserve useful lines while changing contact, without forcing wholesale repositioning?",
+  "method": {
+    "dt": 0.017,
+    "seeds": [
+      17,
+      29,
+      41
+    ],
+    "setup": "Finite legal idealized Pierce poses rebuilt from the current (swung) routes each setup; ordinary purchases with earned scrap; greedy pressure-weighted contact. 're-fly' repositions (free) any drone with under 4 m of contact on this wave's routes; 'never-move' buys the same way but never repositions. Pilot idle and parked out of play.",
+    "limits": "Seeds change only Wisp phase. One purchase policy, Pierce only (no Tripwire, Stasis, Halo or Pin), no human aiming or active pilot fire (a real pilot adds a 34 DPS beam), no browser or frame-rate measurement. Feasibility and contrast, not human difficulty."
+  },
+  "summary": [
+    "drift-frontier re-fly seed 17: win at wave 12, core 100, 17 drones, 1 repositions",
+    "drift-frontier never-move seed 17: win at wave 12, core 100, 17 drones, 0 repositions",
+    "drift-frontier re-fly seed 29: win at wave 12, core 100, 17 drones, 1 repositions",
+    "drift-frontier never-move seed 29: win at wave 12, core 100, 17 drones, 0 repositions",
+    "drift-frontier re-fly seed 41: win at wave 12, core 100, 17 drones, 1 repositions",
+    "drift-frontier never-move seed 41: win at wave 12, core 100, 17 drones, 0 repositions",
+    "helix-frontier never-move seed 17: win at wave 9, core 100, 12 drones, 0 repositions"
+  ],
+  "results": [
+    {
+      "arena": "drift-frontier",
+      "policy": "re-fly",
+      "seed": 17,
+      "outcome": "win",
+      "core": 100,
+      "lastWave": 12,
+      "drones": 17,
+      "purchases": 17,
+      "repositions": 1,
+      "spent": 1972,
+      "waves": [
+        {
+          "wave": 1,
+          "repositioned": 0,
+          "drones": 2,
+          "contactAtLaunchByRoute": [
+            36.985,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 2,
+          "repositioned": 0,
+          "drones": 3,
+          "contactAtLaunchByRoute": [
+            54.978,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 3,
+          "repositioned": 0,
+          "drones": 4,
+          "contactAtLaunchByRoute": [
+            54.978,
+            19.939,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 4,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 54.978,
+              "contactAfterSwing": 39.876
+            }
+          ],
+          "repositioned": 0,
+          "drones": 6,
+          "contactAtLaunchByRoute": [
+            61.807,
+            41.373,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 5,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 41.373,
+              "contactAfterSwing": 23.936
+            }
+          ],
+          "repositioned": 0,
+          "drones": 8,
+          "contactAtLaunchByRoute": [
+            61.807,
+            63.829,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 6,
+          "repositioned": 0,
+          "drones": 9,
+          "contactAtLaunchByRoute": [
+            61.807,
+            74.799,
+            27.961
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 7,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 27.961,
+              "contactAfterSwing": 25.437
+            }
+          ],
+          "repositioned": 0,
+          "drones": 10,
+          "contactAtLaunchByRoute": [
+            61.807,
+            79.287,
+            48.879
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 8,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": -10,
+              "contactBefore": 61.807,
+              "contactAfterSwing": 43.926
+            }
+          ],
+          "repositioned": 0,
+          "drones": 12,
+          "contactAtLaunchByRoute": [
+            73.377,
+            91.754,
+            54.365
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 9,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": -10,
+              "contactBefore": 91.754,
+              "contactAfterSwing": 48.894
+            }
+          ],
+          "repositioned": 1,
+          "drones": 13,
+          "contactAtLaunchByRoute": [
+            73.377,
+            75.336,
+            76.31
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 10,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": 10,
+              "contactBefore": 76.31,
+              "contactAfterSwing": 56.495
+            }
+          ],
+          "repositioned": 0,
+          "drones": 14,
+          "contactAtLaunchByRoute": [
+            82.362,
+            75.336,
+            76.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 11,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 82.362,
+              "contactAfterSwing": 85.465
+            },
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 75.336,
+              "contactAfterSwing": 97.201
+            }
+          ],
+          "repositioned": 0,
+          "drones": 15,
+          "contactAtLaunchByRoute": [
+            95.461,
+            97.201,
+            95.492
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 12,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 95.492,
+              "contactAfterSwing": 105.853
+            }
+          ],
+          "repositioned": 0,
+          "drones": 17,
+          "contactAtLaunchByRoute": [
+            99.959,
+            122.124,
+            129.32
+          ],
+          "coreLost": 0,
+          "core": 100
+        }
+      ]
+    },
+    {
+      "arena": "drift-frontier",
+      "policy": "never-move",
+      "seed": 17,
+      "outcome": "win",
+      "core": 100,
+      "lastWave": 12,
+      "drones": 17,
+      "purchases": 17,
+      "repositions": 0,
+      "spent": 1972,
+      "waves": [
+        {
+          "wave": 1,
+          "repositioned": 0,
+          "drones": 2,
+          "contactAtLaunchByRoute": [
+            36.985,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 2,
+          "repositioned": 0,
+          "drones": 3,
+          "contactAtLaunchByRoute": [
+            54.978,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 3,
+          "repositioned": 0,
+          "drones": 4,
+          "contactAtLaunchByRoute": [
+            54.978,
+            19.939,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 4,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 54.978,
+              "contactAfterSwing": 39.876
+            }
+          ],
+          "repositioned": 0,
+          "drones": 6,
+          "contactAtLaunchByRoute": [
+            61.807,
+            41.373,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 5,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 41.373,
+              "contactAfterSwing": 23.936
+            }
+          ],
+          "repositioned": 0,
+          "drones": 8,
+          "contactAtLaunchByRoute": [
+            61.807,
+            63.829,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 6,
+          "repositioned": 0,
+          "drones": 9,
+          "contactAtLaunchByRoute": [
+            61.807,
+            74.799,
+            27.961
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 7,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 27.961,
+              "contactAfterSwing": 25.437
+            }
+          ],
+          "repositioned": 0,
+          "drones": 10,
+          "contactAtLaunchByRoute": [
+            61.807,
+            79.287,
+            48.879
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 8,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": -10,
+              "contactBefore": 61.807,
+              "contactAfterSwing": 43.926
+            }
+          ],
+          "repositioned": 0,
+          "drones": 12,
+          "contactAtLaunchByRoute": [
+            73.377,
+            91.754,
+            54.365
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 9,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": -10,
+              "contactBefore": 91.754,
+              "contactAfterSwing": 48.894
+            }
+          ],
+          "repositioned": 0,
+          "drones": 13,
+          "contactAtLaunchByRoute": [
+            73.377,
+            58.373,
+            76.31
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 10,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": 10,
+              "contactBefore": 76.31,
+              "contactAfterSwing": 56.495
+            }
+          ],
+          "repositioned": 0,
+          "drones": 14,
+          "contactAtLaunchByRoute": [
+            82.362,
+            58.373,
+            76.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 11,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 82.362,
+              "contactAfterSwing": 85.465
+            },
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 58.373,
+              "contactAfterSwing": 95.706
+            }
+          ],
+          "repositioned": 0,
+          "drones": 15,
+          "contactAtLaunchByRoute": [
+            95.461,
+            95.706,
+            95.492
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 12,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 95.492,
+              "contactAfterSwing": 105.853
+            }
+          ],
+          "repositioned": 0,
+          "drones": 17,
+          "contactAtLaunchByRoute": [
+            99.959,
+            120.629,
+            129.32
+          ],
+          "coreLost": 0,
+          "core": 100
+        }
+      ]
+    },
+    {
+      "arena": "drift-frontier",
+      "policy": "re-fly",
+      "seed": 29,
+      "outcome": "win",
+      "core": 100,
+      "lastWave": 12,
+      "drones": 17,
+      "purchases": 17,
+      "repositions": 1,
+      "spent": 1972,
+      "waves": [
+        {
+          "wave": 1,
+          "repositioned": 0,
+          "drones": 2,
+          "contactAtLaunchByRoute": [
+            36.985,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 2,
+          "repositioned": 0,
+          "drones": 3,
+          "contactAtLaunchByRoute": [
+            54.978,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 3,
+          "repositioned": 0,
+          "drones": 4,
+          "contactAtLaunchByRoute": [
+            54.978,
+            19.939,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 4,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 54.978,
+              "contactAfterSwing": 39.876
+            }
+          ],
+          "repositioned": 0,
+          "drones": 6,
+          "contactAtLaunchByRoute": [
+            61.807,
+            41.373,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 5,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 41.373,
+              "contactAfterSwing": 23.936
+            }
+          ],
+          "repositioned": 0,
+          "drones": 8,
+          "contactAtLaunchByRoute": [
+            61.807,
+            63.829,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 6,
+          "repositioned": 0,
+          "drones": 9,
+          "contactAtLaunchByRoute": [
+            61.807,
+            74.799,
+            27.961
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 7,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 27.961,
+              "contactAfterSwing": 25.437
+            }
+          ],
+          "repositioned": 0,
+          "drones": 10,
+          "contactAtLaunchByRoute": [
+            61.807,
+            79.287,
+            48.879
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 8,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": -10,
+              "contactBefore": 61.807,
+              "contactAfterSwing": 43.926
+            }
+          ],
+          "repositioned": 0,
+          "drones": 12,
+          "contactAtLaunchByRoute": [
+            73.377,
+            91.754,
+            54.365
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 9,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": -10,
+              "contactBefore": 91.754,
+              "contactAfterSwing": 48.894
+            }
+          ],
+          "repositioned": 1,
+          "drones": 13,
+          "contactAtLaunchByRoute": [
+            73.377,
+            75.336,
+            76.31
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 10,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": 10,
+              "contactBefore": 76.31,
+              "contactAfterSwing": 56.495
+            }
+          ],
+          "repositioned": 0,
+          "drones": 14,
+          "contactAtLaunchByRoute": [
+            82.362,
+            75.336,
+            76.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 11,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 82.362,
+              "contactAfterSwing": 85.465
+            },
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 75.336,
+              "contactAfterSwing": 97.201
+            }
+          ],
+          "repositioned": 0,
+          "drones": 15,
+          "contactAtLaunchByRoute": [
+            95.461,
+            97.201,
+            95.492
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 12,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 95.492,
+              "contactAfterSwing": 105.853
+            }
+          ],
+          "repositioned": 0,
+          "drones": 17,
+          "contactAtLaunchByRoute": [
+            99.959,
+            122.124,
+            129.32
+          ],
+          "coreLost": 0,
+          "core": 100
+        }
+      ]
+    },
+    {
+      "arena": "drift-frontier",
+      "policy": "never-move",
+      "seed": 29,
+      "outcome": "win",
+      "core": 100,
+      "lastWave": 12,
+      "drones": 17,
+      "purchases": 17,
+      "repositions": 0,
+      "spent": 1972,
+      "waves": [
+        {
+          "wave": 1,
+          "repositioned": 0,
+          "drones": 2,
+          "contactAtLaunchByRoute": [
+            36.985,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 2,
+          "repositioned": 0,
+          "drones": 3,
+          "contactAtLaunchByRoute": [
+            54.978,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 3,
+          "repositioned": 0,
+          "drones": 4,
+          "contactAtLaunchByRoute": [
+            54.978,
+            19.939,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 4,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 54.978,
+              "contactAfterSwing": 39.876
+            }
+          ],
+          "repositioned": 0,
+          "drones": 6,
+          "contactAtLaunchByRoute": [
+            61.807,
+            41.373,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 5,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 41.373,
+              "contactAfterSwing": 23.936
+            }
+          ],
+          "repositioned": 0,
+          "drones": 8,
+          "contactAtLaunchByRoute": [
+            61.807,
+            63.829,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 6,
+          "repositioned": 0,
+          "drones": 9,
+          "contactAtLaunchByRoute": [
+            61.807,
+            74.799,
+            27.961
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 7,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 27.961,
+              "contactAfterSwing": 25.437
+            }
+          ],
+          "repositioned": 0,
+          "drones": 10,
+          "contactAtLaunchByRoute": [
+            61.807,
+            79.287,
+            48.879
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 8,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": -10,
+              "contactBefore": 61.807,
+              "contactAfterSwing": 43.926
+            }
+          ],
+          "repositioned": 0,
+          "drones": 12,
+          "contactAtLaunchByRoute": [
+            73.377,
+            91.754,
+            54.365
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 9,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": -10,
+              "contactBefore": 91.754,
+              "contactAfterSwing": 48.894
+            }
+          ],
+          "repositioned": 0,
+          "drones": 13,
+          "contactAtLaunchByRoute": [
+            73.377,
+            58.373,
+            76.31
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 10,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": 10,
+              "contactBefore": 76.31,
+              "contactAfterSwing": 56.495
+            }
+          ],
+          "repositioned": 0,
+          "drones": 14,
+          "contactAtLaunchByRoute": [
+            82.362,
+            58.373,
+            76.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 11,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 82.362,
+              "contactAfterSwing": 85.465
+            },
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 58.373,
+              "contactAfterSwing": 95.706
+            }
+          ],
+          "repositioned": 0,
+          "drones": 15,
+          "contactAtLaunchByRoute": [
+            95.461,
+            95.706,
+            95.492
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 12,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 95.492,
+              "contactAfterSwing": 105.853
+            }
+          ],
+          "repositioned": 0,
+          "drones": 17,
+          "contactAtLaunchByRoute": [
+            99.959,
+            120.629,
+            129.32
+          ],
+          "coreLost": 0,
+          "core": 100
+        }
+      ]
+    },
+    {
+      "arena": "drift-frontier",
+      "policy": "re-fly",
+      "seed": 41,
+      "outcome": "win",
+      "core": 100,
+      "lastWave": 12,
+      "drones": 17,
+      "purchases": 17,
+      "repositions": 1,
+      "spent": 1972,
+      "waves": [
+        {
+          "wave": 1,
+          "repositioned": 0,
+          "drones": 2,
+          "contactAtLaunchByRoute": [
+            36.985,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 2,
+          "repositioned": 0,
+          "drones": 3,
+          "contactAtLaunchByRoute": [
+            54.978,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 3,
+          "repositioned": 0,
+          "drones": 4,
+          "contactAtLaunchByRoute": [
+            54.978,
+            19.939,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 4,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 54.978,
+              "contactAfterSwing": 39.876
+            }
+          ],
+          "repositioned": 0,
+          "drones": 6,
+          "contactAtLaunchByRoute": [
+            61.807,
+            41.373,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 5,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 41.373,
+              "contactAfterSwing": 23.936
+            }
+          ],
+          "repositioned": 0,
+          "drones": 8,
+          "contactAtLaunchByRoute": [
+            61.807,
+            63.829,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 6,
+          "repositioned": 0,
+          "drones": 9,
+          "contactAtLaunchByRoute": [
+            61.807,
+            74.799,
+            27.961
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 7,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 27.961,
+              "contactAfterSwing": 25.437
+            }
+          ],
+          "repositioned": 0,
+          "drones": 10,
+          "contactAtLaunchByRoute": [
+            61.807,
+            79.287,
+            48.879
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 8,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": -10,
+              "contactBefore": 61.807,
+              "contactAfterSwing": 43.926
+            }
+          ],
+          "repositioned": 0,
+          "drones": 12,
+          "contactAtLaunchByRoute": [
+            73.377,
+            91.754,
+            54.365
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 9,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": -10,
+              "contactBefore": 91.754,
+              "contactAfterSwing": 48.894
+            }
+          ],
+          "repositioned": 1,
+          "drones": 13,
+          "contactAtLaunchByRoute": [
+            73.377,
+            75.336,
+            76.31
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 10,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": 10,
+              "contactBefore": 76.31,
+              "contactAfterSwing": 56.495
+            }
+          ],
+          "repositioned": 0,
+          "drones": 14,
+          "contactAtLaunchByRoute": [
+            82.362,
+            75.336,
+            76.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 11,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 82.362,
+              "contactAfterSwing": 85.465
+            },
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 75.336,
+              "contactAfterSwing": 97.201
+            }
+          ],
+          "repositioned": 0,
+          "drones": 15,
+          "contactAtLaunchByRoute": [
+            95.461,
+            97.201,
+            95.492
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 12,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 95.492,
+              "contactAfterSwing": 105.853
+            }
+          ],
+          "repositioned": 0,
+          "drones": 17,
+          "contactAtLaunchByRoute": [
+            99.959,
+            122.124,
+            129.32
+          ],
+          "coreLost": 0,
+          "core": 100
+        }
+      ]
+    },
+    {
+      "arena": "drift-frontier",
+      "policy": "never-move",
+      "seed": 41,
+      "outcome": "win",
+      "core": 100,
+      "lastWave": 12,
+      "drones": 17,
+      "purchases": 17,
+      "repositions": 0,
+      "spent": 1972,
+      "waves": [
+        {
+          "wave": 1,
+          "repositioned": 0,
+          "drones": 2,
+          "contactAtLaunchByRoute": [
+            36.985,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 2,
+          "repositioned": 0,
+          "drones": 3,
+          "contactAtLaunchByRoute": [
+            54.978,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 3,
+          "repositioned": 0,
+          "drones": 4,
+          "contactAtLaunchByRoute": [
+            54.978,
+            19.939,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 4,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 54.978,
+              "contactAfterSwing": 39.876
+            }
+          ],
+          "repositioned": 0,
+          "drones": 6,
+          "contactAtLaunchByRoute": [
+            61.807,
+            41.373,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 5,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 41.373,
+              "contactAfterSwing": 23.936
+            }
+          ],
+          "repositioned": 0,
+          "drones": 8,
+          "contactAtLaunchByRoute": [
+            61.807,
+            63.829,
+            4.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 6,
+          "repositioned": 0,
+          "drones": 9,
+          "contactAtLaunchByRoute": [
+            61.807,
+            74.799,
+            27.961
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 7,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 27.961,
+              "contactAfterSwing": 25.437
+            }
+          ],
+          "repositioned": 0,
+          "drones": 10,
+          "contactAtLaunchByRoute": [
+            61.807,
+            79.287,
+            48.879
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 8,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": -10,
+              "contactBefore": 61.807,
+              "contactAfterSwing": 43.926
+            }
+          ],
+          "repositioned": 0,
+          "drones": 12,
+          "contactAtLaunchByRoute": [
+            73.377,
+            91.754,
+            54.365
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 9,
+          "swings": [
+            {
+              "gate": "B",
+              "degrees": -10,
+              "contactBefore": 91.754,
+              "contactAfterSwing": 48.894
+            }
+          ],
+          "repositioned": 0,
+          "drones": 13,
+          "contactAtLaunchByRoute": [
+            73.377,
+            58.373,
+            76.31
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 10,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": 10,
+              "contactBefore": 76.31,
+              "contactAfterSwing": 56.495
+            }
+          ],
+          "repositioned": 0,
+          "drones": 14,
+          "contactAtLaunchByRoute": [
+            82.362,
+            58.373,
+            76.494
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 11,
+          "swings": [
+            {
+              "gate": "A",
+              "degrees": 5,
+              "contactBefore": 82.362,
+              "contactAfterSwing": 85.465
+            },
+            {
+              "gate": "B",
+              "degrees": 5,
+              "contactBefore": 58.373,
+              "contactAfterSwing": 95.706
+            }
+          ],
+          "repositioned": 0,
+          "drones": 15,
+          "contactAtLaunchByRoute": [
+            95.461,
+            95.706,
+            95.492
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 12,
+          "swings": [
+            {
+              "gate": "C",
+              "degrees": -5,
+              "contactBefore": 95.492,
+              "contactAfterSwing": 105.853
+            }
+          ],
+          "repositioned": 0,
+          "drones": 17,
+          "contactAtLaunchByRoute": [
+            99.959,
+            120.629,
+            129.32
+          ],
+          "coreLost": 0,
+          "core": 100
+        }
+      ]
+    },
+    {
+      "arena": "helix-frontier",
+      "policy": "never-move",
+      "seed": 17,
+      "outcome": "win",
+      "core": 100,
+      "lastWave": 9,
+      "drones": 12,
+      "purchases": 12,
+      "repositions": 0,
+      "spent": 1032,
+      "waves": [
+        {
+          "wave": 1,
+          "repositioned": 0,
+          "drones": 2,
+          "contactAtLaunchByRoute": [
+            36.985,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 2,
+          "repositioned": 0,
+          "drones": 3,
+          "contactAtLaunchByRoute": [
+            54.978,
+            0,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 3,
+          "repositioned": 0,
+          "drones": 4,
+          "contactAtLaunchByRoute": [
+            54.978,
+            19.939,
+            0
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 4,
+          "repositioned": 0,
+          "drones": 5,
+          "contactAtLaunchByRoute": [
+            63.974,
+            32.4,
+            4.993
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 5,
+          "repositioned": 0,
+          "drones": 7,
+          "contactAtLaunchByRoute": [
+            63.974,
+            70.284,
+            4.993
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 6,
+          "repositioned": 0,
+          "drones": 8,
+          "contactAtLaunchByRoute": [
+            63.974,
+            76.265,
+            28.46
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 7,
+          "repositioned": 0,
+          "drones": 9,
+          "contactAtLaunchByRoute": [
+            63.974,
+            85.736,
+            49.931
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 8,
+          "repositioned": 0,
+          "drones": 11,
+          "contactAtLaunchByRoute": [
+            81.467,
+            85.736,
+            72.899
+          ],
+          "coreLost": 0,
+          "core": 100
+        },
+        {
+          "wave": 9,
+          "repositioned": 0,
+          "drones": 12,
+          "contactAtLaunchByRoute": [
+            81.467,
+            85.736,
+            95.867
+          ],
+          "coreLost": 0,
+          "core": 100
+        }
+      ]
+    }
+  ]
+}

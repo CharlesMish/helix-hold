@@ -1084,11 +1084,11 @@ LEVELS.push({
   name: "Drift Frontier",
   experiment: true,
   prototype: "route-expansion",
-  subtitle: "Coils that move · 12-wave late-game prototype",
+  subtitle: "Gentle drift · 12-wave spatial prototype",
   blurb:
-    "Helix Frontier's three coils, but they swing around the prism between waves. Re-fly the lines a swing breaks while the waves grow heavier.",
+    "Three coils sway to either side of home between waves. Keep useful lines and adjust only the ones that need it.",
   briefing:
-    "A opens first, B on wave 3, C on wave 6. From wave 4 an announced coil swings around the prism before each wave; your drones stay put, so lines on that coil lose contact. Survey shows each swing and your lost contact; reposition is free during setup. Twelve escalating waves end with all three convoys. Tripwire (6) is available. No campaign score is recorded.",
+    "A opens first, B on wave 3, C on wave 6. From wave 4 the coils take small announced steps between -5° and +5° of their original positions. They visit both sides and return home; your drones stay put. Survey reports contact before and after. Keep useful lines and reposition selectively for free during setup. Twelve light-to-moderate waves end with all three convoys. Tripwire (6) is available. No campaign score is recorded.",
   hangar: frontierHangar,
   accent: 0xe6b86a,
   stasisAvailable: true,
@@ -1098,7 +1098,7 @@ LEVELS.push({
   presentation: "protected-prism",
   protectedVolume: frontierVolume,
   startingScrap: 60,
-  // Tuned with qa/drift-trial.mjs: waves 8–12 carry twice their listed escalation.
+  // Gentle first-play study: modest excursions, with the former doubled late hull removed.
   hpMul: 1.15,
   speedMul: 0.9,
   paths: frontierPaths,
@@ -1122,14 +1122,15 @@ LEVELS.push({
     {
       chapter: "04 · First swing",
       lesson:
-        "A swung 45° south around the prism. Check which west lines still touch it and re-fly the rest.",
-      drift: [{ path: 0, degrees: 45 }],
+        "A shifted 5° south of home. Most of your layout should still help: inspect before moving anything.",
+      drift: [{ path: 0, degrees: 5 }],
       groups: [g("barge", 0, 3, 2.6, 1), g("shard", 1, 8, 1.4, 3), g("wisp", 0, 3, 1.8, 7)],
     },
     {
       chapter: "05 · East swings north",
-      lesson: "B swung 45° north. A stays where it moved. Two coils out of their first places.",
-      drift: [{ path: 1, degrees: 45 }],
+      lesson:
+        "B shifted 5° north of home. A holds its small offset. Keep good lines; adjust only where useful.",
+      drift: [{ path: 1, degrees: 5 }],
       groups: [g("barge", 1, 3, 2.5, 1), g("shard", 0, 8, 1.3, 3), g("wisp", 1, 4, 1.7, 7)],
     },
     {
@@ -1139,8 +1140,9 @@ LEVELS.push({
     },
     {
       chapter: "07 · The vault slides east",
-      lesson: "C swung 45° east toward B. Some eastern lines may now reach it.",
-      drift: [{ path: 2, degrees: -45 }],
+      lesson:
+        "C shifted 5° east of home. Check for a small gain or loss of contact; it will later visit the other side.",
+      drift: [{ path: 2, degrees: -5 }],
       groups: [
         g("barge", 2, 3, 2.4, 1),
         g("shard", 0, 7, 1.3, 3, 1, 1.2),
@@ -1150,61 +1152,65 @@ LEVELS.push({
     },
     {
       chapter: "08 · West swings north",
-      lesson: "A swung 90° the other way, past home and into the north. Heavier west convoy.",
-      drift: [{ path: 0, degrees: -90 }],
+      lesson:
+        "A crossed home to 5° north: a 10° step. A line aimed around home may still cover both positions.",
+      drift: [{ path: 0, degrees: -10 }],
       groups: [
-        g("barge", 0, 5, 2.2, 1, 1, 2.6),
-        g("shard", 1, 8, 1.3, 3, 1, 2.4),
-        g("wisp", 2, 5, 1.5, 6, 1, 2),
+        g("barge", 0, 5, 2.2, 1, 1, 1.3),
+        g("shard", 1, 8, 1.3, 3, 1, 1.2),
+        g("wisp", 2, 5, 1.5, 6, 1, 1),
       ],
     },
     {
-      chapter: "09 · East swings farther",
-      lesson: "B swung another 30° north. Barges on B and C.",
-      drift: [{ path: 1, degrees: 30 }],
+      chapter: "09 · East crosses home",
+      lesson:
+        "B crossed home to 5° south: a 10° step. Compare keeping a broad line with revising a narrow one.",
+      drift: [{ path: 1, degrees: -10 }],
       groups: [
-        g("barge", 1, 4, 2.2, 1, 1, 2.8),
-        g("barge", 2, 3, 2.4, 4, 1, 2.6),
-        g("shard", 0, 9, 1.2, 6, 1, 2.4),
-        g("wisp", 1, 4, 1.5, 10, 1, 2),
+        g("barge", 1, 4, 2.2, 1, 1, 1.4),
+        g("barge", 2, 3, 2.4, 4, 1, 1.3),
+        g("shard", 0, 9, 1.2, 6, 1, 1.2),
+        g("wisp", 1, 4, 1.5, 10, 1, 1),
       ],
     },
     {
       chapter: "10 · Vault swings west",
-      lesson: "C swung 90° west. Fast Wisps on A: a Tripwire across them pays per crossing.",
-      drift: [{ path: 2, degrees: 90 }],
+      lesson:
+        "C crossed home to 5° west: a 10° step. Small route shifts can improve some crossings and weaken others.",
+      drift: [{ path: 2, degrees: 10 }],
       groups: [
-        g("barge", 2, 5, 2.1, 1, 1, 3),
-        g("wisp", 0, 7, 1.3, 3, 1, 2.4),
-        g("shard", 1, 10, 1.1, 6, 1, 2.6),
+        g("barge", 2, 5, 2.1, 1, 1, 1.5),
+        g("wisp", 0, 7, 1.3, 3, 1, 1.2),
+        g("shard", 1, 10, 1.1, 6, 1, 1.3),
       ],
     },
     {
       chapter: "11 · Twin return",
       lesson:
-        "A and B both swing back to their first places. Old lines may work again; heavy convoys on both.",
+        "A and B each shifted 5° back home. Lines planned around their original routes can recover contact.",
       drift: [
-        { path: 0, degrees: 45 },
-        { path: 1, degrees: -75 },
+        { path: 0, degrees: 5 },
+        { path: 1, degrees: 5 },
       ],
       groups: [
-        g("barge", 0, 5, 2, 1, 1, 3.2),
-        g("barge", 1, 5, 2, 3, 1, 3.2),
-        g("shard", 2, 10, 1.1, 5, 1, 2.6),
-        g("wisp", 0, 6, 1.3, 9, 1, 2.4),
+        g("barge", 0, 5, 2, 1, 1, 1.6),
+        g("barge", 1, 5, 2, 3, 1, 1.6),
+        g("shard", 2, 10, 1.1, 5, 1, 1.3),
+        g("wisp", 0, 6, 1.3, 9, 1, 1.2),
       ],
     },
     {
       chapter: "12 · Every frontier",
-      lesson: "C swings home. All three convoys at once, then late bursts. Hold every port.",
-      drift: [{ path: 2, degrees: -45 }],
+      lesson:
+        "C shifts 5° home. All coils are back at their original positions. Hold the three final convoys.",
+      drift: [{ path: 2, degrees: -5 }],
       groups: [
-        g("barge", 0, 6, 2, 1, 1, 3.6),
-        g("barge", 1, 6, 2, 2, 1, 3.6),
-        g("barge", 2, 6, 2, 3, 1, 3.6),
-        g("shard", 0, 8, 1, 12, 1, 2.8),
-        g("shard", 1, 8, 1, 14, 1, 2.8),
-        g("wisp", 2, 8, 1.2, 16, 1, 2.6),
+        g("barge", 0, 6, 2, 1, 1, 1.8),
+        g("barge", 1, 6, 2, 2, 1, 1.8),
+        g("barge", 2, 6, 2, 3, 1, 1.8),
+        g("shard", 0, 8, 1, 12, 1, 1.4),
+        g("shard", 1, 8, 1, 14, 1, 1.4),
+        g("wisp", 2, 8, 1.2, 16, 1, 1.3),
       ],
     },
   ],

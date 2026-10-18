@@ -2,6 +2,10 @@
 
 Repository: [CharlesMish/helix-hold](https://github.com/CharlesMish/helix-hold). Start from the current default branch and identify the commit you reviewed. Read the latest section of [HANDOFF.md](../HANDOFF.md), then [PROTOTYPES_090.md](PROTOTYPES_090.md), [CROWN_LATE_TUNE_081.md](CROWN_LATE_TUNE_081.md), [DRONE_ROLES_080.md](DRONE_ROLES_080.md), [CROWN_GROWTH.md](CROWN_GROWTH.md) and [SPLIT_CROWN.md](SPLIT_CROWN.md). Current source is authoritative when older notes differ.
 
+## Current revision: 0.10.1
+
+Read [GENTLE_DRIFT_0101.md](GENTLE_DRIFT_0101.md) first. Tripwire counts now share combat's re-arm transition; fixed-post controls are explicit. Drift is a gentler ±5° excursion around home, with the extra doubled late hull removed. Main remains separate; this experiment is on `claude/weekend-pass` and the same private Site. Current checks total 114. New funded results are in `DRIFT_GENTLE_TRIAL.json`; the prior `DRIFT_TRIAL.json` and v0.10.0 browser evidence are historical. No post-change browser run is claimed.
+
 ## Current state
 
 Helix Hold is a React/TypeScript/Three.js spatial defense game. The player flies into position and anchors fixed firing drones, seeking useful lines through three-dimensional enemy routes. Flight School teaches the idea; Shear adds competing paths; Split Crown is the larger arena with an eight-wave checkpoint and four optional extra waves. Orbital remains an archived playable study, and the three-wave carrier/Stasis lab remains optional.

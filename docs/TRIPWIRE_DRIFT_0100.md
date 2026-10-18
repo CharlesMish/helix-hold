@@ -1,5 +1,7 @@
 # v0.10.0: Tripwire and Drift Frontier
 
+Historical checkpoint. Current gentler schedule and corrected crossing estimates: [GENTLE_DRIFT_0101.md](GENTLE_DRIFT_0101.md). The old recorded trial remains in `DRIFT_TRIAL.json`; the current `trial:drift` command writes `DRIFT_GENTLE_TRIAL.json`.
+
 Charlie's framing for this pass: the core flight-and-placement loop felt great from the start, but the challenge was easy. Early on it was "hard" only because of the eight-drone cap, and once that was lifted, nothing scaled well. He asked for ideas on new line types and late-game difficulty, plus the formatting and browser-suite fixes. Both features below are opt-in prototypes in the LAB menu. Campaign arenas, prices, schedules and scores are unchanged.
 
 ## Tripwire: a line defined by two flights

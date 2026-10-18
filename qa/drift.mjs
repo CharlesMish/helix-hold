@@ -115,20 +115,20 @@ test("Swings apply between waves only, rebuild the listed route, and never move 
   const original = run.paths;
   for (let w = 1; w <= 2; w++) clearWave(run);
   assert.equal(run.pathRevision, 0, "no swing before wave 4");
-  clearWave(run); // wave 3 clears → wave 4 setup swings A by 45°
+  clearWave(run); // wave 3 clears → wave 4 setup swings A by 5°
   assert.equal(run.pathRevision, 1);
-  assert.deepEqual(run.pathSwing, [45, 0, 0]);
+  assert.deepEqual(run.pathSwing, [5, 0, 0]);
   assert.notEqual(run.paths[0], original[0]);
   assert.equal(run.paths[1], original[1], "unlisted routes keep their exact objects");
   assert.equal(level.paths[0], original[0], "the level's own routes are never mutated");
   for (const key of ["bx", "by", "bz", "fx", "fy", "fz"]) assert.equal(run.drones[0][key], drone[key]);
   const [report] = run.lastDrift;
   assert.equal(report.path, 0);
-  assert.equal(report.degrees, 45);
+  assert.equal(report.degrees, 5);
   assert.ok(report.before > 10, `line had real contact before (${report.before.toFixed(1)} m)`);
   assert.ok(report.after < report.before, "the swing cost this line contact");
   assert.ok(Math.abs(report.after - fleetRouteContact(run)[0]) < 1e-9);
-  assert.match(run.hint, /Gate A swung 45°/);
+  assert.match(run.hint, /Gate A swung 5°/);
 });
 
 test("Drift is deterministic and returns each coil to its original object when home", () => {
@@ -147,6 +147,44 @@ test("Drift is deterministic and returns each coil to its original object when h
   for (let w = 0; w < 8; w++) clearWave(plain);
   assert.equal(plain.pathRevision, 0);
   assert.equal(plain.lastDrift, null);
+});
+
+test("Gentle drift visits both sides of home, stays within five degrees and returns", () => {
+  const angles = [0, 0, 0],
+    seen = [new Set([0]), new Set([0]), new Set([0])];
+  for (const wave of level.waves) {
+    for (const change of wave.drift ?? []) {
+      assert.ok(Math.abs(change.degrees) <= 10, "no large one-step swing");
+      angles[change.path] += change.degrees;
+    }
+    angles.forEach((angle, index) => {
+      assert.ok(Math.abs(angle) <= 5, "stay near the original route");
+      seen[index].add(angle);
+    });
+  }
+  seen.forEach((values) =>
+    assert.deepEqual(
+      [...values].sort((a, b) => a - b),
+      [-5, 0, 5],
+    ),
+  );
+  assert.deepEqual(angles, [0, 0, 0]);
+  // A stable home line should survive the first nudge without losing most of its contact.
+  const run = createRun(DRIFT_INDEX);
+  Object.assign(run.ship, { x: -12.74, y: 12.64, z: 0.66 });
+  const yaw = 0.665,
+    pitch = 0.276;
+  Object.assign(run, {
+    aimx: -Math.sin(yaw) * Math.cos(pitch),
+    aimy: Math.sin(pitch),
+    aimz: -Math.cos(yaw) * Math.cos(pitch),
+  });
+  assert.equal(tryAnchor(run), null);
+  for (let w = 0; w < 3; w++) clearWave(run);
+  assert.ok(
+    run.lastDrift[0].after >= run.lastDrift[0].before * 0.5,
+    "reference line retains at least half its contact",
+  );
 });
 
 console.log(`\n${passed} drift checks passed.`);

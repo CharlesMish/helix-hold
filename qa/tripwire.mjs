@@ -274,4 +274,44 @@ test("Tripwire posts can be recalled only during setup", () => {
   assert.equal(run.drones.length, 2);
 });
 
+test("A shallow exit does not inflate preview crossings before the combat re-arm boundary", () => {
+  const run = frontier();
+  const from = { x: -12.736198109762297, y: 10.708485204307623, z: -0.17536126344421543 };
+  const to = { x: -25.954119221645342, y: 18.340916025660167, z: -11.540086102590925 };
+  assert.equal(place(run, from.x, from.y, from.z), null);
+  Object.assign(run.ship, to);
+  const preview = getPlacementPreview(run);
+  assert.equal(
+    preview.segments.filter((s) => s.pathIndex === 0).length,
+    2,
+    "keep both useful highlight stretches",
+  );
+  assert.equal(preview.nowCrossings, 1, "two stretches without a full exit produce one burst");
+  assert.equal(place(run, to.x, to.y, to.z), null);
+  run.waves = [{ groups: [{ kind: "shard", path: 0, count: 1, interval: 1, delay: 0, spawned: 0 }] }];
+  Object.assign(run.ship, { x: 49, y: 43, z: 0, yaw: -Math.PI / 2, pitch: 0, vx: 0, vy: 0, vz: 0 });
+  Object.assign(run, { aimx: 1, aimy: 0, aimz: 0 });
+  nextWaveNow(run);
+  for (let i = 0; i < 12000 && run.phase === "play" && run.rest === 0; i++) step(run, idle(), 1 / 60);
+  assert.equal(
+    run.drones[0].damage,
+    preview.nowCrossings * TRIPWIRE_DAMAGE,
+    "actual nominal Shard receives the displayed burst count",
+  );
+  assert.equal(run.drones[0].kills, 0);
+  // Genuine full exits continue to show multiple crossings.
+  const control = frontier();
+  control.paths = [
+    polyline([
+      { x: 0, y: 20, z: -10 },
+      { x: 0, y: 20, z: 10 },
+      { x: 4, y: 20, z: -10 },
+      { x: 4, y: 20, z: 10 },
+    ]),
+  ];
+  assert.equal(place(control, -10, 20, 0), null);
+  Object.assign(control.ship, { x: 10, y: 20, z: 0 });
+  assert.equal(getPlacementPreview(control).nowCrossings, 3);
+});
+
 console.log(`\n${passed} tripwire checks passed.`);

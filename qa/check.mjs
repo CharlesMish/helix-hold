@@ -737,7 +737,7 @@ try {
   await page.getByRole("button", { name: /^Drift Frontier/ }).click();
   await page.getByRole("button", { name: /Show 12-wave gate plan/ }).click();
   check(
-    (await page.locator(".gate-plan li").nth(3).innerText()).includes("Gate A swings 45°"),
+    (await page.locator(".gate-plan li").nth(3).innerText()).includes("Gate A swings 5°"),
     "gate plan forecasts the first swing",
   );
   await page.getByRole("button", { name: "Enter prototype", exact: true }).click();
@@ -752,7 +752,7 @@ try {
   }
   await page.locator(".drift-note").first().waitFor({ state: "visible" });
   check(
-    (await page.locator(".drift-note").first().innerText()).includes("Gate A swung 45°"),
+    (await page.locator(".drift-note").first().innerText()).includes("Gate A swung 5°"),
     "wave-4 setup announces the swing with the fleet's lost contact",
   );
   await page.screenshot({ path: `${OUT}drift-swing.png` });

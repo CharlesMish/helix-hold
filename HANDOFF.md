@@ -1,3 +1,20 @@
+# Helix Hold 0.10.1 — trustworthy Tripwire counts and gentle drift
+
+Charlie approved the review fixes and a kinder first Drift playthrough. He wants modest route changes around the original placements, in both directions, so good lines can survive and recover. No new human playtest is claimed. Based on Claude's `claude/weekend-pass` at `2fae0028f494909450e03168b96acc7d31f8b6b6`; GitHub main remains `77632a8`. The same owner-private Site receives this experimental version; GitHub changes stay on Claude's branch.
+
+- Tripwire preview now follows the same contact/re-arm state transition as combat. Two disjoint highlight stretches without a full exit from the wider release volume count as one crossing. Highlights themselves remain intact. Readout says estimated crossings for nominal Shards; it cannot promise other hulls, weaving Wisps or every sampled timestep. An actual West Spindle regression reproduces the old 2× versus one 26-damage burst and now reports 1×.
+- Tripwire's mode description, placement hint and guide explicitly say fixed posts ignore Fan/Slide. The general control guide names that exception. Damage, price, span, paid refunds and setup reposition remain unchanged.
+- Drift now uses cumulative offsets only −5°, 0°, +5°; every coil visits both sides and returns home. Largest step is 10° across home. Changes remain between waves, with fixed breach ports and default unlimited setup. Expansion, contraction, translation and continuous in-wave motion are deferred.
+- Removed the extra 2× hull layer from Drift waves 8–12. Counts, timings, speeds, rewards and waves 1–7 remain. Wave-8 total hull rises about 1.27× from wave 7 rather than 2.53×. Crown and plain Frontier schedules are unchanged.
+
+Validation: 114 deterministic checks, separate geometry checks, TypeScript and production build. The funded gentle trial finishes at 100 core for re-fly and never-move policies across three seeds. Re-fly makes one reposition (previously 24); a seed-17 fleet retains 53–91% of contact on the outward/cross-home shifts and gains contact returning home. This is evidence against compulsory rebuilding, not proof of human difficulty. No attempt was made to force optimized fleets to lose.
+
+Read `docs/GENTLE_DRIFT_0101.md` and `docs/DRIFT_GENTLE_TRIAL.json`. `npm run trial:drift` writes the new report; `DRIFT_TRIAL.json` preserves Claude's prior aggressive experiment. Claude's 83 browser checks belong to v0.10.0. Browser control remains unavailable here; updated assertions are prepared, not executed. In-game HUD fit, contact legibility and human comfort need the first playthrough.
+
+---
+
+## Previous v0.10.0 checkpoint
+
 # Helix Hold 0.10.0: Tripwire, Drift Frontier and a green browser suite
 
 Started from GitHub `77632a8` (v0.9.0) on branch `claude/weekend-pass`. Work by Claude (Anthropic), with source, simulation and browser checks run in a cloud container.

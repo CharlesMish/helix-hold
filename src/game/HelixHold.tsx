@@ -49,7 +49,7 @@ import {
 import { clamp, forwardOf } from "./math";
 
 type Stick = { x: number; y: number; pointer: number | null };
-const BUILD_LABEL = "0.10.0";
+const BUILD_LABEL = "0.10.1";
 const MODE_KEYS: Record<DroneMode, number> = {
   pierce: 1,
   sweep: 2,
@@ -1191,7 +1191,7 @@ export function HelixHold() {
             : hud.mode === "relay"
               ? "Receives Lumen and redirects along your aim · one turn · no weapon of its own"
               : hud.mode === "tripwire"
-                ? `Two posts · strand up to ${TRIPWIRE_MAX_SPAN}m · ${TRIPWIRE_DAMAGE} damage to every enemy, once per crossing · aim doesn’t matter`
+                ? `Two posts · strand up to ${TRIPWIRE_MAX_SPAN}m · ${TRIPWIRE_DAMAGE} damage per re-armed crossing · fixed posts ignore Fan/Slide`
                 : hud.mode === "pierce"
                   ? "Long, narrow · hits every foe in line"
                   : `Short, wide · nearest foe${selected === CARRIER_TEST_INDEX ? " · 22 DPS trial" : ""}`;
@@ -1209,7 +1209,7 @@ export function HelixHold() {
         : `${carrierName} not reached.`;
   const debriefCopy = prototype
     ? (drifting
-        ? "Coils that move. Did re-flying broken lines after each swing feel like a fresh puzzle, or like chores? Did Tripwire earn a place?"
+        ? "Gentle drift around home. Did keeping some lines and adjusting others feel useful? Did Tripwire earn a place?"
         : frontier
           ? "Three coils, three breach ports. Did each opening ask for a new line while keeping your older drones useful?"
           : "Did redirecting one Lumen beam create a useful line? Try changing the receiver’s aim or compare it with Stasis.") +
@@ -1503,7 +1503,7 @@ export function HelixHold() {
               {driftNote && (
                 <p className="drift-note">
                   <b>Drift</b>
-                  {driftNote}. Select a drone that lost its line and reposition it for free.
+                  {driftNote}. Check which lines still help; reposition only where useful.
                 </p>
               )}
               {newRouteSetup && (
@@ -1735,7 +1735,7 @@ export function HelixHold() {
                         {wireMode
                           ? hud.wireSpan === null
                             ? "Strand · place the second post next"
-                            : `Crossings ${hud.rest > 0 ? "this wave" : "still active"} · ${hud.wireSpan.toFixed(1)}m strand`
+                            : `Est. crossings ${hud.rest > 0 ? "this wave" : "still active"} · ${hud.wireSpan.toFixed(1)}m strand`
                           : hud.mode === "relay" || hud.mode === "lumen"
                             ? hud.rest > 0
                               ? "Connected beam · this wave"
@@ -1828,7 +1828,7 @@ export function HelixHold() {
                               ? "Passive damage centered on the drone. Aim does not change its sphere."
                               : wireMode
                                 ? hud.wireSpan === null
-                                  ? `Posts ignore aim. Anchor here, then fly up to ${TRIPWIRE_MAX_SPAN}m away for the free second post.`
+                                  ? `Fixed posts ignore aim, Fan and Slide. Anchor here, then fly up to ${TRIPWIRE_MAX_SPAN}m away for the free second post.`
                                   : hud.nowCrossings > 0
                                     ? "Every enemy crossing this strand takes a burst. Cut across routes, not along them."
                                     : "No crossing with this wave yet. Stretch the strand across a ribbon."
@@ -2016,7 +2016,7 @@ export function HelixHold() {
                 {
                   index: DRIFT_INDEX,
                   label: "Drift Frontier",
-                  note: "Coils swing between waves · 12-wave late game",
+                  note: "Small shifts around home · 12-wave experiment",
                 },
                 { index: RELAY_LAB_INDEX, label: "Relay Lab", note: "Slowing light · one fixed redirection" },
                 { index: CARRIER_TEST_INDEX, label: "Stasis + carrier", note: "Short field comparison" },
@@ -2186,9 +2186,10 @@ export function HelixHold() {
                 your aim; a passive field holds your position. You return to the cradle.
               </li>
               <li>
-                <b>Adjust the defense.</b> Fan or slide the drones together. During setup, open Survey to
-                select any drone. Reposition it for free, or recall it for its actual paid price. Moving
-                reuses the same drone; Anchor commits and Cancel keeps its old placement.
+                <b>Adjust the defense.</b> Fan or slide the drones together, except fixed Tripwire posts.
+                During setup, open Survey to select any drone. Reposition it for free, or recall it for its
+                actual paid price. Moving reuses the same drone; Anchor commits and Cancel keeps its old
+                placement.
               </li>
             </ol>
             <div className="guide-beams">
@@ -2276,18 +2277,22 @@ export function HelixHold() {
                   <p>
                     Anchor a first post anywhere, then fly up to {TRIPWIRE_MAX_SPAN}m away and anchor the free
                     second post. Every enemy that crosses the strand between them takes {TRIPWIRE_DAMAGE}{" "}
-                    damage, once per crossing, however fast it moves. Riding along the strand counts once, so
-                    cut across ribbons and coil turns instead of following them. Posts ignore aim.
+                    damage, once per crossing, on entry. It must fully leave the wider release zone before
+                    another burst; riding along the strand counts once, so cut across ribbons and coil turns
+                    instead of following them. Posts ignore aim, Fan and Slide. Move them only with setup
+                    Reposition. The crossing count estimates Shards on the nominal route; other hulls and
+                    weaving Wisps can differ.
                   </p>
                 </div>
               </div>
             )}
             {drifting && (
               <p className="lab-guide">
-                Drift Frontier uses the same coils, but from wave 4 an announced coil swings around the prism
-                before each wave. Your drones never move by themselves: lines on a swung coil lose contact.
-                The placement panel and Survey show each swing with your contact before and after; the moved
-                route gets a ribbon (G). Reposition is free during setup. Waves 8–12 are deliberately heavy.
+                Drift Frontier takes small steps between −5° and +5° of each coil’s original position, between
+                waves from wave 4. Each coil visits both sides and returns home. Your drones stay put. Inspect
+                contact before and after; some lines improve while others weaken. The moved route gets a
+                ribbon (G). Reposition selectively for free during setup. This first trial has gentler late
+                waves.
               </p>
             )}
             {frontier && !drifting && (

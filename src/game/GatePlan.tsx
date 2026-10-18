@@ -82,7 +82,7 @@ export function GatePlan({
         <div className="gate-plan-body">
           <p>
             {level.driftPath ? (
-              "Three coils open on waves 1, 3 and 6. From wave 4, an announced coil swings around the prism before launch; your drones stay put."
+              "Three coils open on waves 1, 3 and 6. From wave 4, coils step to either side of home (at most 5° away) before launch; your drones stay put."
             ) : level.prototype === "route-expansion" ? (
               "Three coils open in stages: A on wave 1, B on wave 3, C on wave 6. Each has a separate breach port."
             ) : level.prototype === "relay" ? (

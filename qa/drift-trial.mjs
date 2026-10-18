@@ -217,7 +217,8 @@ const summary = results.map(
 );
 console.log(summary.join("\n"));
 const report = {
-  question: "Does Drift Frontier reward re-flying lines after a swing, and can an earned fleet finish it?",
+  question:
+    "Does gentle drift preserve useful lines while changing contact, without forcing wholesale repositioning?",
   method: {
     dt,
     seeds,
@@ -231,6 +232,6 @@ const report = {
 };
 if (process.argv.includes("--write"))
   await writeFile(
-    new URL("../docs/DRIFT_TRIAL.json", import.meta.url),
+    new URL("../docs/DRIFT_GENTLE_TRIAL.json", import.meta.url),
     JSON.stringify(report, (_, v) => (typeof v === "number" ? +v.toFixed(3) : v), 2) + "\n",
   );

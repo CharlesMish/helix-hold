@@ -20,6 +20,7 @@ import {
   TRIPWIRE_RELEASE,
   selectBeamTargets,
   type Beam,
+  type BeamTarget,
   type DroneMode,
 } from "./combat";
 import { traceRelay, type RelayTrace as Trace } from "./relay";
@@ -535,20 +536,34 @@ export function getCoverageTiming(run: Run, coverage: BeamCoverage): CoverageTim
   return timing;
 }
 
-/** Tripwire value is the number of separate route crossings, split by the same lane timing. */
-export function getCrossingTiming(run: Run, coverage: BeamCoverage): CrossingTiming {
+/** Nominal Shard crossings use the same entry/re-arm state as combat, not highlight gaps.
+ * Highlights still show every contact stretch; the count follows the wider release volume.
+ */
+export function getCrossingTiming(run: Run, beam: Beam | null): CrossingTiming {
+  const timing: CrossingTiming = { nowCrossings: 0, laterCrossings: 0 };
+  if (!beam) return timing;
   const upcoming = run.rest > 0 || run.waveIndex < 0;
   const waveIndex = run.waveIndex + (upcoming ? 1 : 0);
   const laterLanes = new Set(
     run.waves.slice(waveIndex + 1).flatMap((w) => w.groups.filter((g) => g.count > 0).map((g) => g.path)),
   );
-  const status = run.paths.map((_, index) => getLaneStatus(run, index));
-  const timing: CrossingTiming = { nowCrossings: 0, laterCrossings: 0 };
-  for (const segment of coverage.segments) {
-    const lane = status[segment.pathIndex];
-    if (lane === "active" || lane === "upcoming") timing.nowCrossings += 1;
-    else if (laterLanes.has(segment.pathIndex)) timing.laterCrossings += 1;
-  }
+  const release = wireReleaseBeam(beam);
+  run.paths.forEach((path, index) => {
+    let touching = false,
+      crossings = 0;
+    // Finer than the 0.5m highlight sampling; nominal geometry remains an estimate,
+    // not a promise about drifting Wisps, other hull sizes or a combat timestep.
+    const count = Math.max(1, Math.ceil(path.length / 0.1));
+    for (let i = 0; i <= count; i++) {
+      const target = { ...path.pointAt((i * path.length) / count), radius: KINDS.shard.radius };
+      const next = wireContactState(beam, release, target, touching);
+      if (!touching && next) crossings++;
+      touching = next;
+    }
+    const status = getLaneStatus(run, index);
+    if (status === "active" || status === "upcoming") timing.nowCrossings += crossings;
+    else if (laterLanes.has(index)) timing.laterCrossings += crossings;
+  });
   return timing;
 }
 
@@ -589,6 +604,11 @@ function wireReleaseBeam(beam: Beam): Beam {
     range: beam.range + TRIPWIRE_RELEASE * 2,
     radius: beam.radius + TRIPWIRE_RELEASE,
   };
+}
+
+/** One shared hysteresis rule for preview and combat. */
+function wireContactState(beam: Beam, release: Beam, target: BeamTarget, touching: boolean): boolean {
+  return beamContact(touching ? release : beam, target) !== null;
 }
 
 export type Strand = { ownerId: number; owner: Drone; partner: Drone; beam: Beam };
@@ -952,7 +972,7 @@ export function getPlacementPreview(run: Run): PlacementPreview {
   return {
     ...coverage,
     ...getCoverageTiming(run, coverage),
-    ...getCrossingTiming(run, coverage),
+    ...getCrossingTiming(run, drone.mode === "tripwire" && wire ? beam : null),
     drone,
     beam,
     wire,
@@ -1019,11 +1039,12 @@ function weapons(run: Run, dt: number) {
     for (const enemy of run.enemies) {
       if (!enemy.alive) continue;
       const touching = enemy.wireContacts.includes(strand.ownerId);
-      if (!touching && beamContact(strand.beam, enemy) !== null) {
+      const next = wireContactState(strand.beam, release, enemy, touching);
+      if (!touching && next) {
         enemy.wireContacts.push(strand.ownerId);
         strand.owner.shotFlash = PIN_FLASH_DURATION;
         damageEnemy(run, enemy, TRIPWIRE_DAMAGE, strand.owner);
-      } else if (touching && beamContact(release, enemy) === null) {
+      } else if (touching && !next) {
         enemy.wireContacts = enemy.wireContacts.filter((id) => id !== strand.ownerId);
       }
     }
@@ -1193,7 +1214,7 @@ function applyDrift(run: Run, wave: Run["waves"][number] | undefined): void {
         (d) =>
           `Gate ${String.fromCharCode(65 + d.path)} swung ${Math.abs(d.degrees)}° · your contact ${d.before.toFixed(0)} → ${d.after.toFixed(0)}m.`,
       )
-      .join(" ") + " Re-fly the lines that lost it; repositioning is free.";
+      .join(" ") + " Check surviving lines before moving; setup repositioning is free.";
 }
 
 function moveEnemies(run: Run, dt: number) {
