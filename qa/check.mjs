@@ -1,6 +1,6 @@
-// Browser regression checks for Helix Hold. Updated 2026-10-14; these revisions
-// are prepared, NOT browser-executed in the managed Sites environment.
-// Run these later in an environment where browser testing is permitted:
+// Browser regression checks for Helix Hold. Executed 2026-10-17 against a
+// production preview in headless Chromium with SwiftShader (software WebGL, ~4 fps).
+// Assertions poll simulation state, so a slow renderer lengthens them rather than failing.
 //   npm run build && npm run preview      (leave running; default http://127.0.0.1:4173)
 //   npm run qa                            (or BASE_URL=... npm run qa)
 // Set CHROMIUM_PATH if Chromium is already installed outside Playwright's cache.
@@ -168,8 +168,11 @@ try {
   await page.waitForTimeout(600);
   await page.keyboard.up("KeyA");
   check((await page.evaluate(() => window.__controlsTest.getYaw())) > y0, "A turns left (yaw increases)");
+  // Poll the simulated speed: at ~4 fps a fixed 900 ms wait can cover only a few steps.
   await page.keyboard.down("KeyW");
-  await page.waitForTimeout(900);
+  await page
+    .waitForFunction(() => window.__controlsTest.getSpeed() > 3, null, { timeout: 15000 })
+    .catch(() => {});
   check((await page.evaluate(() => window.__controlsTest.getSpeed())) > 3, "W thrusts forward");
   await page.keyboard.up("KeyW");
   await page.keyboard.press("Digit2");
@@ -392,7 +395,8 @@ try {
   console.log("Optional carrier test flight");
   await page.goto(`${BASE}/?qa`, { waitUntil: "load" });
   await page.waitForFunction(() => !!window.__helixDebug);
-  await page.locator(".lab-option").click();
+  // Three lab entries exist since 0.9.0; select the carrier lab by its label.
+  await page.getByRole("button", { name: /^Stasis \+ carrier/ }).click();
   await page.getByRole("button", { name: "Enter test flight", exact: true }).click();
   await page.keyboard.press("Digit3");
   await waitState({ mode: "stasis" });
