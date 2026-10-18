@@ -819,7 +819,9 @@ export function HelixHold() {
         wireAnchorId: ghost.wire?.anchorId ?? null,
         drift: r.rest > 0 ? (r.lastDrift ?? []) : [],
         recallSetupOnly:
-          !!lastDrone && (lastDrone.mode === "relay" || lastDrone.mode === "lumen") && r.rest <= 0,
+          !!lastDrone &&
+          (lastDrone.mode === "relay" || lastDrone.mode === "lumen" || lastDrone.mode === "tripwire") &&
+          r.rest <= 0,
         checking: !!r.fieldCheck,
         touched: r.stasisTouched,
         exposure: r.stasisExposure,
@@ -1093,7 +1095,7 @@ export function HelixHold() {
         },
         clear: () => {
           const r = runRef.current;
-          if (!r || r.phase !== "play") return;
+          if (!r || r.phase !== "play" || r.fieldCheck || r.repositionId !== null) return;
           if (r.rest > 0) nextWaveNow(r);
           const wave = r.waves[r.waveIndex];
           if (!wave) return;
@@ -1853,7 +1855,7 @@ export function HelixHold() {
                         onClick={recall}
                         title={
                           hud.recallSetupOnly
-                            ? "Lumen and Relay can be recalled during setup only"
+                            ? "Lumen, Relay and Tripwire posts can be recalled during setup only"
                             : hud.lastDrone
                         }
                       >

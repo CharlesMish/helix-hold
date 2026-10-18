@@ -18,10 +18,12 @@ Charlie's framing for this pass: the core flight-and-placement loop felt great f
 **Rules.**
 - Anchoring in Tripwire mode with an open post completes that strand. Otherwise it places a new paid first post.
 - **Recall last** on a free second post refunds nothing and reopens the first post. Selected recall in Survey removes **both posts** and refunds the strand's price, so a leftover open post can never become a free strand.
-- Reposition moves one post. The strand re-forms from its partner and must respect the span. Fan/Slide move strands with the lattice.
+- Reposition moves one post. The strand re-forms from its partner and must respect the span.
+- **Posts ignore Fan and Slide.** They are fixed pylons. An independent review found that letting the lattice move them made it possible to sweep a strand back and forth and re-arm it: one Barge took 11 bursts instead of 1. A regression test now pins this.
+- Tripwire posts, like Lumen and Relay, can be recalled only during setup, so a free second post cannot be re-strung across a convoy mid-wave. New paid strands can still be anchored during combat.
 - Damage and kills belong to the paid post (the strand's owner). The HUD shows crossings ("2×") instead of metres, split into this wave and later waves.
 
-**Evidence.** `qa/tripwire.mjs` has 7 checks: roster and pricing, span limits, crossing counts on synthetic routes (straight through = 1, zig-zag = 3, along the strand = 1), preview crossings, recall/reposition rules, and Fan/Slide projection. In the browser, a vertical 22.5 m strand at the West Spindle's end angle crosses both passes of its 1.2 turns and alone killed all six wave-1 Shards. That is a single setup, not a balance claim.
+**Evidence.** `qa/tripwire.mjs` has 8 checks: roster and pricing, span limits, crossing counts on synthetic routes (straight through = 1, zig-zag = 3, along the strand = 1), preview crossings, recall/reposition rules, fixed posts under Fan/Slide (including the burst-farming regression), and setup-only recall. A separate review also fuzzed 3,000 random anchor/recall/reposition/cancel sequences and found scrap conserved and pairs always consistent. In the browser, a vertical 22.5 m strand at the West Spindle's end angle crosses both passes of its 1.2 turns and alone killed all six wave-1 Shards. That is a single setup, not a balance claim.
 
 ## Drift Frontier: the problem moves, not just the hull
 

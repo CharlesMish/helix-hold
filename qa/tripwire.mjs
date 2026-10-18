@@ -72,7 +72,7 @@ const polyline = (points) =>
     400,
   );
 // One sturdy Shard on a custom route, with the pilot parked far away aiming at the sky.
-const crossingRun = (points, strand) => {
+const crossingRun = (points, strand, input = () => idle()) => {
   const run = frontier();
   run.level = { ...run.level, hpMul: 100, speedMul: 1 };
   run.paths = [polyline(points)];
@@ -84,7 +84,7 @@ const crossingRun = (points, strand) => {
   run.aimy = 1;
   run.aimz = 0;
   nextWaveNow(run);
-  for (let i = 0; i < 60 * 30 && run.phase === "play" && run.rest <= 0; i++) step(run, idle(), 1 / 60);
+  for (let i = 0; i < 60 * 30 && run.phase === "play" && run.rest <= 0; i++) step(run, input(i), 1 / 60);
   const owner = run.drones.find((d) => d.mode === "tripwire" && d.paid > 0);
   return Math.round(owner.damage / TRIPWIRE_DAMAGE);
 };
@@ -229,17 +229,49 @@ test("Reposition moves one post, keeps the pair and price, and respects the span
   assert.equal(getStrands(run.drones).length, 1);
 });
 
-test("Strands follow the Fan/Slide-projected posts", () => {
+test("Fan and Slide never move posts, so sweeping a strand cannot farm bursts", () => {
   const run = frontier();
   place(run, -10, 20, 4);
   place(run, 10, 20, 4);
   for (let i = 0; i < 60; i++) step(run, { ...idle(), expand: true, shift: 1 }, 1 / 60);
   const [a, b] = run.drones;
-  assert.ok(Math.hypot(a.x - a.bx, a.z - a.bz) > 1, "lattice moved the posts");
-  const expected = wireBeam(a, b);
+  assert.ok(run.expand > 0.9 && run.shift > 0.9, "the lattice was fully fanned and slid");
+  for (const post of [a, b]) assert.deepEqual([post.x, post.y, post.z], [post.bx, post.by, post.bz]);
   const strand = getStrands(run.drones)[0].beam;
+  const expected = wireBeam({ x: a.bx, y: a.by, z: a.bz }, { x: b.bx, y: b.by, z: b.bz });
   for (const key of ["x", "y", "z", "dx", "dy", "dz", "range"])
     assert.ok(Math.abs(expected[key] - strand[key]) < 1e-12);
+  // Review regression: an enemy riding along the strand while Fan and Slide are toggled every
+  // 0.2 s previously took ~11 bursts. It must take exactly one.
+  const along = [
+    { x: -30, y: 20, z: 0 },
+    { x: 30, y: 20, z: 0 },
+  ];
+  const toggling = (i) => ({
+    ...idle(),
+    expand: Math.floor(i / 12) % 2 === 0,
+    shift: Math.floor(i / 12) % 2 ? 1 : -1,
+  });
+  assert.equal(
+    crossingRun(
+      along,
+      [
+        [-10, 20, 0],
+        [10, 20, 0],
+      ],
+      toggling,
+    ),
+    1,
+  );
+});
+
+test("Tripwire posts can be recalled only during setup", () => {
+  const run = frontier();
+  place(run, -10, 20, 0);
+  place(run, 10, 20, 0);
+  nextWaveNow(run);
+  assert.match(recallLast(run), /during setup/);
+  assert.equal(run.drones.length, 2);
 });
 
 console.log(`\n${passed} tripwire checks passed.`);

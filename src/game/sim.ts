@@ -443,6 +443,17 @@ function killEnemy(run: Run, e: Enemy) {
 
 /** Rest coordinates stay fixed; fan/slide only change the projected pose. */
 function projectDrone(d: Drone, expand: number, shift: number): Drone {
+  if (d.mode === "tripwire") {
+    // Posts are fixed pylons. If Fan/Slide moved them, sweeping a strand back and forth
+    // would re-arm it and farm per-crossing bursts from enemies that never crossed.
+    d.x = d.bx;
+    d.y = d.by;
+    d.z = d.bz;
+    d.ax = d.fx;
+    d.ay = d.fy;
+    d.az = d.fz;
+    return d;
+  }
   let rx = d.bx - CORE.x;
   let rz = d.bz - CORE.z;
   let rl = Math.hypot(rx, rz);
@@ -998,7 +1009,12 @@ function weapons(run: Run, dt: number) {
   for (const drone of run.drones) {
     if (drone.mode === "tripwire") drone.shotFlash = Math.max(0, (drone.shotFlash ?? 0) - dt);
   }
-  for (const strand of getStrands(run.drones)) {
+  const strands = getStrands(run.drones);
+  const owners = new Set(strands.map((s) => s.ownerId));
+  for (const enemy of run.enemies)
+    if (enemy.alive && enemy.wireContacts.length)
+      enemy.wireContacts = enemy.wireContacts.filter((id) => owners.has(id));
+  for (const strand of strands) {
     const release = wireReleaseBeam(strand.beam);
     for (const enemy of run.enemies) {
       if (!enemy.alive) continue;
@@ -1112,9 +1128,11 @@ function updateWaves(run: Run, dt: number) {
       run.banner = run.waveMode === "manual" ? "Lane clear · launch when ready" : "Lane clear  8";
       const cost = getAnchorCost(run);
       const placement =
-        run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
-          ? `Next drone costs ${cost} scrap. `
-          : "Adjust your defense. ";
+        cost === 0 && run.droneMode === "tripwire"
+          ? "Your open Tripwire post is waiting for its free second end. "
+          : run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
+            ? `Next drone costs ${cost} scrap. `
+            : "Adjust your defense. ";
       run.hint =
         placement +
         (run.waveMode === "manual"
@@ -1143,7 +1161,16 @@ export function fleetRouteContact(
 function applyDrift(run: Run, wave: Run["waves"][number] | undefined): void {
   run.lastDrift = null;
   if (!wave?.drift?.length || !run.level.driftPath) return;
-  const before = fleetRouteContact(run);
+  // Report the resting layout, even if the player is holding Fan or Slide as the wave clears.
+  const resting = (paths: PathCurve[]) =>
+    fleetRouteContact({
+      ...run,
+      paths,
+      drones: run.drones.map((d) => projectDrone({ ...d }, 0, 0)),
+      expand: 0,
+      shift: 0,
+    });
+  const before = resting(run.paths);
   const paths = [...run.paths];
   for (const { path, degrees } of wave.drift) {
     run.pathSwing[path] = (run.pathSwing[path] ?? 0) + degrees;
@@ -1151,7 +1178,7 @@ function applyDrift(run: Run, wave: Run["waves"][number] | undefined): void {
   }
   run.paths = paths;
   run.pathRevision += 1;
-  const after = fleetRouteContact(run);
+  const after = resting(run.paths);
   const report = wave.drift.map(({ path, degrees }) => ({
     path,
     degrees,
@@ -1318,6 +1345,8 @@ export function recallLast(run: Run): string | null {
   const last = run.drones[run.drones.length - 1];
   if (run.rest <= 0 && (last?.mode === "lumen" || last?.mode === "relay"))
     return "Recall Lumen/Relay during setup";
+  // A free second post could otherwise be recalled and re-strung across a convoy mid-wave.
+  if (run.rest <= 0 && last?.mode === "tripwire") return "Recall Tripwire posts during setup";
   const drone = run.drones.pop();
   if (!drone) return "No drone to recall";
   // Undoing a strand's free second post reopens its first post; a paid post takes its partner along.
