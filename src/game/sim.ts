@@ -15,7 +15,7 @@ import {
   type LevelDef,
   type PathCurve,
 } from "./paths";
-import { recordWin, type SaveData } from "./save";
+import { recordLabResult, recordWin, type SaveData } from "./save";
 
 /**
  * Chase-cam gunship.
@@ -206,11 +206,19 @@ export type Run = {
 
 /** Only arenas authored for scrap-funded growth omit the ordinary fleet limit. */
 export function getDroneLimit(level: LevelDef): number {
-  return level.fleetGrowth === "scrap" ? Infinity : MAX_DRONES;
+  return level.fleetCap ?? (level.fleetGrowth === "scrap" ? Infinity : MAX_DRONES);
+}
+
+/** In a lean arena a full lattice has no next anchor: the HUD and scene show the
+ * lattice itself instead of a drone that cannot be bought. Other arenas keep
+ * their existing next-anchor preview at the cap. */
+export function latticeComplete(run: Pick<Run, "level" | "drones" | "repositionId">): boolean {
+  return run.level.fleetCap !== undefined && run.drones.length >= run.level.fleetCap && run.repositionId === null;
 }
 
 export function hasStasis(level: LevelDef): boolean {
-  return !!(level.stasisAvailable || level.experiment);
+  // An experiment may opt out explicitly; unspecified experiments keep fields.
+  return level.stasisAvailable ?? !!level.experiment;
 }
 
 export function availableDroneModes(level: LevelDef): DroneMode[] {
@@ -283,6 +291,8 @@ function setPhase(run: Run, phase: Phase) {
   if (run.phase === phase) return;
   run.phase = phase;
   if (phase === "win" && !run.level.experiment && !run.continued) run.save = recordWin(run.level.id, run.core);
+  // Lean experiments keep a personal best apart from every campaign record.
+  if (phase === "win" && run.level.fleetCap !== undefined) run.save = recordLabResult(run.level.id, run.core);
   run.onPhase?.(phase, run);
 }
 
@@ -787,7 +797,9 @@ function updateWaves(run: Run, dt: number) {
       run.rest = 8;
       run.banner = run.waveMode === "manual" ? "Lane clear · launch when ready" : "Lane clear  8";
       const cost = getAnchorCost(run);
-      const placement = run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
+      const placement = run.level.fleetCap !== undefined
+        ? "Reposition any drone for free in Survey before the next wave. "
+        : run.scrap >= cost && run.drones.length < getDroneLimit(run.level)
         ? `Next drone costs ${cost} scrap. ` : "Adjust your defense. ";
       run.hint = placement + (run.waveMode === "manual"
         ? "Take your time, then launch the next wave."
@@ -1160,7 +1172,9 @@ export function createRun(levelIndex: number, seed = 0x48454c49): Run {
     expand: 0,
     shift: 0,
     time: 0,
-    hint: "Your first two drones are funded. Fly, line up and anchor; launch the first wave when ready.",
+    hint: level.fleetCap !== undefined
+      ? `All ${level.fleetCap} drones are funded and they are your whole fleet. Fly, line up and anchor; launch when ready.`
+      : "Your first two drones are funded. Fly, line up and anchor; launch the first wave when ready.",
     banner: "Prepare · launch when ready",
     shipHitting: false,
     wasHitting: false,

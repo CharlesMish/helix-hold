@@ -1,6 +1,6 @@
 # Helix Hold — outside review guide
 
-Repository: [CharlesMish/helix-hold](https://github.com/CharlesMish/helix-hold). Start from the current default branch and identify the commit you reviewed. Read the latest section of [HANDOFF.md](../HANDOFF.md), then [PROTOTYPES_090.md](PROTOTYPES_090.md), [CROWN_LATE_TUNE_081.md](CROWN_LATE_TUNE_081.md), [DRONE_ROLES_080.md](DRONE_ROLES_080.md), [CROWN_GROWTH.md](CROWN_GROWTH.md) and [SPLIT_CROWN.md](SPLIT_CROWN.md). Current source is authoritative when older notes differ.
+Repository: [CharlesMish/helix-hold](https://github.com/CharlesMish/helix-hold). Start from the current default branch and identify the commit you reviewed. Read the latest section of [HANDOFF.md](../HANDOFF.md), then [LEAN_LATTICE.md](LEAN_LATTICE.md), [PROTOTYPES_090.md](PROTOTYPES_090.md), [CROWN_LATE_TUNE_081.md](CROWN_LATE_TUNE_081.md), [DRONE_ROLES_080.md](DRONE_ROLES_080.md), [CROWN_GROWTH.md](CROWN_GROWTH.md) and [SPLIT_CROWN.md](SPLIT_CROWN.md). Current source is authoritative when older notes differ.
 
 ## Current state
 
@@ -17,6 +17,8 @@ Version 0.8.0 introduced the Crown roster experiment: Halo adds passive 5m-radiu
 Version 0.8.1 follows Charlie’s actual v0.8 playtest: roughly 32 drones, minor early leaks, then no later core loss, with a much longer but still comfortable carrier chase. Only optional waves 9–12 gain modest hull and earlier final escort overlap. First eight waves, prices, counts, rewards, speeds and weapons remain unchanged. The final carrier now has 3,207.6 hull (+10%). Stasis and uncapped Crown growth remain; the exact human fleet is unknown.
 
 Version 0.9.0 adds two isolated, opt-in prototypes: nine-wave Helix Frontier with three staged coils and distinct protected-box ports, and four-wave Relay Lab with one slowing-light emitter and fixed-direction receivers. One redirection conserves source range/DPS. Stasis remains for comparison. They use independent prices and uncapped growth, do not save campaign scores, and do not alter the five existing arenas. The user requested spatial exploration before detailed balance. Enemy storage and matching render buffers now grow beyond the former initial 64; practical frame rate is unmeasured.
+
+Version 0.10.0 is a direction check, not new content for the campaign. [LEAN_LATTICE.md](LEAN_LATTICE.md) argues that fleet growth and roster additions have diluted the game's distinctive verbs, with a scripted tension study as evidence, and adds one optional lab arena, **Three Lines**: Shear with three drones and six overlapping waves. Existing arenas are unchanged. The question for a reviewer or playtester is whether a small fleet makes repositioning, Fan/Slide and piloting matter, and whether that is more interesting than further growth.
 
 ## Run and inspect
 

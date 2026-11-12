@@ -1,6 +1,8 @@
 const KEY = "helix-hold-v2";
 const LEGACY_KEY = "helix-hold-v1";
 const ACTIVE_IDS = ["tutorial", "shear", "orbital", "split-crown"] as const;
+/** Lean lab arenas keep a personal best in their own map, never in campaign scores. */
+const LAB_IDS = ["lean-shear"] as const;
 const LEGACY_LEVELS = [
   { id: "needle", name: "Glass Needle" },
   { id: "twin", name: "Twin Ribbon" },
@@ -13,6 +15,8 @@ export type SaveData = {
   bestByLevel: Record<string, number>;
   /** Archived v1 scores retain their original arena identity after reordering. */
   legacyBestByLevel: Record<string, LegacyBest>;
+  /** Best core kept in optional lean experiments; absent in older saves. */
+  labBestByLevel: Record<string, number>;
 };
 
 export function freshSave(): SaveData {
@@ -20,6 +24,7 @@ export function freshSave(): SaveData {
     version: 2,
     bestByLevel: { tutorial: -1, shear: -1, orbital: -1, "split-crown": -1 },
     legacyBestByLevel: {},
+    labBestByLevel: {},
   };
 }
 
@@ -55,6 +60,12 @@ export function loadSave(): SaveData {
   if (object(current) && current.version === 2 && object(current.bestByLevel)) {
     const save = freshSave();
     for (const id of ACTIVE_IDS) save.bestByLevel[id] = score(current.bestByLevel[id]);
+    if (object(current.labBestByLevel)) {
+      for (const id of LAB_IDS) {
+        const best = score(current.labBestByLevel[id]);
+        if (best >= 0) save.labBestByLevel[id] = best;
+      }
+    }
     if (object(current.legacyBestByLevel)) {
       for (const level of LEGACY_LEVELS) {
         const old = current.legacyBestByLevel[level.id];
@@ -86,6 +97,15 @@ export function recordWin(levelId: string, core: number): SaveData {
   const save = loadSave();
   if (!ACTIVE_IDS.some((id) => id === levelId)) return save;
   save.bestByLevel[levelId] = Math.max(save.bestByLevel[levelId] ?? -1, score(core));
+  persist(save);
+  return save;
+}
+
+/** Optional lean arenas: campaign entries are read back unchanged. */
+export function recordLabResult(levelId: string, core: number): SaveData {
+  const save = loadSave();
+  if (!LAB_IDS.some((id) => id === levelId)) return save;
+  save.labBestByLevel[levelId] = Math.max(save.labBestByLevel[levelId] ?? -1, score(core));
   persist(save);
   return save;
 }

@@ -195,3 +195,7 @@
  .game-root[data-prototype='route-expansion'][data-touch='1'] .placement,.game-root[data-prototype='relay'][data-touch='1'] .placement{max-height:calc(100dvh - 520px)}
  .game-root[data-prototype][data-survey='1']>.lane-intel{left:auto;right:auto;top:auto;width:auto}
 }
+/* Lean arenas: once the fleet is complete the panel reports the lattice, not a next anchor. */
+.lattice-card .lattice-state{font:500 19px/1.2 'Sora',sans-serif;color:#dfe7f7;margin:12px 0 8px;letter-spacing:-.01em}.lattice-card .lattice-state[data-flex=true]{color:var(--ice)}.lattice-card .placement-status{margin-top:0}
+@media(max-width:760px){.lattice-card .lattice-state{font-size:15px;margin:8px 0 5px}}
+

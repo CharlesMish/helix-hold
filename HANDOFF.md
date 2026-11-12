@@ -1,3 +1,27 @@
+# Helix Hold 0.10.0 — lean lattice experiment
+
+Started from GitHub `77632a8dd1eab8c36b10368b592e166bb24d8a8f` (v0.9.0) on branch `lean-lattice`. This pass was made by Claude from the public repository only; the private Sites checkout was not touched and is not updated by it.
+
+**Latest request:** Charlie asked for an outside look at where Helix Hold should go next, or whether to stop and what to try instead, with leave to make adjustments. This is a design read plus one isolated experiment, not a response to a new playtest.
+
+- **Read:** the game's distinctive part is the line (piloted 3D sightlines). Since v0.6 it has grown along the ordinary tower-defense axis (roster, boss, longer waves, uncapped fleet), and each step made single lines, Fan/Slide and the pilot matter less. `docs/LEAN_LATTICE.md` has the argument, measurements and what each playtest answer would mean.
+- **Tension study** (`npm run study:tension`, `docs/TENSION_STUDY.json`): under a greedy all-Pierce buyer, Crown's deepest enemy falls from 0.99 of its route in wave 3 to about 0.6 by waves 9–11 as the fleet grows; seven frozen Pierces clear eight waves at 100 core with the pilot parked. On Shear, six scripted play styles from "re-place but never fly" to "fly sharply and flex" all finish at 100 core. One wave's hull can grow 40–100% before an untouched earned fleet leaks, then a whole group leaks together.
+- **Three Lines** (Lab, id `lean-shear`): Shear's routes, six new waves, three drones funded up front (`fleetCap: 3`, 96 scrap), Pierce/Sweep only, hull `1.5`. The same six styles now spread from a wave-3 loss to a clean hold; planning alone and flying alone both lose. A win saves a best under `labBestByLevel`, apart from campaign scores.
+- Once a lean fleet is complete, the next-anchor panel, ghost and preview coverage give way to a small lattice card (Resting / Fanned / Sliding). `latticeComplete` in `sim.ts` is the single rule. Other arenas keep their existing preview at a full cap.
+- `hasStasis` honors an explicit `stasisAvailable: false`. `getDroneLimit` honors `fleetCap`. No existing arena sets either. Authored schedules, routes, prices, weapons and saved campaign scores are unchanged; the historical guards still pass.
+
+Validation: **106 deterministic checks** (the previous 100 plus six in `qa/lean.mjs`: cap and funding, roster, Shear untouched, score isolation, and two policy checks that hold the experiment's premise). TypeScript and production build pass. `qa/crown-growth.mjs` now reads an authored `fleetCap` where it asserted eight for every non-prototype arena.
+
+Browser: for the first time since v0.6.1 this revision **was opened in a browser**: headless Chrome with a software renderer, 1280×800 and 390×844 touch. Observed with no page errors: title and Lab entry, entering Three Lines, three anchors, the fourth refused as "Lattice is full", lattice card in setup and combat, Slide state during wave 1. Poses were set through the `?qa` debug hook, so this is not flight evidence. Frame rate, feel, contrast and touch comfort were not assessed. One existing portrait issue seen and left alone: when a gate card's "inbound" text wraps to two lines it overlaps the telemetry row beneath it.
+
+Scripted policies are not people. Three Lines' difficulty for a human is unknown; its hull is a first guess and a single number.
+
+Next playtest: fly Three Lines once or twice. Did you move drones between waves by choice, reach for Fan/Slide mid-wave and know what it would do, and feel a loss was yours? Decide the direction from that before adding content. If it lands, the next single step is a lean west pair on Crown or a direction-sensitive enemy, not both.
+
+---
+
+## Previous v0.9.0 checkpoint
+
 # Helix Hold 0.9.0 — spatial prototypes
 
 Started from authenticated Sites `1c85f390b01b7d3e27278ada85ab9e0f3af76e12` and GitHub `a24e5b2ac3acd4a3734ddc6c9dd38d75348a979c`. Preserve the existing owner-private Site and public repository.

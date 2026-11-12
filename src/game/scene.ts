@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { CORE, PATH_COLORS, type Kind } from "./paths";
 import { beamContact, DRONE_SPECS, insideSphere, STASIS_RADIUS, STASIS_SPEED_SCALE, type Beam, type DroneMode } from "./combat";
-import { BEAM_RANGE, MAX_DRONES, SHIP_DPS, SHIP_RADIUS, droneBeam, getDroneCoverage, getBeamCoverage, getLaneFirstWave, getLaneStatus, getPlacementPreview, getRelayTraces, type RelayTrace, type Run } from "./sim";
+import { BEAM_RANGE, MAX_DRONES, SHIP_DPS, SHIP_RADIUS, droneBeam, getDroneCoverage, getBeamCoverage, getLaneFirstWave, getLaneStatus, getPlacementPreview, getRelayTraces, latticeComplete, type RelayTrace, type Run } from "./sim";
 
 export type Projection = { x: number; y: number; visible: boolean; behind: boolean };
 export type World = {
@@ -828,7 +828,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
     if (overview || run.rest > 0 || run.expand > 0.05 || Math.abs(run.shift) > 0.05) {
       for (const drone of run.drones.filter(d => !run.fieldCheck || showFieldVisual(d.mode, run.fieldCheck))) batches.push({ segments: getDroneCoverage(run, drone).segments, color: DRONE_SPECS[drone.mode].color, width: 0.85 });
     }
-    if (run.phase !== "title" && !overview && !run.fieldCheck) batches.push({ segments: preview.segments, color: DRONE_SPECS[run.droneMode].color, width: 2.2 });
+    if (run.phase !== "title" && !overview && !run.fieldCheck && !latticeComplete(run)) batches.push({ segments: preview.segments, color: DRONE_SPECS[run.droneMode].color, width: 2.2 });
     coverage.sync(batches);
   }
   function updateCamera(run: Run, dt: number, elapsed: number) {
@@ -1011,7 +1011,7 @@ export function createWorld(canvas: HTMLCanvasElement): World {
         } else placeBeam(beam, droneBeam(drone), color, drone.hit, run, i);
       }
 
-      const showPreview = run.phase === "play" && !overview && !run.fieldCheck;
+      const showPreview = run.phase === "play" && !overview && !run.fieldCheck && !latticeComplete(run);
       const previewColor = DRONE_SPECS[run.droneMode].color;
       ghost.visible = showPreview;
       const relayPreview = run.droneMode === "lumen" || run.droneMode === "relay";

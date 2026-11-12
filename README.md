@@ -1,4 +1,4 @@
-# Helix Hold · Sightline Lab (0.9.0)
+# Helix Hold · Sightline Lab (0.10.0)
 
 A 3D defense game in which placement is piloting. Fly into a useful line, anchor a weaker drone there, and return to the launch cradle to build the next.
 
@@ -37,6 +37,12 @@ Stasis is available from setup, with the same passive 6m radius, half-speed effe
 
 `npm run trial:crown` retains the historical eight-drone comparisons and an ordinary-input opening. `npm run trial:crown-growth` tests normally funded larger fleets through twelve waves, including an automated pursuing pilot; `npm run study:crown-pilot` isolates the original short carrier encounter. The current [late-wave tune](docs/CROWN_LATE_TUNE_081.md) compares frozen paid fleets of 19, 25 and 33 drones; reproduce it with `npm run study:crown-late`. Earlier roster results are in [the v0.8 role study](docs/DRONE_ROLES_080.md); `npm run trial:crown-roles` includes the Halo/Pin fleet. [The original growth note](docs/CROWN_GROWTH.md) is a v0.7 historical snapshot, whose stored figures use the old shared prices. In the historical trial, shared-line layouts finish with and without Stasis; one dedicated-line layout benefits from a late field and a free carrier-wave reposition. These establish feasibility and a useful tradeoff, not human difficulty or an optimal solution. Browser visuals remain unverified in this environment.
 
+## Three Lines · lean experiment
+
+Under **LAB · OPTIONAL EXPERIMENTS**, choose **Three Lines**: Shear's three routes, six waves, and three drones for the whole flight. All three are funded before wave 1; no more can be bought. Pierce and Sweep only. No resting three-line lattice holds every lane, so the result depends on what you do: reposition for free between waves, hold **Fan** (Shift) or **Slide** (Q/E) while a wave is in flight, and use your own gun on the lane your lines cannot reach. Once the fleet is complete, the placement panel becomes a small lattice card showing Resting / Fanned / Sliding. Core kept is the score; your best is saved apart from campaign records.
+
+This tests a direction, not a balance: whether a small fleet makes each line and each live adjustment matter. See [the read, measurements and what to look for](docs/LEAN_LATTICE.md). `npm run study:tension` reproduces the figures; scripted play styles are not human play.
+
 ## Optional spatial prototypes
 
 Under **LAB · OPTIONAL EXPERIMENTS**, choose **Helix Frontier** for three authored coils opening on waves 1/3/6 around a holographic protected box. West/east winding differs; the third coil winds horizontally. Each has a distinct breach port. Nine light waves test whether new routes call for new lines while older placements stay useful. The flight boundary is unchanged. This is a finite geometry prototype, not endless mode. Press **G**, or use Survey, to toggle the newly opening route's solid ribbon. [Route chart](public/frontier-routes.svg).
@@ -72,10 +78,11 @@ npm run build
 npm test
 ```
 
-`npm test` runs 100 deterministic simulation, revision, field-check, Split Crown, coverage, growth and renderer-allocation checks, including manual/automatic pacing, paid per-type growth, discrete shot cadence, actual-3D fields, slow expiry, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
+`npm test` runs 106 deterministic simulation, revision, field-check, Split Crown, coverage, growth, renderer-allocation and lean-lattice checks, including manual/automatic pacing, paid per-type growth, discrete shot cadence, actual-3D fields, slow expiry, hit geometry and real-input opening trials. The historical campaign guard compares authored settings exactly and geometry with a 1e-6 m tolerance; see [fixture provenance](qa/fixtures/README.md). `npm run test:geometry` checks solid enemy bounds and exact field boundary radius; `npm run trial:carrier` runs funded encounter feasibility trials; `npm run study:sweep` compares matched synthetic Wisp cases. `npm run study:stasis` compares field strengths and local value; `npm run trial:continuation` checks funded eight-wave feasibility. `npm run study:crown-coverage` compares old total versus current-wave coverage rankings; `npm run study:crown-stasis` examines the paid late-slot tradeoff with matched refits. `npm run qa` is a browser suite for a separately running preview, subject to the environment's browser policy (see `qa/check.mjs`). It is not run by the build.
 
 ### Verification for this revision
 
+- v0.10.0 adds six lean-lattice checks (106 in all) and was opened in headless Chrome with a software renderer at desktop and phone sizes: Lab entry, three-drone cap, lattice card and Slide state observed with no page errors. That is a smoke test through the debug hook, not flight, feel or frame-rate evidence. The remaining notes in this list describe v0.9.0.
 - 100 deterministic checks pass, including relay contact/range/slow rules, prototype score isolation, original arena settings and enemy-pool growth. Seven drone models are exercised for correct slot reuse; existing fleet and coverage allocation checks remain.
 - Separate geometry checks cover enemy solids and field boundaries. Frontier paths stay within the flight envelope and reach their distinct ports without earlier box entry. The source-derived route chart was rasterized and inspected.
 - One coarse funded Frontier policy finishes at 100 core with 12 Pierces; a control frozen after wave 2 loses during wave 5. New B/C openings create measurable coverage gaps, addressed with earned purchases while old defenses still contribute. This is feasibility evidence, not human difficulty or perfect balance.
@@ -94,6 +101,8 @@ The v0.6.2 review follow-up also adds Enter-to-end for the desktop field check, 
 - `src/game/HelixHold.tsx`: input, lifecycle, responsive HUD, guide and controls.
 - `src/game/save.ts`: arena-ID records and legacy migration.
 - `qa/simulation.mjs`: source-bundled simulation checks.
+- `qa/tension-study.mjs`, `qa/lean.mjs`: slack, depth, skill-spread and hull-headroom study; Three Lines contract checks.
+- `docs/LEAN_LATTICE.md`: outside read of the game's direction, measurements and the Three Lines experiment.
 - `docs/PROTOTYPES_090.md`: new optional geometry/relay experiments, precise rules and validation limits.
 - `docs/CROWN_LATE_TUNE_081.md`: preserved late-wave tune, paired funded evidence and playtest question.
 - `docs/DRONE_ROLES_080.md`: roles, independent Crown pricing and the historical v0.8.0 studies.

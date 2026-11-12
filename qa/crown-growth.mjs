@@ -61,8 +61,10 @@ test('Crown buys past eight with per-type prices; other arenas retain their limi
   assert.match(tryAnchor(run), /Need 140 scrap/);
   for (const [index, other] of LEVELS.entries()) {
     if (index === SPLIT_CROWN_INDEX || other.prototype) continue;
-    assert.equal(getDroneLimit(other), 8);
-    const capped = fundedFleet(index, 8);
+    // A lean experiment authors its own smaller cap; every other arena keeps eight.
+    const limit = other.fleetCap ?? 8;
+    assert.equal(getDroneLimit(other), limit);
+    const capped = fundedFleet(index, limit);
     Object.assign(capped.ship, { x: 5, y: 20, z: 12 });
     assert.equal(tryAnchor(capped), 'Lattice is full');
   }

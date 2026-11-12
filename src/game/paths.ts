@@ -49,6 +49,8 @@ export type LevelDef = {
   stasisAvailable?: boolean;
   /** Crown grows through earned scrap; other arenas retain their eight-drone limit. */
   fleetGrowth?: "scrap";
+  /** Lean experiments fix the whole fleet at a small number; scrap buys nothing beyond it. */
+  fleetCap?: number;
   /** The Crown experiment introduces distinct specialist roles and independent prices. */
   droneRoster?: "expanded";
   dronePricing?: "per-type";
@@ -550,5 +552,31 @@ LEVELS.push({
     { chapter: "02 · Redirect east", lesson: "Only B sends traffic this wave. Try a free setup reposition to turn a relay toward the east, keeping its incoming connection clear.", groups: [g("shard", 1, 6, 2, 1), g("barge", 1, 1, 3, 5)] },
     { chapter: "03 · Shared attention", lesson: "Both gates send escorts. A target before the relay can block its outgoing light: compare the potential line with the powered segment.", groups: [g("shard", 0, 5, 1.8, 1), g("shard", 1, 5, 1.8, 3), g("wisp", 1, 2, 2.2, 8)] },
     { chapter: "04 · Two convoys", lesson: "Choose which convoy needs the redirected slow. Other weapons still supply the damage; Stasis remains a passive comparison.", groups: [g("barge", 0, 3, 2.8, 1), g("barge", 1, 3, 2.8, 4), g("shard", 0, 4, 1.8, 7)] },
+  ],
+});
+
+/** Lean Lattice: Shear's routes, three drones for the whole flight. The schedule
+ * sends traffic down lanes a resting three-line lattice cannot all hold, so the
+ * pilot gun, Fan/Slide and free setup repositioning carry the difference. It asks
+ * whether a small fleet makes each line and each live adjustment matter.
+ */
+export const LEAN_INDEX = LEVELS.length;
+LEVELS.push({
+  ...shear,
+  continuation: undefined,
+  id: "lean-shear", name: "Three Lines", experiment: true, fleetCap: 3, startingScrap: 96, stasisAvailable: false,
+  subtitle: "Shear with three drones · 6 waves · lean experiment",
+  blurb: "Three drones, no more. Hold three lanes by choosing shared lines, flexing the lattice and flying the gap.",
+  briefing: "All three drones are funded before the first wave and nothing more can be bought. No resting lattice holds every lane here: reposition for free between waves, Fan (Shift) or Slide (Q/E) the whole lattice while a wave is in flight, and use your own gun on the lane your lines cannot reach. Core kept is the score; your best is saved separately from campaign records.",
+  // One knob for the whole experiment: hull is about 1.4x Shear's (1.08), so three
+  // lines and one gun stay busy. Lower it if the first playtest is punishing.
+  hpMul: 1.5,
+  waves: [
+    { chapter: "01 · Three lines", lesson: "All three drones are funded and they are your whole fleet. Only the dive is open: place lines you will be happy to move later.", groups: [g("shard", 0, 6, 1.4, 0.8, 0.55), g("barge", 0, 1, 3, 6, 0.55)] },
+    { chapter: "02 · Second lane", lesson: "The middle coil and the dive both send traffic. Look for one line through both, or cover one lane and fly the other yourself.", groups: [g("barge", 1, 4, 2.3, 0.8), g("shard", 0, 8, 1.1, 2.5, 0.55)] },
+    { chapter: "03 · Wide and near", lesson: "The wide figure-eight opens while the dive stays busy, then the middle coil answers. Try holding Slide or Fan as traffic changes lanes; release to return to rest.", groups: [g("wisp", 2, 6, 1.3, 0.8), g("shard", 0, 8, 1.05, 2.5, 0.55), g("barge", 2, 3, 2.3, 6), g("shard", 1, 6, 1.1, 9)] },
+    { chapter: "04 · Changing lanes", lesson: "A middle convoy, then the dive, then the wide loop, each before the last has cleared. One resting lattice cannot hold all three: decide which lane is yours to fly.", groups: [g("barge", 1, 5, 2.1, 0.8), g("shard", 0, 9, 1, 3.5, 0.55), g("wisp", 2, 7, 1.25, 6.5), g("barge", 2, 2, 2.4, 12)] },
+    { chapter: "05 · Two convoys", lesson: "Barges take the wide loop and the middle coil together, with a dive burst between them. Reposition before launching; flex during the wave.", groups: [g("barge", 2, 5, 2, 0.8), g("barge", 1, 5, 2, 1.8), g("shard", 0, 9, 1, 6, 0.55)] },
+    { chapter: "06 · Three-way hold", lesson: "Every lane at once, then a late middle push. Keep three lines and yourself working the whole way down.", groups: [g("barge", 2, 4, 2.1, 0.8), g("wisp", 2, 4, 1.4, 2), g("shard", 0, 8, 1.05, 5, 0.55), g("barge", 1, 4, 2.2, 7), g("shard", 1, 5, 1.1, 16)] },
   ],
 });
